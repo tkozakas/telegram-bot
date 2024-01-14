@@ -42,11 +42,17 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     @SneakyThrows
-    @Scheduled(cron = "0 0 12 * * ?")
+    @Scheduled(cron = "0 0 11 * * ?")
     public void sendScheduledMessage() {
         Optional<SendMessage> sendMessage = messageService.processScheduledMessage();
         if (sendMessage.isPresent()) {
             execute(sendMessage.get());
         }
+    }
+
+    @SneakyThrows
+    @Scheduled(cron = "0 0 0 * * ?") // midnight
+    public void resetWinner() {
+        messageService.resetWinner();
     }
 }

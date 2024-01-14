@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -14,17 +15,21 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Stats {
     @Id
+    private UUID statsId;
+    private Long chatId;
     private Long userId;
     private String firstName;
-    private Long chatId;
     private Long score;
     private LocalDateTime createdAt;
+    private Boolean isWinner;
 
-    public Stats(Long userId, String firstName, Long chatId, Long score, LocalDateTime createdAt) {
-        this.userId = userId;
-        this.firstName = firstName;
+    public Stats(UUID uuid, Long chatId, Long id, String firstName, long l, LocalDateTime now, Boolean isWinner) {
+        this.statsId = uuid;
         this.chatId = chatId;
-        this.score = score;
-        this.createdAt = createdAt;
+        this.userId = id;
+        this.firstName = firstName;
+        this.score = l;
+        this.createdAt = now;
+        this.isWinner = Boolean.FALSE;
     }
 }

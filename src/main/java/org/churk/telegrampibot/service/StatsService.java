@@ -19,6 +19,7 @@ public class StatsService {
                 .filter(stats -> stats.getChatId().equals(chatId))
                 .toList();
     }
+
     public List<Stats> getStatsByChatIdAndYear(Long chatId, int year) {
         return statsRepository.findAll().stream()
                 .filter(stats -> stats.getChatId().equals(chatId) && stats.getCreatedAt().getYear() == year)
@@ -31,8 +32,14 @@ public class StatsService {
                 .toList();
     }
 
-    public boolean existsById(Long id) {
-        return statsRepository.existsById(id);
+    public boolean existsByUserId(Long userId) {
+        return statsRepository.findAll().stream()
+                .anyMatch(stats -> stats.getUserId().equals(userId));
+    }
+
+    public boolean existsByChatId(Long chatId) {
+        return statsRepository.findAll().stream()
+                .anyMatch(stats -> stats.getChatId().equals(chatId));
     }
 
     public void addStat(Stats stats) {
@@ -43,7 +50,15 @@ public class StatsService {
         return statsRepository.findAll();
     }
 
-    public void updateStats(Stats winner) {
-        statsRepository.save(winner);
+    public void updateStats(Stats stats) {
+        statsRepository.save(stats);
+    }
+    public void updateStats(List<Stats> stats) {
+        statsRepository.saveAll(stats);
+    }
+
+    public boolean existsWinnerToday() {
+        return statsRepository.findAll().stream()
+                .anyMatch(stats -> stats.getIsWinner() == Boolean.TRUE);
     }
 }

@@ -10,10 +10,11 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-@Service
 @Slf4j
+@Service
 public class MessageService {
     private final StatsService statsService;
 
@@ -24,12 +25,17 @@ public class MessageService {
     public Optional<SendMessage> processScheduledMessage() {
         log.info("Scheduled message");
         List<Stats> allStats = statsService.getAllStats();
-
+        if (statsService.existsWinnerToday()) {
+            Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
+            String messageText = String.format("Today's pidoras is %s!", winner.getFirstName(), winner.getScore()) + "\n" +
+                    "Total pidoras count: " + winner.getScore();
+            return createMessage(messageText, winner.getChatId(), winner.getFirstName());
+        }
         if (!allStats.isEmpty()) {
             Stats winner = allStats.get(ThreadLocalRandom.current().nextInt(allStats.size()));
             winner.setScore(winner.getScore() + 1);
+            winner.setIsWinner(Boolean.TRUE);
             statsService.updateStats(winner);
-
             String messageText = String.format("Today's pidoras is %s!", winner.getFirstName(), winner.getScore()) + "\n" +
                     "Total pidoras count: " + winner.getScore();
 
@@ -47,33 +53,30 @@ public class MessageService {
 
         log.info("Message received: " + message + " from " + user.getFirstName());
 
-        switch (message) {
-            case "/pidoreg" -> {
-                return createRegisterMessage(user, chatId);
-            }
-            case "/pidorstats" -> {
-                List<Stats> stats = statsService.getStatsByChatIdAndYear(chatId, LocalDateTime.now().getYear());
-                return createStatsMessage(stats, chatId, user.getFirstName());
-            }
-            case "/pidorall" -> {
-                List<Stats> stats = statsService.getStatsByChatId(chatId);
-                return createStatsMessage(stats, chatId, user.getFirstName());
-            }
-            case "/pidorme" -> {
-                List<Stats> stats = statsService.getStatsByChatIdAndUserId(chatId, user.getId());
-                return createStatsMessage(stats, chatId, user.getFirstName());
-            }
-            default -> log.error("Unknown command: " + message);
+        if (message.contains("/pidoreg")) {
+            return createRegisterMessage(user, chatId);
+        } else if (message.equals("/pidor") || message.equals("/pidor@PidorSheepLoverBot")) {
+            return processScheduledMessage();
+        } else if (message.contains("/pidorstats")) {
+            List<Stats> stats = statsService.getStatsByChatIdAndYear(chatId, LocalDateTime.now().getYear());
+            return createStatsMessage(stats, chatId, user.getFirstName());
+        } else if (message.contains("/pidorall")) {
+            List<Stats> stats = statsService.getStatsByChatId(chatId);
+            return createStatsMessage(stats, chatId, user.getFirstName());
+        } else if (message.contains("/pidorme")) {
+            List<Stats> stats = statsService.getStatsByChatIdAndUserId(chatId, user.getId());
+            return createStatsMessage(stats, chatId, user.getFirstName());
+        } else {
+            log.error("Unknown command: " + message);
         }
-        return processScheduledMessage();
+        return Optional.empty();
     }
 
     private Optional<SendMessage> createRegisterMessage(User user, Long chatId) {
-        if (!statsService.existsById(user.getId())) {
-            statsService.addStat(new Stats(user.getId(), user.getFirstName(), chatId, 0L, LocalDateTime.now()));
+        if (!statsService.existsByUserId(user.getId())) {
+            statsService.addStat(new Stats(UUID.randomUUID(), chatId, user.getId(), user.getFirstName(), 0L, LocalDateTime.now(), Boolean.FALSE));
             log.info("New user: " + user.getFirstName() + " (" + user.getId() + ")");
             return createMessage("You have been registered to the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
-
         } else {
             log.info("User: " + user.getFirstName() + " (" + user.getId() + ")", " is already registered");
             return createMessage("You are already in the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
@@ -82,15 +85,12 @@ public class MessageService {
 
     private Optional<SendMessage> createStatsMessage(List<Stats> stats, Long chatId, String firstName) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Top Players of All Time:\n");
-
-        int rank = 1;
-        for (Stats stat : stats) {
-            stringBuilder.append(rank++)
+        for (int i = 0; i < stats.size() && i < 10; i++) {
+            stringBuilder.append(i + 1)
                     .append(". ")
-                    .append(stat.getFirstName())
+                    .append(stats.get(i).getFirstName())
                     .append(" — ")
-                    .append(stat.getScore())
+                    .append(stats.get(i).getScore())
                     .append(" times\n");
         }
         stringBuilder.append("\nTotal Participants — ")
@@ -101,11 +101,17 @@ public class MessageService {
 
 
     private Optional<SendMessage> createMessage(String s, Long chatId, String firstName) {
-        log.info("Message sent: [" + s + "] to [" + firstName + " (" + chatId + ")]");
+        log.info("Message sent: [" + s.replace("\n", "") + "] to [" + firstName + " (" + chatId + ")]");
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(String.valueOf(chatId));
         sendMessage.setText(s);
 
         return Optional.of(sendMessage);
+    }
+
+    public void resetWinner() {
+        List<Stats> allStats = statsService.getAllStats();
+        allStats.forEach(stats -> stats.setIsWinner(Boolean.FALSE));
+        statsService.updateStats(allStats);
     }
 }
