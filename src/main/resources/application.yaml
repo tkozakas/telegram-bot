@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/telegram_pibot
+    username: postgres
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        ddl-auto: update
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+      show-sql: true
+
+bot:
+  username: SheepLoverBot
+  token: 6808027276:AAFnr0RVHbR2TCtf1B4N6QC5m7GLDi3bk1Y
