@@ -1,0 +1,14 @@
+target/
+.mvn/
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+docker/data/
+.run
+prod-compose.yaml
+.direnv
+nix
+result
+deploy.sh

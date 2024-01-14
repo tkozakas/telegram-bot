@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:6969/telegram_bot
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+bot:
+  # username: <<PROVIDE USING ENVIRONMENT VARIABLES>>
+  # token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
+  # winner_name: <<PROVIDE USING ENVIRONMENT VARIABLES>>
+
+reddit:
+  api-url: https://meme-api.herokuapp.com/gimme
+  download-path: /tmp/
+  file-name: meme
+
+schedule:
+  daily-message: 0 0 12 * * *
+  winner-reset: 0 0 0 * * *
+  meme-post: 0 0 * * * *
