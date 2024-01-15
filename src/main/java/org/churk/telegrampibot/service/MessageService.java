@@ -1,6 +1,7 @@
 package org.churk.telegrampibot.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.churk.telegrampibot.config.BotConfig;
 import org.churk.telegrampibot.model.Stats;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -8,40 +9,47 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Service
 public class MessageService {
+    private final BotConfig botConfig;
     private final StatsService statsService;
 
-    public MessageService(StatsService statsService) {
+    public MessageService(BotConfig botConfig, StatsService statsService) {
+        this.botConfig = botConfig;
         this.statsService = statsService;
     }
 
     public Optional<SendMessage> processScheduledMessage() {
         log.info("Scheduled message");
         List<Stats> allStats = statsService.getAllStats();
-        if (statsService.existsWinnerToday()) {
-            Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
-            String messageText = String.format("Today's pidoras is %s!", winner.getFirstName(), winner.getScore()) + "\n" +
-                    "Total pidoras count: " + winner.getScore();
-            return createMessage(messageText, winner.getChatId(), winner.getFirstName());
-        }
-        if (!allStats.isEmpty()) {
+
+        if (!allStats.isEmpty() && !statsService.existsWinnerToday()) {
             Stats winner = allStats.get(ThreadLocalRandom.current().nextInt(allStats.size()));
             winner.setScore(winner.getScore() + 1);
             winner.setIsWinner(Boolean.TRUE);
             statsService.updateStats(winner);
-            String messageText = String.format("Today's pidoras is %s!", winner.getFirstName(), winner.getScore()) + "\n" +
-                    "Total pidoras count: " + winner.getScore();
+            String messageText = String.format("Today's pidoras is %s!", winner.getFirstName() + "%n" +
+                    "Total pidoras count: " + winner.getScore());
 
             return createMessage(messageText, winner.getChatId(), winner.getFirstName());
-        } else {
-            log.info("No stats available to pick a winner.");
+        }
+        log.info("No stats available to pick a winner.");
+        return Optional.empty();
+    }
+
+    public Optional<SendMessage> processMessage() {
+        List<Stats> allStats = statsService.getAllStats();
+        if (statsService.existsWinnerToday()) {
+            Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
+            assert winner != null;
+            String messageText = String.format("Today's pidoras is %s with the total count of: %d", winner.getFirstName(), winner.getScore());
+            return createMessage(messageText, winner.getChatId(), winner.getFirstName());
         }
         return Optional.empty();
     }
@@ -64,44 +72,42 @@ public class MessageService {
 
     private Optional<SendMessage> handleCommand(List<String> commandList, User user, Long chatId) {
         String mainCommand = commandList.get(0);
-        switch (mainCommand) {
-            case "/pidorstats":
-                return handlePidorStats(commandList, chatId, user);
-            case "/pidoreg":
-                return createRegisterMessage(user, chatId);
-            case "/pidor":
-                return processScheduledMessage();
-            case "/pidorall":
-                return createStatsMessageForAll(user, chatId);
-            case "/pidorme":
-                return createStatsMessageForUser(chatId, user);
-            default:
-                log.error("Unknown command: {}", mainCommand);
-                return Optional.empty();
+        String botUsername = "@" + botConfig.getUsername();
+        if (mainCommand.equals("/pidorstats") || mainCommand.equals("/pidorstats" + botUsername)) {
+            return handlePidorStats(commandList, chatId, user);
+        } else if (mainCommand.equals("/pidoreg") || mainCommand.equals("/pidoreg" + botUsername)) {
+            return createRegisterMessage(user, chatId);
+        } else if (mainCommand.equals("/pidorall") || mainCommand.equals("/pidorall" + botUsername)) {
+            return createStatsMessageForAll(user, chatId);
+        } else if (mainCommand.equals("/pidorme") || mainCommand.equals("/pidorme" + botUsername)) {
+            return createStatsMessageForUser(chatId, user);
+        } else if (mainCommand.contains("/pidor") || mainCommand.equals("/pidor" + botUsername)) {
+            return processMessage();
         }
+        log.error("Unknown command: {}", mainCommand);
+        return Optional.empty();
     }
 
     private Optional<SendMessage> createStatsMessageForUser(Long chatId, User user) {
         List<Stats> statsByChatIdAndUserId = statsService.getStatsByChatIdAndUserId(chatId, user.getId());
-        if (statsByChatIdAndUserId.isEmpty()) {
-            return createMessage("You are not registered for the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
-        } else {
+        if (!statsByChatIdAndUserId.isEmpty()) {
             Stats stats = statsByChatIdAndUserId.get(0);
             return createMessage("You have been pidor " + stats.getScore() + " times, " + user.getFirstName() + "!", chatId, user.getFirstName());
         }
+        return createMessage("You are not registered for the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
     }
 
     private Optional<SendMessage> handlePidorStats(List<String> commandList, Long chatId, User user) {
         switch (commandList.size()) {
             case 1 -> {
                 List<Stats> statsList = statsService.getStatsByChatIdAndYear(chatId, LocalDateTime.now().getYear());
-                return createStatsMessageForStat(statsList, chatId, user.getFirstName());
+                return createStatsMessageForYear(statsList, chatId, user.getFirstName());
             }
             case 2 -> {
                 try {
                     int year = Integer.parseInt(commandList.get(1));
                     List<Stats> statsList = statsService.getStatsByChatIdAndYear(chatId, year);
-                    return createStatsMessageForStat(statsList, chatId, user.getFirstName());
+                    return createStatsMessageForYear(statsList, chatId, user.getFirstName());
                 } catch (NumberFormatException e) {
                     log.error("Invalid year: {}", commandList.get(1));
                     return Optional.empty();
@@ -115,35 +121,46 @@ public class MessageService {
     }
 
     private Optional<SendMessage> createRegisterMessage(User user, Long chatId) {
-        if (!statsService.existsByUserId(user.getId())) {
-            statsService.addStat(new Stats(UUID.randomUUID(), chatId, user.getId(), user.getFirstName(), 0L, LocalDateTime.now(), Boolean.FALSE));
-            log.info("New user: " + user.getFirstName() + " (" + user.getId() + ")");
-            return createMessage("You have been registered to the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
-        } else {
+        if (statsService.existsByUserId(user.getId())) {
             log.info("User: " + user.getFirstName() + " (" + user.getId() + ")", " is already registered");
             return createMessage("You are already in the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
         }
+        statsService.addStat(new Stats(UUID.randomUUID(), chatId, user.getId(), user.getFirstName(), 0L, LocalDateTime.now(), Boolean.FALSE));
+        log.info("New user: " + user.getFirstName() + " (" + user.getId() + ")");
+        return createMessage("You have been registered to the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
+
     }
 
-    private Optional<SendMessage> createStatsMessageForStat(List<Stats> statsList, Long chatId, String firstName) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < statsList.size() && i < 10; i++) {
-            stringBuilder.append(i + 1)
-                    .append(". ")
-                    .append(statsList.get(i).getFirstName())
-                    .append(" — ")
-                    .append(statsList.get(i).getScore())
-                    .append(" times\n");
-        }
-        stringBuilder.append("\nTotal Participants — ")
-                .append(statsList.size());
+    private Optional<SendMessage> createStatsMessageForStat(List<Stats> statsList, Long chatId, String firstName, String header, String footer) {
+        List<Stats> modifiableList = new ArrayList<>(statsList);
+        modifiableList.sort(Comparator.comparing(Stats::getScore).reversed());
+        int maxIndexLength = String.valueOf(Math.min(modifiableList.size(), 10)).length();
 
-        return createMessage(stringBuilder.toString(), chatId, firstName);
+        String stringBuilder = IntStream
+                .iterate(0, i -> i < modifiableList.size() && i < 10, i -> i + 1)
+                .mapToObj(i -> String.format("%" + maxIndexLength + "d. %s — %d times%n",
+                        i + 1,
+                        modifiableList.get(i).getFirstName(),
+                        modifiableList.get(i).getScore()))
+                .collect(Collectors.joining("", header, footer));
+
+        return createMessage(stringBuilder, chatId, firstName);
     }
 
     private Optional<SendMessage> createStatsMessageForAll(User user, Long chatId) {
-        List<Stats> statsList = statsService.getStatsByChatId(chatId);
-        return createStatsMessageForStat(statsList, chatId, user.getFirstName());
+        List<Stats> statsList = statsService.getAggregatedStatsByChatId(chatId);
+        String header = String.format("**All time pidors**%n%n");
+        String footer = String.format("%n**Total Participants — %d**", statsList.size());
+
+        return createStatsMessageForStat(statsList, chatId, user.getFirstName(), header, footer);
+    }
+
+    private Optional<SendMessage> createStatsMessageForYear(List<Stats> statsList, Long chatId, String firstName) {
+        int year = statsList.get(0).getCreatedAt().getYear();
+        String header = String.format("**Pidors of %d**%n%n", year);
+        String footer = String.format("%n**Total Participants — %d**", statsList.size());
+
+        return createStatsMessageForStat(statsList, chatId, firstName, header, footer);
     }
 
 
@@ -151,6 +168,7 @@ public class MessageService {
         log.info("Message sent: [" + s.replace("\n", "") + "] to [" + firstName + " (" + chatId + ")]");
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(String.valueOf(chatId));
+        sendMessage.setParseMode("Markdown");
         sendMessage.setText(s);
 
         return Optional.of(sendMessage);
