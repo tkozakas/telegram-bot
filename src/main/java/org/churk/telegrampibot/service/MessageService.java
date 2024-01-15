@@ -1,10 +1,15 @@
 package org.churk.telegrampibot.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.churk.telegrampibot.config.BotConfig;
+import org.churk.telegrampibot.csv.CSVLoader;
 import org.churk.telegrampibot.model.Stats;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
@@ -17,57 +22,15 @@ import java.util.stream.IntStream;
 @Slf4j
 @Service
 public class MessageService {
+    private static Queue<Update> latestMessages = new CircularFifoQueue<>(5);
     private final BotConfig botConfig;
     private final StatsService statsService;
+    private final CSVLoader csvLoader;
 
-    public MessageService(BotConfig botConfig, StatsService statsService) {
+    public MessageService(BotConfig botConfig, StatsService statsService, CSVLoader csvLoader) {
         this.botConfig = botConfig;
         this.statsService = statsService;
-    }
-
-    public Optional<SendMessage> processScheduledMessage() {
-        log.info("Scheduled message");
-        List<Stats> allStats = statsService.getAllStats();
-
-        if (!allStats.isEmpty() && !statsService.existsWinnerToday()) {
-            Stats winner = allStats.get(ThreadLocalRandom.current().nextInt(allStats.size()));
-            winner.setScore(winner.getScore() + 1);
-            winner.setIsWinner(Boolean.TRUE);
-            statsService.updateStats(winner);
-            String messageText = String.format("Today's pidoras is %s!", winner.getFirstName() + "%n" +
-                    "Total pidoras count: " + winner.getScore());
-
-            return createMessage(messageText, winner.getChatId(), winner.getFirstName());
-        }
-        log.info("No stats available to pick a winner.");
-        return Optional.empty();
-    }
-
-    public Optional<SendMessage> processMessage() {
-        List<Stats> allStats = statsService.getAllStats();
-        if (statsService.existsWinnerToday()) {
-            Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
-            assert winner != null;
-            String messageText = String.format("Today's pidoras is %s with the total count of: %d", winner.getFirstName(), winner.getScore());
-            return createMessage(messageText, winner.getChatId(), winner.getFirstName());
-        }
-        return Optional.empty();
-    }
-
-    public Optional<SendMessage> processMessage(Update update) {
-        User user = update.getMessage().getFrom();
-        String message = update.getMessage().getText();
-        Long chatId = update.getMessage().getChatId();
-
-        log.info("Message received: {} from {}", message, user.getFirstName());
-
-        if (message.isBlank()) {
-            log.info("Blank message received");
-            return Optional.empty();
-        }
-
-        List<String> commandList = List.of(message.split(" "));
-        return handleCommand(commandList, user, chatId);
+        this.csvLoader = csvLoader;
     }
 
     private Optional<SendMessage> handleCommand(List<String> commandList, User user, Long chatId) {
@@ -83,9 +46,87 @@ public class MessageService {
             return createStatsMessageForUser(chatId, user);
         } else if (mainCommand.contains("/pidor") || mainCommand.equals("/pidor" + botUsername)) {
             return processMessage();
+        } else if (mainCommand.contains("/fact") || mainCommand.equals("/fact" + botUsername)) {
+            return processRandomFact(chatId, user);
         }
         log.error("Unknown command: {}", mainCommand);
         return Optional.empty();
+    }
+
+    public Optional<SendMessage> processScheduledMessage() {
+        log.info("Scheduled message");
+        List<Stats> allStats = statsService.getAllStats();
+
+        if (allStats.isEmpty() || statsService.existsWinnerToday()) {
+            log.info("No stats available to pick a winner.");
+            return Optional.empty();
+        }
+        Stats winner = allStats.get(ThreadLocalRandom.current().nextInt(allStats.size()));
+        winner.setScore(winner.getScore() + 1);
+        winner.setIsWinner(Boolean.TRUE);
+        statsService.updateStats(winner);
+        String messageText = String.format("Today's pidoras is %s!", winner.getFirstName() + "%n" +
+                "Total pidoras count: " + winner.getScore());
+
+        return createMessage(messageText, winner.getChatId(), winner.getFirstName());
+    }
+
+    public Optional<SendMessage> processMessage() {
+        List<Stats> allStats = statsService.getAllStats();
+        if (!statsService.existsWinnerToday()) {
+            return Optional.empty();
+        }
+        Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
+        assert winner != null;
+        String messageText = String.format("Today's pidoras is %s with the total count of: %d", winner.getFirstName(), winner.getScore());
+        return createMessage(messageText, winner.getChatId(), winner.getFirstName());
+    }
+
+    public Optional<SendMessage> processMessage(Update update) {
+        User user = update.getMessage().getFrom();
+        String message = update.getMessage().getText();
+        Long chatId = update.getMessage().getChatId();
+
+        log.info("Message received: {} from {}", message, user.getFirstName());
+        latestMessages.add(update);
+
+        if (message.isBlank()) {
+            log.info("Blank message received");
+            return Optional.empty();
+        }
+
+        List<String> commandList = List.of(message.split(" "));
+        return handleCommand(commandList, user, chatId);
+    }
+
+    public Optional<SendSticker> processSendRandomSticker() {
+        if (ThreadLocalRandom.current().nextInt(100) > 10) {
+            return Optional.empty();
+        }
+        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/stickers.csv");
+        List<String> randomSticker = records.get(ThreadLocalRandom.current().nextInt(records.size()));
+        String stickerId = randomSticker.get(0);
+        log.info("Sending sticker: {}", stickerId);
+        assert latestMessages.peek() != null;
+        Message message = latestMessages.peek().getMessage();
+        return createStickerMessage(stickerId, message.getChatId(), message.getFrom().getFirstName());
+    }
+
+    private Optional<SendSticker> createStickerMessage(String stickerId, Long chatId, String firstName) {
+        log.info("Sticker sent: [" + stickerId + "] to [" + firstName + " (" + chatId + ")]");
+        SendSticker sendSticker = new SendSticker();
+        sendSticker.setChatId(String.valueOf(chatId));
+        sendSticker.setSticker(new InputFile(stickerId));
+        assert latestMessages.peek() != null;
+        sendSticker.setReplyToMessageId(latestMessages.peek().getMessage().getMessageId());
+
+        return Optional.of(sendSticker);
+    }
+
+    private Optional<SendMessage> processRandomFact(Long chatId, User user) {
+        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/facts.csv");
+        List<String> randomFact = records.get(ThreadLocalRandom.current().nextInt(records.size()));
+        return createMessage(randomFact.get(0), chatId, user.getFirstName());
     }
 
     private Optional<SendMessage> createStatsMessageForUser(Long chatId, User user) {

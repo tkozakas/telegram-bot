@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
@@ -28,7 +29,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                 new BotCommand("/pidor", "Get today's pidor"),
                 new BotCommand("/pidorstats", "Get stats (use /pidorstats [year] for specific year)"),
                 new BotCommand("/pidorall", "Get all-time stats"),
-                new BotCommand("/pidorme", "Get personal stats")
+                new BotCommand("/pidorme", "Get personal stats"),
+                new BotCommand("/fact", "Random fact of the day")
         );
         registerBotCommands(botCommandList);
     }
@@ -55,6 +57,10 @@ public class TelegramBot extends TelegramLongPollingBot {
             Optional<SendMessage> sendMessage = messageService.processMessage(update);
             if (sendMessage.isPresent()) {
                 execute(sendMessage.get());
+            }
+            Optional<SendSticker> sendSticker = messageService.processSendRandomSticker();
+            if (sendSticker.isPresent()) {
+                execute(sendSticker.get());
             }
         }
     }

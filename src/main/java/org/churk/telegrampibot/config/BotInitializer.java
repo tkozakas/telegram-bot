@@ -9,6 +9,10 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 @Component
 @Slf4j
 public class BotInitializer {
@@ -19,12 +23,30 @@ public class BotInitializer {
     }
 
     @EventListener({ContextRefreshedEvent.class})
-    public void init() throws TelegramApiException {
+    public void init() throws TelegramApiException, IOException, InterruptedException {
+        stickerInit();
+
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         try {
             telegramBotsApi.registerBot(telegramBot);
         } catch (TelegramApiException e) {
             log.error("Error while initializing bot", e);
+        }
+    }
+
+    private static void stickerInit() throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder("python", "src/main/resources/stickerpack-extract-script.py");
+        processBuilder.redirectErrorStream(true);
+        Process process = processBuilder.start();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            log.info(line);
+        }
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            log.error("Exited with error code : " + exitCode);
         }
     }
 }
