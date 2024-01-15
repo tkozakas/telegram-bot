@@ -2,6 +2,25 @@
 
 Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 
+## Run
+```bash
+  # Clone repository
+  git clone https://github.com/tomas6446/telegram-pibot
+  # Enter the directory
+  cd telegram-pibot
+
+  # Run Postgres container
+  docker compose up -d
+
+  # Copy and run the script inside container
+  docker cp init-db.sql telegram-pibot-postgres:/init-db.sql
+  docker exec -u postgres telegram-pibot-postgres psql -d telegram_pibot -f /init-db.sql
+
+  # Build and run project
+  mvn clean install
+  mvn spring-boot:run
+```
+
 ## Features
 
 ### User Interaction and Command Handling
