@@ -30,7 +30,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                 new BotCommand("/pidorstats", "Get stats (use /pidorstats [year] for specific year)"),
                 new BotCommand("/pidorall", "Get all-time stats"),
                 new BotCommand("/pidorme", "Get personal stats"),
-                new BotCommand("/fact", "Random fact of the day")
+                new BotCommand("/fact", "Random fact of the day"),
+                new BotCommand("/sticker", "Random sticker from a churka")
         );
         registerBotCommands(botCommandList);
     }
@@ -58,7 +59,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             if (sendMessage.isPresent()) {
                 execute(sendMessage.get());
             }
-            Optional<SendSticker> sendSticker = messageService.processSendRandomSticker();
+            Optional<SendSticker> sendSticker = messageService.processSticker(update);
             if (sendSticker.isPresent()) {
                 execute(sendSticker.get());
             }

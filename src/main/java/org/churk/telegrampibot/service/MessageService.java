@@ -33,6 +33,24 @@ public class MessageService {
         this.csvLoader = csvLoader;
     }
 
+    public Optional<SendMessage> processScheduledMessage() {
+        log.info("Scheduled message");
+        List<Stats> allStats = statsService.getAllStats();
+
+        if (allStats.isEmpty() || statsService.existsWinnerToday()) {
+            log.info("No stats available to pick a winner.");
+            return Optional.empty();
+        }
+        Stats winner = allStats.get(ThreadLocalRandom.current().nextInt(allStats.size()));
+        winner.setScore(winner.getScore() + 1);
+        winner.setIsWinner(Boolean.TRUE);
+        statsService.updateStats(winner);
+        String messageText = String.format("Today's pidoras is %s!", winner.getFirstName() + "%n" +
+                "Total pidoras count: " + winner.getScore());
+
+        return createMessage(messageText, winner.getChatId(), winner.getFirstName());
+    }
+
     private Optional<SendMessage> handleCommand(List<String> commandList, User user, Long chatId) {
         String mainCommand = commandList.get(0);
         String botUsername = "@" + botConfig.getUsername();
@@ -53,22 +71,26 @@ public class MessageService {
         return Optional.empty();
     }
 
-    public Optional<SendMessage> processScheduledMessage() {
-        log.info("Scheduled message");
-        List<Stats> allStats = statsService.getAllStats();
-
-        if (allStats.isEmpty() || statsService.existsWinnerToday()) {
-            log.info("No stats available to pick a winner.");
+    public Optional<SendSticker> processSticker(Update update) {
+        String message = update.getMessage().getText();
+        String botUsername = "@" + botConfig.getUsername();
+        if (message.contains("/sticker") || message.equals("/sticker" + botUsername)) {
+            return processRandomSticker();
+        }
+        if (ThreadLocalRandom.current().nextInt(100) > 10) {
             return Optional.empty();
         }
-        Stats winner = allStats.get(ThreadLocalRandom.current().nextInt(allStats.size()));
-        winner.setScore(winner.getScore() + 1);
-        winner.setIsWinner(Boolean.TRUE);
-        statsService.updateStats(winner);
-        String messageText = String.format("Today's pidoras is %s!", winner.getFirstName() + "%n" +
-                "Total pidoras count: " + winner.getScore());
+        return processRandomSticker();
+    }
 
-        return createMessage(messageText, winner.getChatId(), winner.getFirstName());
+    private Optional<SendSticker> processRandomSticker() {
+        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/stickers.csv");
+        List<String> randomSticker = records.get(ThreadLocalRandom.current().nextInt(records.size()));
+        String stickerId = randomSticker.get(0);
+        log.info("Sending sticker: {}", stickerId);
+        assert latestMessages.peek() != null;
+        Message message = latestMessages.peek().getMessage();
+        return createStickerMessage(stickerId, message.getChatId(), message.getFrom().getFirstName());
     }
 
     public Optional<SendMessage> processMessage() {
@@ -97,19 +119,6 @@ public class MessageService {
 
         List<String> commandList = List.of(message.split(" "));
         return handleCommand(commandList, user, chatId);
-    }
-
-    public Optional<SendSticker> processSendRandomSticker() {
-        if (ThreadLocalRandom.current().nextInt(100) > 10) {
-            return Optional.empty();
-        }
-        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/stickers.csv");
-        List<String> randomSticker = records.get(ThreadLocalRandom.current().nextInt(records.size()));
-        String stickerId = randomSticker.get(0);
-        log.info("Sending sticker: {}", stickerId);
-        assert latestMessages.peek() != null;
-        Message message = latestMessages.peek().getMessage();
-        return createStickerMessage(stickerId, message.getChatId(), message.getFrom().getFirstName());
     }
 
     private Optional<SendSticker> createStickerMessage(String stickerId, Long chatId, String firstName) {

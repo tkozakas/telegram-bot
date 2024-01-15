@@ -12,4 +12,7 @@ spring:
 
 bot:
   username: SheepLoverBot
-  token: 6808027276:AAFnr0RVHbR2TCtf1B4N6QC5m7GLDi3bk1Y
+  token: 6808027276:AAGWqNNwRoLJ3-NF6Mi0dbpJcrqOmqAGsHI
+  sticker_sets:
+    - primates_uffchat
+    - greatchurkobesfbi_by_fStikBot
