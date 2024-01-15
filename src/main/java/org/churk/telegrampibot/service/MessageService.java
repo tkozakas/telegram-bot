@@ -51,25 +51,67 @@ public class MessageService {
         String message = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
 
-        log.info("Message received: " + message + " from " + user.getFirstName());
+        log.info("Message received: {} from {}", message, user.getFirstName());
 
-        if (message.contains("/pidoreg")) {
-            return createRegisterMessage(user, chatId);
-        } else if (message.equals("/pidor") || message.equals("/pidor@PidorSheepLoverBot")) {
-            return processScheduledMessage();
-        } else if (message.contains("/pidorstats")) {
-            List<Stats> stats = statsService.getStatsByChatIdAndYear(chatId, LocalDateTime.now().getYear());
-            return createStatsMessage(stats, chatId, user.getFirstName());
-        } else if (message.contains("/pidorall")) {
-            List<Stats> stats = statsService.getStatsByChatId(chatId);
-            return createStatsMessage(stats, chatId, user.getFirstName());
-        } else if (message.contains("/pidorme")) {
-            List<Stats> stats = statsService.getStatsByChatIdAndUserId(chatId, user.getId());
-            return createStatsMessage(stats, chatId, user.getFirstName());
-        } else {
-            log.error("Unknown command: " + message);
+        if (message.isBlank()) {
+            log.info("Blank message received");
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        List<String> commandList = List.of(message.split(" "));
+        return handleCommand(commandList, user, chatId);
+    }
+
+    private Optional<SendMessage> handleCommand(List<String> commandList, User user, Long chatId) {
+        String mainCommand = commandList.get(0);
+        switch (mainCommand) {
+            case "/pidorstats":
+                return handlePidorStats(commandList, chatId, user);
+            case "/pidoreg":
+                return createRegisterMessage(user, chatId);
+            case "/pidor":
+                return processScheduledMessage();
+            case "/pidorall":
+                return createStatsMessageForAll(user, chatId);
+            case "/pidorme":
+                return createStatsMessageForUser(chatId, user);
+            default:
+                log.error("Unknown command: {}", mainCommand);
+                return Optional.empty();
+        }
+    }
+
+    private Optional<SendMessage> createStatsMessageForUser(Long chatId, User user) {
+        List<Stats> statsByChatIdAndUserId = statsService.getStatsByChatIdAndUserId(chatId, user.getId());
+        if (statsByChatIdAndUserId.isEmpty()) {
+            return createMessage("You are not registered for the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
+        } else {
+            Stats stats = statsByChatIdAndUserId.get(0);
+            return createMessage("You have been pidor " + stats.getScore() + " times, " + user.getFirstName() + "!", chatId, user.getFirstName());
+        }
+    }
+
+    private Optional<SendMessage> handlePidorStats(List<String> commandList, Long chatId, User user) {
+        switch (commandList.size()) {
+            case 1 -> {
+                List<Stats> statsList = statsService.getStatsByChatIdAndYear(chatId, LocalDateTime.now().getYear());
+                return createStatsMessageForStat(statsList, chatId, user.getFirstName());
+            }
+            case 2 -> {
+                try {
+                    int year = Integer.parseInt(commandList.get(1));
+                    List<Stats> statsList = statsService.getStatsByChatIdAndYear(chatId, year);
+                    return createStatsMessageForStat(statsList, chatId, user.getFirstName());
+                } catch (NumberFormatException e) {
+                    log.error("Invalid year: {}", commandList.get(1));
+                    return Optional.empty();
+                }
+            }
+            default -> {
+                log.error("Invalid command: {}", commandList);
+                return Optional.empty();
+            }
+        }
     }
 
     private Optional<SendMessage> createRegisterMessage(User user, Long chatId) {
@@ -83,20 +125,25 @@ public class MessageService {
         }
     }
 
-    private Optional<SendMessage> createStatsMessage(List<Stats> stats, Long chatId, String firstName) {
+    private Optional<SendMessage> createStatsMessageForStat(List<Stats> statsList, Long chatId, String firstName) {
         StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < stats.size() && i < 10; i++) {
+        for (int i = 0; i < statsList.size() && i < 10; i++) {
             stringBuilder.append(i + 1)
                     .append(". ")
-                    .append(stats.get(i).getFirstName())
+                    .append(statsList.get(i).getFirstName())
                     .append(" — ")
-                    .append(stats.get(i).getScore())
+                    .append(statsList.get(i).getScore())
                     .append(" times\n");
         }
         stringBuilder.append("\nTotal Participants — ")
-                .append(stats.size());
+                .append(statsList.size());
 
         return createMessage(stringBuilder.toString(), chatId, firstName);
+    }
+
+    private Optional<SendMessage> createStatsMessageForAll(User user, Long chatId) {
+        List<Stats> statsList = statsService.getStatsByChatId(chatId);
+        return createStatsMessageForStat(statsList, chatId, user.getFirstName());
     }
 
 

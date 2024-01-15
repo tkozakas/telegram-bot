@@ -5,9 +5,13 @@ import org.churk.telegrampibot.config.BotConfig;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -18,6 +22,19 @@ public class TelegramBot extends TelegramLongPollingBot {
     public TelegramBot(BotConfig botConfig, MessageService messageService) {
         this.botConfig = botConfig;
         this.messageService = messageService;
+
+        List<BotCommand> botCommandList = List.of(
+                new BotCommand("/pidoreg", "Register yourself as a pidor"),
+                new BotCommand("/pidor", "Get today's pidor"),
+                new BotCommand("/pidorstats", "Get stats for today"),
+                new BotCommand("/pidorstats <year>", "Get stats for the year")
+        );
+        registerBotCommands(botCommandList);
+    }
+
+    @SneakyThrows
+    private void registerBotCommands(List<BotCommand> botCommandList) {
+        this.execute(new SetMyCommands(botCommandList, new BotCommandScopeDefault(), null));
     }
 
     @Override
