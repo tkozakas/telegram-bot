@@ -63,7 +63,7 @@ public class MessageService {
         } else if (mainCommand.equals("/pidorme") || mainCommand.equals("/pidorme" + botUsername)) {
             return createStatsMessageForUser(chatId, user);
         } else if (mainCommand.contains("/pidor") || mainCommand.equals("/pidor" + botUsername)) {
-            return processMessage();
+            return processWinnerOfTheDay();
         } else if (mainCommand.contains("/fact") || mainCommand.equals("/fact" + botUsername)) {
             return processRandomFact(chatId, user);
         }
@@ -93,7 +93,7 @@ public class MessageService {
         return createStickerMessage(stickerId, message.getChatId(), message.getFrom().getFirstName());
     }
 
-    public Optional<SendMessage> processMessage() {
+    public Optional<SendMessage> processWinnerOfTheDay() {
         List<Stats> allStats = statsService.getAllStats();
         if (!statsService.existsWinnerToday()) {
             return Optional.empty();
