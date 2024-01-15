@@ -26,8 +26,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<BotCommand> botCommandList = List.of(
                 new BotCommand("/pidoreg", "Register yourself as a pidor"),
                 new BotCommand("/pidor", "Get today's pidor"),
-                new BotCommand("/pidorstats", "Get stats for today"),
-                new BotCommand("/pidorstats <year>", "Get stats for the year")
+                new BotCommand("/pidorstats", "Get stats (use /pidorstats [year] for specific year)"),
+                new BotCommand("/pidorall", "Get all-time stats"),
+                new BotCommand("/pidorme", "Get personal stats")
         );
         registerBotCommands(botCommandList);
     }
