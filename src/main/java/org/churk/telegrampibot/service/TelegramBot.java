@@ -60,7 +60,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     @SneakyThrows
-    @Scheduled(cron = "0 0 11 * * ?")
+    @Scheduled(cron = "0 0 11 * * ?") // 11 am
     public void sendScheduledMessage() {
         Optional<SendMessage> sendMessage = messageService.processScheduledMessage();
         if (sendMessage.isPresent()) {
