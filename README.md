@@ -2,7 +2,7 @@
 
 Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 
-## Run
+## Deployment
 ```bash
   # Clone repository
   git clone https://github.com/tomas6446/telegram-pibot
