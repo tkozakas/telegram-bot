@@ -1,4 +1,4 @@
-package org.churk.telegrampibot.csv;
+package org.churk.telegrampibot.reader;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
