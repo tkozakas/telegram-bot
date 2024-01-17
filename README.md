@@ -38,6 +38,18 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 - Manages 'Stats' objects representing the users' game statistics.
 - Functions include registering users, updating scores, and selecting winners.
 
+ 
+## New Features to Implement
+
+- `/memes` Command
+  - Retrieves random memes from specified subreddits.
+
+- Multiple Messages Typing Animation
+  - Shows typing animation for longer duration when selecting the winner of the day.
+
+- Custom Winner Name in Configuration
+  - Allows setting a custom title for the winner in YAML configuration.
+
 ## Implementation Details
 - Developed using Java and Spring Boot framework.
 - Integrates with Telegram Bot API for messaging and user interaction.
