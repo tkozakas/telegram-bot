@@ -1,4 +1,4 @@
-# Telegram Pidor Bot
+# Telegram Bot
 
 Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 
