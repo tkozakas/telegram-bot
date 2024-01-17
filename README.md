@@ -31,24 +31,13 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
   - `/pidorall`: Get all-time stats.
   - `/pidorme`: Get personal stats.
 
-### Scheduled Message Processing
+### Other features
 - Sends scheduled message for daily updates of who is the winner of the day.
-
-### Statistics Management
 - Manages 'Stats' objects representing the users' game statistics.
 - Functions include registering users, updating scores, and selecting winners.
-
- 
-## New Features to Implement
-
-- `/memes` Command
-  - Retrieves random memes from specified subreddits.
-
 - Multiple Messages Typing Animation
-  - Shows typing animation for longer duration when selecting the winner of the day.
-
 - Custom Winner Name in Configuration
-  - Allows setting a custom title for the winner in YAML configuration.
+- Allows setting a custom title for the winner in YAML configuration.
 
 ## Implementation Details
 - Developed using Java and Spring Boot framework.

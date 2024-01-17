@@ -17,7 +17,7 @@ public class StatsService {
         this.statsRepository = statsRepository;
     }
 
-    List<Stats> getAggregatedStatsByChatId(Long chatId) {
+    public List<Stats> getAggregatedStatsByChatId(Long chatId) {
         return statsRepository.findAll().stream()
                 .filter(stats -> stats.getChatId().equals(chatId))
                 .collect(Collectors.groupingBy(Stats::getUserId))

@@ -36,3 +36,4 @@ build/
 ### custom ###
 src/main/resources/stickers.csv
 src/main/resources/facts.csv
+src/main/resources/daily-messages.csv

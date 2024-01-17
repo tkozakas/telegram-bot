@@ -2,103 +2,76 @@ package org.churk.telegrampibot.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
+import org.churk.telegrampibot.builder.MessageBuilder;
 import org.churk.telegrampibot.config.BotConfig;
 import org.churk.telegrampibot.model.Stats;
 import org.churk.telegrampibot.reader.CSVLoader;
+import org.churk.telegrampibot.reader.JSONLoader;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Slf4j
 @Service
 public class MessageService {
-    private static final Queue<Update> latestMessages = new CircularFifoQueue<>(3);
+    public static final Queue<Update> latestMessages = new CircularFifoQueue<>(3);
+    private static final boolean ENABLED = false;
     private final BotConfig botConfig;
     private final StatsService statsService;
     private final CSVLoader csvLoader;
+    private final JSONLoader jsonLoader;
+    private final MessageBuilder messageBuilder;
 
-    public MessageService(BotConfig botConfig, StatsService statsService, CSVLoader csvLoader) {
+    public MessageService(BotConfig botConfig, StatsService statsService, CSVLoader csvLoader, org.churk.telegrampibot.reader.JSONLoader jsonLoader, MessageBuilder messageBuilder) {
         this.botConfig = botConfig;
         this.statsService = statsService;
         this.csvLoader = csvLoader;
+        this.jsonLoader = jsonLoader;
+        this.messageBuilder = messageBuilder;
     }
 
-    public Optional<SendMessage> handleCommand(Update update) {
-        List<String> commandList = processMessage(update);
-        User user = update.getMessage().getFrom();
-        Long chatId = update.getMessage().getChatId();
+    public List<Validable> handleCommand(Update update) {
+        Optional<Integer> messageIdToReply = Optional.of(update.getMessage().getMessageId());
+        List<Validable> response = new ArrayList<>();
 
+        List<String> commandList = processMessage(update);
         String mainCommand = commandList.get(0);
-        String botUsername = "@" + botConfig.getUsername();
-        if (mainCommand.equals("/pidorstats") || mainCommand.equals("/pidorstats" + botUsername)) {
-            return handleStats(commandList, chatId, user);
-        } else if (mainCommand.equals("/pidoreg") || mainCommand.equals("/pidoreg" + botUsername)) {
-            return createRegisterMessage(user, chatId);
-        } else if (mainCommand.equals("/pidorall") || mainCommand.equals("/pidorall" + botUsername)) {
-            return createStatsMessageForAll(user, chatId);
-        } else if (mainCommand.equals("/pidorme") || mainCommand.equals("/pidorme" + botUsername)) {
-            return createStatsMessageForUser(chatId, user);
-        } else if (mainCommand.contains("/fact") || mainCommand.equals("/fact" + botUsername)) {
-            return processRandomFact(chatId, user);
+
+        if (mainCommand.equals("/pidorstats") || mainCommand.equals("/pidorstats@" + botConfig.getUsername())) {
+            response.add(handleStats(commandList, update, Optional.empty()).orElse(null));
+        } else if (mainCommand.equals("/pidorall") || mainCommand.equals("/pidorall@" + botConfig.getUsername())) {
+            response.add(messageBuilder.createStatsMessageForAll(update, Optional.empty()).orElse(null));
+        } else if (mainCommand.equals("/pidorme") || mainCommand.equals("/pidorme@" + botConfig.getUsername())) {
+            response.add(messageBuilder.createStatsMessageForUser(update, messageIdToReply));
+        } else if (mainCommand.equals("/pidoreg") || mainCommand.equals("/pidoreg@" + botConfig.getUsername())) {
+            response.add(messageBuilder.createRegisterMessage(update, messageIdToReply));
+        } else if (mainCommand.contains("/fact") || mainCommand.equals("/fact@" + botConfig.getUsername())) {
+            response.add(processRandomFact(update, Optional.empty()));
+        } else if (mainCommand.contains("/pidor") || mainCommand.contains("/pidor@" + botConfig.getUsername())) {
+            response.addAll(processDailyWinnerMessage());
+        } else if (mainCommand.contains("/sticker") || mainCommand.equals("/sticker@" + botConfig.getUsername())) {
+            response.add(processRandomSticker(update, messageIdToReply));
+        } else {
+            response.add(processRandomSticker().orElse(null));
         }
-        return Optional.empty();
+        return response;
     }
 
-    public Optional<SendSticker> handleSticker(Update update) {
-        String message = update.getMessage().getText();
-        String botUsername = "@" + botConfig.getUsername();
+    private Optional<Validable> handleStats(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
+        if (commandList.isEmpty() || commandList.size() > 2) {
+            log.error("Invalid command: {}", commandList);
+            return Optional.empty();
+        }
+        int year = (commandList.size() == 2) ? Integer.parseInt(commandList.get(1)) : LocalDateTime.now().getYear();
 
-        if (message.contains("/sticker") || message.equals("/sticker" + botUsername)) {
-            return processRandomSticker();
-        }
-        if (ThreadLocalRandom.current().nextInt(100) <= 3) {
-            return processRandomSticker();
-        }
-        return Optional.empty();
+        return messageBuilder.createStatsMessageForYear(update, year, messageIdToReply);
     }
 
-    public List<BotApiMethod<Message>> handleDailyMessage(Update update) {
-        List<String> commandList = processMessage(update);
-
-        if (commandList.contains("/pidor") || commandList.contains("/pidor@" + botConfig.getUsername())) {
-            return processDailyWinnerMessage();
-        }
-        return List.of();
-    }
-
-    public List<BotApiMethod<Message>> processDailyWinnerMessage() {
-        log.info("Scheduled message");
-        List<Stats> allStats = statsService.getAllStats();
-
-        if (allStats.isEmpty()) {
-            log.info("No stats available to pick a winner.");
-            return List.of();
-        }
-        if (statsService.existsWinnerToday()) {
-            Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
-            assert winner != null;
-            List<String> messageText = List.of("Согласно моей информации, по результатам сегодняшнего розыгрыша пидор дня - " + winner.getFirstName() + "!");
-            return createMessage(messageText, winner.getChatId(), winner.getFirstName());
-        }
-        Stats winner = allStats.get(ThreadLocalRandom.current().nextInt(allStats.size()));
-        winner.setScore(winner.getScore() + 1);
-        winner.setIsWinner(Boolean.TRUE);
-        statsService.updateStats(winner);
-        List<String> messageText = createDailyMessage(winner);
-
-        return createMessage(messageText, winner.getChatId(), winner.getFirstName());
-    }
 
     public List<String> processMessage(Update update) {
         String message = update.getMessage().getText();
@@ -112,73 +85,88 @@ public class MessageService {
         return List.of(message.split(" "));
     }
 
-    private Optional<SendSticker> createStickerMessage(String stickerId, Long chatId, String firstName) {
-        log.info("Sticker sent: [%s] to [%s (%d)]".formatted(stickerId, firstName, chatId));
-        SendSticker sendSticker = new SendSticker();
-        sendSticker.setChatId(String.valueOf(chatId));
-        sendSticker.setSticker(new InputFile(stickerId));
+    public List<Validable> processDailyWinnerMessage() {
+        log.info("Scheduled message");
+        List<Stats> allStats = statsService.getAllStats();
+
+        if (allStats.isEmpty()) {
+            log.info("No stats available to pick a winner.");
+            return List.of();
+        }
+        if (statsService.existsWinnerToday()) {
+            Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
+            return processDailyMessage(winner, "winner_exists");
+        }
+        Stats winner = allStats.get(ThreadLocalRandom.current().nextInt(allStats.size()));
+        if (ENABLED) {
+            winner.setScore(winner.getScore() + 1);
+            winner.setIsWinner(Boolean.TRUE);
+            statsService.updateStats(winner);
+        }
+        return processDailyMessage(winner, "sentences");
+    }
+
+    private Validable processRandomFact(Update update, Optional<Integer> messageIdToReply) {
+        Long chatId = update.getMessage().getChatId();
+        String firstName = update.getMessage().getFrom().getFirstName();
+
+        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/facts.csv");
+        List<String> randomFact = records.get(ThreadLocalRandom.current().nextInt(records.size()));
+        return messageBuilder.createMessage(randomFact.get(0), chatId, firstName, messageIdToReply);
+    }
+
+    private Validable processRandomSticker(Update update, Optional<Integer> messageIdToReply) {
+        Long chatId = update.getMessage().getChatId();
+        String firstName = update.getMessage().getFrom().getFirstName();
+
+        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/stickers.csv");
+        List<String> randomSticker = records.get(ThreadLocalRandom.current().nextInt(records.size()));
+        String stickerId = randomSticker.get(0);
+        log.info("Sending sticker: {}", stickerId);
+
+        return messageBuilder.createStickerMessage(stickerId, chatId, firstName, messageIdToReply);
+    }
+
+    private Optional<Validable> processRandomSticker() {
+        if (ThreadLocalRandom.current().nextInt(100) > 2) {
+            return Optional.empty();
+        }
+
+        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/stickers.csv");
+        List<String> randomSticker = records.get(ThreadLocalRandom.current().nextInt(records.size()));
+        String stickerId = randomSticker.get(0);
+        log.info("Sending sticker: {}", stickerId);
+
         assert latestMessages.peek() != null;
-        sendSticker.setReplyToMessageId(latestMessages.peek().getMessage().getMessageId());
+        Message message = latestMessages.peek().getMessage();
+        Optional<Integer> messageIdToReply = Optional.of(message.getMessageId());
+        Long chatId = message.getChatId();
+        String firstName = message.getFrom().getFirstName();
 
-        return Optional.of(sendSticker);
+        return Optional.of(messageBuilder.createStickerMessage(stickerId, chatId, firstName, messageIdToReply));
     }
 
-    private Optional<SendMessage> createStatsMessageForUser(Long chatId, User user) {
-        List<Stats> statsByChatIdAndUserId = statsService.getStatsByChatIdAndUserId(chatId, user.getId());
-        if (!statsByChatIdAndUserId.isEmpty()) {
-            Stats stats = statsByChatIdAndUserId.get(0);
-            return createMessage("You have been pidor " + stats.getScore() + " times, " + user.getFirstName() + "!", chatId, user.getFirstName());
+    private List<Validable> processDailyMessage(Stats winner, String key) {
+        List<Map<String, Object>> jsonData = jsonLoader.readFromJSON("src/main/resources/daily-messages.json");
+        List<Map<String, Object>> sentencesData = jsonData.stream()
+                .filter(data -> data.containsKey(key))
+                .toList();
+        if (sentencesData.isEmpty()) {
+            return Collections.emptyList();
         }
-        return createMessage("You are not registered for the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
-    }
-
-    private Optional<SendMessage> handleStats(List<String> commandList, Long chatId, User user) {
-        switch (commandList.size()) {
-            case 1 -> {
-                List<Stats> statsList = statsService.getStatsByChatIdAndYear(chatId, LocalDateTime.now().getYear());
-                return createStatsMessageForYear(statsList, chatId, user.getFirstName());
-            }
-            case 2 -> {
-                try {
-                    int year = Integer.parseInt(commandList.get(1));
-                    List<Stats> statsList = statsService.getStatsByChatIdAndYear(chatId, year);
-                    return createStatsMessageForYear(statsList, chatId, user.getFirstName());
-                } catch (NumberFormatException e) {
-                    log.error("Invalid year: {}", commandList.get(1));
-                    return Optional.empty();
-                }
-            }
-            default -> {
-                log.error("Invalid command: {}", commandList);
-                return Optional.empty();
-            }
+        if (key.equals("already_exists")) {
+            String message = (String) sentencesData.get(0).get(key);
+            return messageBuilder.createMessages(List.of(message + winner.getFirstName()), winner.getChatId(), winner.getFirstName());
         }
-    }
 
-    private Optional<SendMessage> createRegisterMessage(User user, Long chatId) {
-        if (statsService.existsByUserId(user.getId())) {
-            log.info("User: " + user.getFirstName() + " (" + user.getId() + ")", " is already registered");
-            return createMessage("You are already in the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
+        List<List<String>> sentencesList = (List<List<String>>) sentencesData.get(0).get("sentences");
+        List<String> randomSentences = sentencesList.get(ThreadLocalRandom.current().nextInt(sentencesList.size()));
+
+        if (!randomSentences.isEmpty()) {
+            int lastSentenceIndex = randomSentences.size() - 1;
+            randomSentences.set(lastSentenceIndex, randomSentences.get(lastSentenceIndex) + winner.getFirstName());
         }
-        statsService.addStat(new Stats(UUID.randomUUID(), chatId, user.getId(), user.getFirstName(), 0L, LocalDateTime.now(), Boolean.FALSE));
-        log.info("New user: " + user.getFirstName() + " (" + user.getId() + ")");
-        return createMessage("You have been registered to the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
-    }
-
-    private Optional<SendMessage> createStatsMessageForStat(List<Stats> statsList, Long chatId, String firstName, String header, String footer) {
-        List<Stats> modifiableList = new ArrayList<>(statsList);
-        modifiableList.sort(Comparator.comparing(Stats::getScore).reversed());
-        int maxIndexLength = String.valueOf(Math.min(modifiableList.size(), 10)).length();
-
-        String stringBuilder = IntStream
-                .iterate(0, i -> i < modifiableList.size() && i < 10, i -> i + 1)
-                .mapToObj(i -> String.format("%" + maxIndexLength + "d. %s — %d times%n",
-                        i + 1,
-                        modifiableList.get(i).getFirstName(),
-                        modifiableList.get(i).getScore()))
-                .collect(Collectors.joining("", header, footer));
-
-        return createMessage(stringBuilder, chatId, firstName);
+        return messageBuilder.createMessages(randomSentences, winner.getChatId(), winner.getFirstName());
     }
 
     public void resetWinner() {
@@ -187,66 +175,4 @@ public class MessageService {
         statsService.updateStats(allStats);
     }
 
-    private Optional<SendMessage> createStatsMessageForAll(User user, Long chatId) {
-        List<Stats> statsList = statsService.getAggregatedStatsByChatId(chatId);
-        String header = String.format("**All time pidors**%n%n");
-        String footer = String.format("%n**Total Participants — %d**", statsList.size());
-
-        return createStatsMessageForStat(statsList, chatId, user.getFirstName(), header, footer);
-    }
-
-    private Optional<SendMessage> createStatsMessageForYear(List<Stats> statsList, Long chatId, String firstName) {
-        int year = statsList.get(0).getCreatedAt().getYear();
-        String header = String.format("**Pidors of %d**%n%n", year);
-        String footer = String.format("%n**Total Participants — %d**", statsList.size());
-
-        return createStatsMessageForStat(statsList, chatId, firstName, header, footer);
-    }
-
-    private Optional<SendMessage> createMessage(String s, Long chatId, String firstName) {
-        log.info("Message sent: [" + s.replace("\n", "") + "] to [" + firstName + " (" + chatId + ")]");
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(String.valueOf(chatId));
-        sendMessage.setParseMode("Markdown");
-        sendMessage.setText(s);
-
-        return Optional.of(sendMessage);
-    }
-
-    private List<BotApiMethod<Message>> createMessage(List<String> s, Long chatId, String firstName) {
-        s.forEach(str -> str.replace("\n", ""));
-        log.info("Messages sent: [" + s + "] to [" + firstName + " (" + chatId + ")]");
-        List<BotApiMethod<Message>> sendMessage = new ArrayList<>();
-        s.forEach(str -> {
-            SendMessage message = new SendMessage();
-            message.setChatId(String.valueOf(chatId));
-            message.setParseMode("Markdown");
-            message.setText(str);
-            sendMessage.add(message);
-        });
-        return sendMessage;
-    }
-
-    private Optional<SendMessage> processRandomFact(Long chatId, User user) {
-        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/facts.csv");
-        List<String> randomFact = records.get(ThreadLocalRandom.current().nextInt(records.size()));
-        return createMessage(randomFact.get(0), chatId, user.getFirstName());
-    }
-
-    private List<String> createDailyMessage(Stats winner) {
-        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/daily-messages.csv");
-        List<String> randomMessage = records.get(ThreadLocalRandom.current().nextInt(records.size()));
-        randomMessage.set(randomMessage.size() - 1, randomMessage.get(randomMessage.size() - 1) + winner.getFirstName());
-        return randomMessage;
-    }
-
-    private Optional<SendSticker> processRandomSticker() {
-        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/stickers.csv");
-        List<String> randomSticker = records.get(ThreadLocalRandom.current().nextInt(records.size()));
-        String stickerId = randomSticker.get(0);
-        log.info("Sending sticker: {}", stickerId);
-        assert latestMessages.peek() != null;
-        Message message = latestMessages.peek().getMessage();
-        return createStickerMessage(stickerId, message.getChatId(), message.getFrom().getFirstName());
-    }
 }

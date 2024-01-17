@@ -6,18 +6,18 @@ import org.churk.telegrampibot.config.BotConfig;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.List;
-import java.util.Optional;
+
+import static java.lang.Thread.sleep;
 
 @Slf4j
 @Component
@@ -31,8 +31,8 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.messageService = messageService;
 
         List<BotCommand> botCommandList = List.of(
-                new BotCommand("/pidoreg", "Register yourself as a pidor"),
-                new BotCommand("/pidor", "Get today's pidor"),
+                new BotCommand("/pidoreg", "Register yourself as a " + botConfig.getWinnerName()),
+                new BotCommand("/pidor", "Get today's " + botConfig.getWinnerName()),
                 new BotCommand("/pidorstats", "Get stats (use /pidorstats [year] for specific year)"),
                 new BotCommand("/pidorall", "Get all-time stats"),
                 new BotCommand("/pidorme", "Get personal stats"),
@@ -72,34 +72,24 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void executeMessage(Optional<SendMessage> sendMessage) {
-        if (sendMessage.isPresent()) {
+    private void executeMessages(List<Validable> sendMessages) {
+        for (Validable sendMessage : sendMessages) {
             try {
-                execute(sendMessage.get());
+                if (sendMessage == null) {
+                    continue;
+                }
+                if (sendMessage instanceof SendMessage sendmessage) {
+                    execute(sendmessage);
+                } else if (sendMessage instanceof SendSticker sendsticker) {
+                    execute(sendsticker);
+                }
+                sleep(1000);
             } catch (TelegramApiException e) {
                 log.error("Error while sending message", e);
+            } catch (InterruptedException e) {
+                log.error("Error while sleeping", e);
             }
         }
-    }
-
-    private void executeSticker(Optional<SendSticker> sendSticker) {
-        if (sendSticker.isPresent()) {
-            try {
-                execute(sendSticker.get());
-            } catch (TelegramApiException e) {
-                log.error("Error while sending sticker", e);
-            }
-        }
-    }
-
-    private void executeMessages(List<BotApiMethod<Message>> sendMessages) {
-        sendMessages.forEach(sendMessage -> {
-            try {
-                execute(sendMessage);
-            } catch (TelegramApiException e) {
-                log.error("Error while sending message", e);
-            }
-        }));
     }
 
     @SneakyThrows
