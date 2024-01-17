@@ -1,7 +1,7 @@
 package org.churk.telegrampibot.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.churk.telegrampibot.reader.StickerPackLoader;
+import org.churk.telegrampibot.utility.StickerPackLoader;
 import org.churk.telegrampibot.service.TelegramBot;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;

@@ -1,4 +1,4 @@
-package org.churk.telegrampibot.reader;
+package org.churk.telegrampibot.utility;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +21,7 @@ import java.util.Map;
 @Slf4j
 @Component
 public class StickerPackLoader {
+    private final boolean ENABLED = false;
     private static final String csvPath = "src/main/resources/stickers.csv";
     private final BotConfig botConfig;
 
@@ -29,6 +30,9 @@ public class StickerPackLoader {
     }
 
     public void loadStickerPacks() {
+        if (!ENABLED) {
+            return;
+        }
         List<String> stickerSetNames = botConfig.getStickerSets();
         String botToken = botConfig.getToken();
 

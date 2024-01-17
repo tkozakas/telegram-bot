@@ -5,13 +5,17 @@ import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.churk.telegrampibot.builder.MessageBuilder;
 import org.churk.telegrampibot.config.BotConfig;
 import org.churk.telegrampibot.model.Stats;
-import org.churk.telegrampibot.reader.CSVLoader;
-import org.churk.telegrampibot.reader.JSONLoader;
+import org.churk.telegrampibot.utility.CSVLoader;
+import org.churk.telegrampibot.utility.JSONLoader;
+import org.churk.telegrampibot.utility.MemeDownloader;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -27,7 +31,7 @@ public class MessageService {
     private final JSONLoader jsonLoader;
     private final MessageBuilder messageBuilder;
 
-    public MessageService(BotConfig botConfig, StatsService statsService, CSVLoader csvLoader, org.churk.telegrampibot.reader.JSONLoader jsonLoader, MessageBuilder messageBuilder) {
+    public MessageService(BotConfig botConfig, StatsService statsService, CSVLoader csvLoader, org.churk.telegrampibot.utility.JSONLoader jsonLoader, MessageBuilder messageBuilder, MemeDownloader memeDownloader) {
         this.botConfig = botConfig;
         this.statsService = statsService;
         this.csvLoader = csvLoader;
@@ -56,10 +60,37 @@ public class MessageService {
             response.addAll(processDailyWinnerMessage());
         } else if (mainCommand.contains("/sticker") || mainCommand.equals("/sticker@" + botConfig.getUsername())) {
             response.add(processRandomSticker(update, messageIdToReply));
+        } else if (mainCommand.contains("/meme") || mainCommand.equals("/meme@" + botConfig.getUsername())) {
+            response.add(processRandomMeme(commandList, update, messageIdToReply).orElse(null));
         } else {
             response.add(processRandomSticker().orElse(null));
         }
         return response;
+    }
+
+    private Optional<Validable> processRandomMeme(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
+        Long chatId = update.getMessage().getChatId();
+        String firstName = update.getMessage().getFrom().getFirstName();
+        String subreddit = (commandList.size() == 2) ? commandList.get(1) : null;
+
+        log.info("Sending meme");
+        MemeDownloader.downloadMeme(subreddit);
+        String downloadedFilePath = MemeDownloader.waitForDownload();
+
+        if (downloadedFilePath != null) {
+            File memeFile = new File(downloadedFilePath);
+            SendPhoto sendPhoto = new SendPhoto();
+            sendPhoto.setChatId(String.valueOf(chatId));
+            sendPhoto.setPhoto(new InputFile(memeFile));
+            sendPhoto.setCaption("Here's your meme, " + firstName);
+            messageIdToReply.ifPresent(sendPhoto::setReplyToMessageId);
+            memeFile.deleteOnExit();
+            return Optional.of(sendPhoto);
+        } else {
+            log.error("Meme file was not downloaded in the given time");
+        }
+        return Optional.empty();
+
     }
 
     private Optional<Validable> handleStats(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {

@@ -9,6 +9,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
@@ -82,6 +83,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     execute(sendmessage);
                 } else if (sendMessage instanceof SendSticker sendsticker) {
                     execute(sendsticker);
+                } else if (sendMessage instanceof SendPhoto sendphoto) {
+                    execute(sendphoto);
                 }
                 sleep(1000);
             } catch (TelegramApiException e) {

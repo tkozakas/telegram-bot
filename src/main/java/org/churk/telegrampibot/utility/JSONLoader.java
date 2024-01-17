@@ -1,4 +1,4 @@
-package org.churk.telegrampibot.reader;
+package org.churk.telegrampibot.utility;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
