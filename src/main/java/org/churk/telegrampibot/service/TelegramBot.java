@@ -10,7 +10,6 @@ import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -21,6 +20,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
+    private static final boolean ENABLED = true;
     private final BotConfig botConfig;
     private final MessageService messageService;
 
@@ -59,41 +59,41 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            User user = update.getMessage().getFrom();
-            Long chatId = update.getMessage().getChatId();
             List<String> commands = messageService.processMessage(update);
 
-            List<SendMessage> sendMessages = messageService.handleDailyMessage(commands);
-            sendMessages.forEach(sendMessage -> {
-                try {
-                    execute(sendMessage);
-                } catch (TelegramApiException e) {
-                    log.error("Error while sending daily message", e);
-                }
-            });
-
-            Optional<SendMessage> sendMessage = messageService.handleCommand(commands, user, chatId);
-            if (sendMessage.isPresent()) {
-                execute(sendMessage.get());
+            if (!ENABLED) {
+                return;
             }
-            Optional<SendSticker> sendSticker = messageService.handleSticker(update);
-            if (sendSticker.isPresent()) {
+            executeMessage(messageService.handleDailyMessage(commands));
+            executeSticker(messageService.handleSticker(update));
+            executeSticker(messageService.handleSticker(update));
+        }
+    }
+
+    private void executeSticker(Optional<SendSticker> sendSticker) {
+        if (sendSticker.isPresent()) {
+            try {
                 execute(sendSticker.get());
+            } catch (TelegramApiException e) {
+                log.error("Error while sending sticker", e);
             }
         }
+    }
+
+    private void executeMessage(List<Optional<SendMessage>> sendMessages) {
+        sendMessages.forEach(sendMessage -> sendMessage.ifPresent(message -> {
+            try {
+                execute(message);
+            } catch (TelegramApiException e) {
+                log.error("Error while sending message", e);
+            }
+        }));
     }
 
     @SneakyThrows
     @Scheduled(cron = "0 0 11 * * ?") // 11 am
     public void sendScheduledMessage() {
-        Optional<List<SendMessage>> sendMessage = messageService.processDailyWinnerMessage();
-        sendMessage.ifPresent(sendMessages -> sendMessages.forEach(message -> {
-            try {
-                execute(message);
-            } catch (TelegramApiException e) {
-                log.error("Error while sending scheduled message", e);
-            }
-        }));
+        executeMessage(messageService.processDailyWinnerMessage());
     }
 
     @SneakyThrows
