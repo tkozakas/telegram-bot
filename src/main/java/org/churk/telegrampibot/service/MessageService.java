@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.churk.telegrampibot.builder.MessageBuilder;
 import org.churk.telegrampibot.config.BotConfig;
+import org.churk.telegrampibot.model.Sentence;
 import org.churk.telegrampibot.model.Stats;
 import org.churk.telegrampibot.utility.CSVLoader;
 import org.churk.telegrampibot.utility.JSONLoader;
@@ -30,13 +31,17 @@ public class MessageService {
     private final CSVLoader csvLoader;
     private final JSONLoader jsonLoader;
     private final MessageBuilder messageBuilder;
+    private final StickerService stickerService;
+    private final DailyMessageService dailyMessageService;
 
-    public MessageService(BotConfig botConfig, StatsService statsService, CSVLoader csvLoader, org.churk.telegrampibot.utility.JSONLoader jsonLoader, MessageBuilder messageBuilder, MemeDownloader memeDownloader) {
+    public MessageService(BotConfig botConfig, StatsService statsService, CSVLoader csvLoader, org.churk.telegrampibot.utility.JSONLoader jsonLoader, MessageBuilder messageBuilder, MemeDownloader memeDownloader, StickerService stickerService, DailyMessageService dailyMessageService) {
         this.botConfig = botConfig;
         this.statsService = statsService;
         this.csvLoader = csvLoader;
         this.jsonLoader = jsonLoader;
         this.messageBuilder = messageBuilder;
+        this.stickerService = stickerService;
+        this.dailyMessageService = dailyMessageService;
     }
 
     public List<Validable> handleCommand(Update update) {
@@ -123,7 +128,8 @@ public class MessageService {
         }
         if (statsService.existsWinnerToday()) {
             Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
-            return processDailyMessage(winner, "winner_exists");
+            String winnerExistsMessage = dailyMessageService.getKeyNameSentence("key_name");
+            return messageBuilder.createMessages(List.of(winnerExistsMessage), winner.getChatId(), winner.getFirstName());
         }
         Stats winner = allStats.get(ThreadLocalRandom.current().nextInt(allStats.size()));
         if (ENABLED) {
@@ -131,7 +137,12 @@ public class MessageService {
             winner.setIsWinner(Boolean.TRUE);
             statsService.updateStats(winner);
         }
-        return processDailyMessage(winner, "sentences");
+        List<String> sentenceList = dailyMessageService.getRandomGroupSentences().stream().map(Sentence::getText).toList();
+        if (sentenceList.isEmpty()) {
+            return List.of();
+        }
+        sentenceList.set(sentenceList.size() - 1, sentenceList.get(sentenceList.size() - 1) + winner.getFirstName());
+        return messageBuilder.createMessages(sentenceList, winner.getChatId(), winner.getFirstName());
     }
 
     private Validable processRandomFact(Update update, Optional<Integer> messageIdToReply) {
@@ -146,10 +157,7 @@ public class MessageService {
     private Validable processRandomSticker(Update update, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
         String firstName = update.getMessage().getFrom().getFirstName();
-
-        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/stickers.csv");
-        List<String> randomSticker = records.get(ThreadLocalRandom.current().nextInt(records.size()));
-        String stickerId = randomSticker.get(0);
+        String stickerId = stickerService.getRandomStickerId();
         log.info("Sending sticker: {}", stickerId);
 
         return messageBuilder.createStickerMessage(stickerId, chatId, firstName, messageIdToReply);
@@ -159,17 +167,14 @@ public class MessageService {
         if (ThreadLocalRandom.current().nextInt(100) > 2) {
             return Optional.empty();
         }
-
-        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/stickers.csv");
-        List<String> randomSticker = records.get(ThreadLocalRandom.current().nextInt(records.size()));
-        String stickerId = randomSticker.get(0);
-        log.info("Sending sticker: {}", stickerId);
-
         assert latestMessages.peek() != null;
         Message message = latestMessages.peek().getMessage();
         Optional<Integer> messageIdToReply = Optional.of(message.getMessageId());
+
         Long chatId = message.getChatId();
         String firstName = message.getFrom().getFirstName();
+        String stickerId = stickerService.getRandomStickerId();
+        log.info("Sending sticker: {}", stickerId);
 
         return Optional.of(messageBuilder.createStickerMessage(stickerId, chatId, firstName, messageIdToReply));
     }
@@ -183,6 +188,7 @@ public class MessageService {
             return Collections.emptyList();
         }
         if (key.equals("already_exists")) {
+
             String message = (String) sentencesData.get(0).get(key);
             return messageBuilder.createMessages(List.of(message + winner.getFirstName()), winner.getChatId(), winner.getFirstName());
         }

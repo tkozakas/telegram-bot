@@ -1,8 +1,10 @@
 package org.churk.telegrampibot.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.churk.telegrampibot.utility.StickerPackLoader;
-import org.churk.telegrampibot.service.TelegramBot;
+import org.churk.telegrampibot.service.DailyMessageService;
+import org.churk.telegrampibot.service.FactService;
+import org.churk.telegrampibot.service.StickerService;
+import org.churk.telegrampibot.service.TelegramBotService;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -13,20 +15,26 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Component
 @Slf4j
 public class BotInitializer {
-    private final TelegramBot telegramBot;
-    private final StickerPackLoader stickerPackLoader;
+    private final TelegramBotService telegramBotService;
+    private final StickerService stickerPackService;
+    private final DailyMessageService dailyMessageService;
+    private final FactService factService;
 
-    public BotInitializer(TelegramBot telegramBot, StickerPackLoader stickerPackLoader) {
-        this.telegramBot = telegramBot;
-        this.stickerPackLoader = stickerPackLoader;
+    public BotInitializer(TelegramBotService telegramBotService, StickerService stickerPackService, DailyMessageService dailyMessageService, FactService factService) {
+        this.telegramBotService = telegramBotService;
+        this.stickerPackService = stickerPackService;
+        this.dailyMessageService = dailyMessageService;
+        this.factService = factService;
     }
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws TelegramApiException {
-        stickerPackLoader.loadStickerPacks();
+        stickerPackService.loadStickers();
+        dailyMessageService.loadMessages();
+        factService.loadFacts();
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         try {
-            telegramBotsApi.registerBot(telegramBot);
+            telegramBotsApi.registerBot(telegramBotService);
         } catch (TelegramApiException e) {
             log.error("Error while initializing bot", e);
         }

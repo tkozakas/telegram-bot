@@ -22,12 +22,12 @@ import static java.lang.Thread.sleep;
 
 @Slf4j
 @Component
-public class TelegramBot extends TelegramLongPollingBot {
+public class TelegramBotService extends TelegramLongPollingBot {
     private static final boolean ENABLED = true;
     private final BotConfig botConfig;
     private final MessageService messageService;
 
-    public TelegramBot(BotConfig botConfig, MessageService messageService) {
+    public TelegramBotService(BotConfig botConfig, MessageService messageService) {
         this.botConfig = botConfig;
         this.messageService = messageService;
 
@@ -38,7 +38,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                 new BotCommand("/pidorall", "Get all-time stats"),
                 new BotCommand("/pidorme", "Get personal stats"),
                 new BotCommand("/fact", "Random fact of the day"),
-                new BotCommand("/sticker", "Random sticker from a churka")
+                new BotCommand("/sticker", "Random sticker from a churka"),
+                new BotCommand("/meme", "Random meme (use /meme [year] for specific subreddit)")
         );
         registerBotCommands(botCommandList);
     }
@@ -64,7 +65,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             String firstName = update.getMessage().getFrom().getFirstName();
-            log.info("Message received: {} from {}", messageText, firstName);
+            log.info("{}: {}", firstName, messageText);
 
             if (!ENABLED) {
                 return;
