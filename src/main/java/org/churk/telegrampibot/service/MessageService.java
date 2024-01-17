@@ -3,9 +3,10 @@ package org.churk.telegrampibot.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.churk.telegrampibot.config.BotConfig;
-import org.churk.telegrampibot.reader.CSVLoader;
 import org.churk.telegrampibot.model.Stats;
+import org.churk.telegrampibot.reader.CSVLoader;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -22,7 +23,7 @@ import java.util.stream.IntStream;
 @Slf4j
 @Service
 public class MessageService {
-    private static Queue<Update> latestMessages = new CircularFifoQueue<>(5);
+    private static final Queue<Update> latestMessages = new CircularFifoQueue<>(3);
     private final BotConfig botConfig;
     private final StatsService statsService;
     private final CSVLoader csvLoader;
@@ -33,11 +34,15 @@ public class MessageService {
         this.csvLoader = csvLoader;
     }
 
-    public Optional<SendMessage> handleCommand(List<String> commandList, User user, Long chatId) {
+    public Optional<SendMessage> handleCommand(Update update) {
+        List<String> commandList = processMessage(update);
+        User user = update.getMessage().getFrom();
+        Long chatId = update.getMessage().getChatId();
+
         String mainCommand = commandList.get(0);
         String botUsername = "@" + botConfig.getUsername();
         if (mainCommand.equals("/pidorstats") || mainCommand.equals("/pidorstats" + botUsername)) {
-            return handlePidorStats(commandList, chatId, user);
+            return handleStats(commandList, chatId, user);
         } else if (mainCommand.equals("/pidoreg") || mainCommand.equals("/pidoreg" + botUsername)) {
             return createRegisterMessage(user, chatId);
         } else if (mainCommand.equals("/pidorall") || mainCommand.equals("/pidorall" + botUsername)) {
@@ -57,28 +62,28 @@ public class MessageService {
         if (message.contains("/sticker") || message.equals("/sticker" + botUsername)) {
             return processRandomSticker();
         }
-        if (ThreadLocalRandom.current().nextInt(100) <= 10) {
+        if (ThreadLocalRandom.current().nextInt(100) <= 3) {
             return processRandomSticker();
         }
         return Optional.empty();
     }
 
-    public List<SendMessage> handleDailyMessage(List<String> commands) {
-        List<SendMessage> sendMessages = new ArrayList<>();
-        if (commands.contains("/pidor") || commands.contains("/pidor@" + botConfig.getUsername())) {
-            Optional<List<SendMessage>> sendMessage = processDailyWinnerMessage();
-            sendMessage.ifPresent(sendMessages::addAll);
+    public List<BotApiMethod<Message>> handleDailyMessage(Update update) {
+        List<String> commandList = processMessage(update);
+
+        if (commandList.contains("/pidor") || commandList.contains("/pidor@" + botConfig.getUsername())) {
+            return processDailyWinnerMessage();
         }
-        return sendMessages;
+        return List.of();
     }
 
-    public Optional<List<SendMessage>> processDailyWinnerMessage() {
+    public List<BotApiMethod<Message>> processDailyWinnerMessage() {
         log.info("Scheduled message");
         List<Stats> allStats = statsService.getAllStats();
 
         if (allStats.isEmpty()) {
             log.info("No stats available to pick a winner.");
-            return Optional.empty();
+            return List.of();
         }
         if (statsService.existsWinnerToday()) {
             Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
@@ -96,9 +101,7 @@ public class MessageService {
     }
 
     public List<String> processMessage(Update update) {
-        User user = update.getMessage().getFrom();
         String message = update.getMessage().getText();
-        log.info("Message received: {} from {}", message, user.getFirstName());
         latestMessages.add(update);
 
         if (message.isBlank()) {
@@ -129,7 +132,7 @@ public class MessageService {
         return createMessage("You are not registered for the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
     }
 
-    private Optional<SendMessage> handlePidorStats(List<String> commandList, Long chatId, User user) {
+    private Optional<SendMessage> handleStats(List<String> commandList, Long chatId, User user) {
         switch (commandList.size()) {
             case 1 -> {
                 List<Stats> statsList = statsService.getStatsByChatIdAndYear(chatId, LocalDateTime.now().getYear());
@@ -160,7 +163,6 @@ public class MessageService {
         statsService.addStat(new Stats(UUID.randomUUID(), chatId, user.getId(), user.getFirstName(), 0L, LocalDateTime.now(), Boolean.FALSE));
         log.info("New user: " + user.getFirstName() + " (" + user.getId() + ")");
         return createMessage("You have been registered to the pidor game, " + user.getFirstName() + "!", chatId, user.getFirstName());
-
     }
 
     private Optional<SendMessage> createStatsMessageForStat(List<Stats> statsList, Long chatId, String firstName, String header, String footer) {
@@ -211,10 +213,10 @@ public class MessageService {
         return Optional.of(sendMessage);
     }
 
-    private Optional<List<SendMessage>> createMessage(List<String> s, Long chatId, String firstName) {
+    private List<BotApiMethod<Message>> createMessage(List<String> s, Long chatId, String firstName) {
         s.forEach(str -> str.replace("\n", ""));
         log.info("Messages sent: [" + s + "] to [" + firstName + " (" + chatId + ")]");
-        List<SendMessage> sendMessage = new ArrayList<>();
+        List<BotApiMethod<Message>> sendMessage = new ArrayList<>();
         s.forEach(str -> {
             SendMessage message = new SendMessage();
             message.setChatId(String.valueOf(chatId));
@@ -222,7 +224,7 @@ public class MessageService {
             message.setText(str);
             sendMessage.add(message);
         });
-        return Optional.of(sendMessage);
+        return sendMessage;
     }
 
     private Optional<SendMessage> processRandomFact(Long chatId, User user) {

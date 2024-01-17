@@ -6,9 +6,11 @@ import org.churk.telegrampibot.config.BotConfig;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
@@ -59,14 +61,24 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            List<String> commands = messageService.processMessage(update);
+            String messageText = update.getMessage().getText();
+            String firstName = update.getMessage().getFrom().getFirstName();
+            log.info("Message received: {} from {}", messageText, firstName);
 
             if (!ENABLED) {
                 return;
             }
-            executeMessage(messageService.handleDailyMessage(commands));
-            executeSticker(messageService.handleSticker(update));
-            executeSticker(messageService.handleSticker(update));
+            executeMessages(messageService.handleCommand(update));
+        }
+    }
+
+    private void executeMessage(Optional<SendMessage> sendMessage) {
+        if (sendMessage.isPresent()) {
+            try {
+                execute(sendMessage.get());
+            } catch (TelegramApiException e) {
+                log.error("Error while sending message", e);
+            }
         }
     }
 
@@ -80,10 +92,10 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void executeMessage(List<Optional<SendMessage>> sendMessages) {
-        sendMessages.forEach(sendMessage -> sendMessage.ifPresent(message -> {
+    private void executeMessages(List<BotApiMethod<Message>> sendMessages) {
+        sendMessages.forEach(sendMessage -> {
             try {
-                execute(message);
+                execute(sendMessage);
             } catch (TelegramApiException e) {
                 log.error("Error while sending message", e);
             }
@@ -93,7 +105,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     @SneakyThrows
     @Scheduled(cron = "0 0 11 * * ?") // 11 am
     public void sendScheduledMessage() {
-        executeMessage(messageService.processDailyWinnerMessage());
+        executeMessages(messageService.processDailyWinnerMessage());
     }
 
     @SneakyThrows
