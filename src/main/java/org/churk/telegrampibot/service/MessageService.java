@@ -70,7 +70,6 @@ public class MessageService {
 
     private Optional<Validable> processRandomMeme(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
-        String firstName = update.getMessage().getFrom().getFirstName();
         String subreddit = (commandList.size() == 2) ? commandList.get(1) : null;
 
         log.info("Sending meme");
@@ -82,7 +81,6 @@ public class MessageService {
             SendPhoto sendPhoto = new SendPhoto();
             sendPhoto.setChatId(String.valueOf(chatId));
             sendPhoto.setPhoto(new InputFile(memeFile));
-            sendPhoto.setCaption("Here's your meme, " + firstName);
             messageIdToReply.ifPresent(sendPhoto::setReplyToMessageId);
             memeFile.deleteOnExit();
             return Optional.of(sendPhoto);
@@ -90,7 +88,6 @@ public class MessageService {
             log.error("Meme file was not downloaded in the given time");
         }
         return Optional.empty();
-
     }
 
     private Optional<Validable> handleStats(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
