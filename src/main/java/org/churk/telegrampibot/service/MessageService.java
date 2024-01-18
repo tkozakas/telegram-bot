@@ -107,23 +107,24 @@ public class MessageService {
     public List<Validable> processRandomMeme(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
         String subreddit = (commandList.size() == 2) ? commandList.get(1) : null;
-        if (subreddit == null) {
-            log.info("Sending random meme");
-            Optional<File> memeFile = memeService.getMeme();
-            if (memeFile.isPresent()) {
-                return List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get()));
-            }
-            log.error("Meme file was not downloaded in the given time");
-            return List.of();
-        }
 
-        Optional<File> memeFile = memeService.getMemeFromSubreddit(subreddit);
+        Optional<File> memeFile = retrieveMeme(subreddit);
         if (memeFile.isPresent()) {
             return List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get()));
         }
+
         log.error("Meme file was not downloaded in the given time");
         return List.of();
     }
+
+    private Optional<File> retrieveMeme(String subreddit) {
+        if (subreddit == null) {
+            log.info("Sending random meme");
+            return memeService.getMeme();
+        }
+        return memeService.getMemeFromSubreddit(subreddit);
+    }
+
 
     public List<Validable> processScheduledRandomMeme() {
         assert latestMessages.peek() != null;
@@ -165,15 +166,25 @@ public class MessageService {
             log.info("No stats available to pick a winner.");
             return List.of();
         }
+
         if (statsService.existsByWinnerToday()) {
-            Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
-            if (winner == null) {
-                log.error("Winner exists but not found in the database");
-                return List.of();
-            }
-            String winnerExistsMessage = dailyMessageService.getKeyNameSentence("key_name") + winner.getFirstName();
-            return messageBuilder.createMessages(List.of(winnerExistsMessage), winner.getChatId(), winner.getFirstName());
+            return handleExistingWinner(allStats);
         }
+
+        return handleNewWinner(allStats);
+    }
+
+    private List<Validable> handleExistingWinner(List<Stats> allStats) {
+        Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
+        if (winner == null) {
+            log.error("Winner exists but not found in the database");
+            return List.of();
+        }
+        String winnerExistsMessage = dailyMessageService.getKeyNameSentence("key_name") + winner.getFirstName();
+        return messageBuilder.createMessages(List.of(winnerExistsMessage), winner.getChatId(), winner.getFirstName());
+    }
+
+    private List<Validable> handleNewWinner(List<Stats> allStats) {
         Stats winner = allStats.get(ThreadLocalRandom.current().nextInt(allStats.size()));
         if (ENABLED) {
             winner.setScore(winner.getScore() + 1);
@@ -188,6 +199,7 @@ public class MessageService {
         sentenceList.set(lastSentenceIndex, sentenceList.get(lastSentenceIndex) + winner.getFirstName());
         return messageBuilder.createMessages(sentenceList, winner.getChatId(), winner.getFirstName());
     }
+
 
     private Validable processRandomFact(Update update, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
