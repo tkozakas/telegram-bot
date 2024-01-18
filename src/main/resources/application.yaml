@@ -27,10 +27,12 @@ bot:
   sticker_sets:
     - primates_uffchat
     - greatchurkobesfbi_by_fStikBot
+
 meme:
   api-url: https://meme-api.herokuapp.com/gimme
   download-path: src/main/resources/temp/
   file-name: meme
+
   # hourly schedule of memes
   schedule: 0 0 * * * *
   # every minute schedule # commented
