@@ -15,9 +15,10 @@ public interface StatsRepository extends JpaRepository<Stats, Long> {
     @Query("SELECT s FROM Stats s WHERE s.chatId = ?1 AND YEAR(s.createdAt) = ?2")
     List<Stats> findStatsByChatIdAndYear(Long chatId, int year);
 
-    @Query("SELECT s.isWinner FROM Stats s WHERE s.isWinner = TRUE")
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Stats s WHERE s.isWinner = TRUE")
     boolean existsIsWinner();
 
-    @Query("SELECT s.userId FROM Stats s WHERE s.userId = ?1")
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM Stats s WHERE s.userId = ?1")
     boolean existsByUserId(Long userId);
+
 }
