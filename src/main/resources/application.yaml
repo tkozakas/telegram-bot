@@ -19,7 +19,7 @@ bot:
   token: 6808027276:AAHear-Y_VmdZXnjOz10Gg0zWcs0YuBscv8
   winner_name: pidor
 
-  # daily schedule of pidor
+  # daily schedule of winner
   schedule: 0 0 12 * * *
   # daily schedule of reset
   reset-schedule: 0 0 0 * * *
