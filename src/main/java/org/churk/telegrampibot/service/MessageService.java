@@ -46,10 +46,6 @@ public class MessageService {
                 () -> Optional.of(processRandomSticker(update, Optional.empty())),
                 List.of(".*/sticker.*"),
 
-                // Process Random Meme
-                () -> Optional.ofNullable(processRandomMeme(commandList, update, Optional.empty()).get(0)),
-                List.of(".*/meme.*"),
-
                 // Create Register Message
                 () -> Optional.of(messageBuilder.createRegisterMessage(update, messageIdToReply)),
                 List.of(".*/pidorreg.*"),
@@ -66,6 +62,13 @@ public class MessageService {
                 () -> Optional.of(messageBuilder.createStatsMessageForUser(update, messageIdToReply)),
                 List.of(".*/pidorme.*"),
 
+                // Process Random Meme
+                () -> {
+                    List<Validable> memeResponse = processRandomMeme(commandList, update, Optional.empty());
+                    return memeResponse.isEmpty() ? Optional.empty() : Optional.ofNullable(memeResponse.get(0));
+                },
+                List.of(".*/meme.*"),
+
                 // Process Daily Winner Message
                 () -> {
                     response.addAll(processDailyWinnerMessage());
@@ -73,7 +76,6 @@ public class MessageService {
                 },
                 List.of(".*/pidor.*")
         );
-
 
         Optional<Supplier<Optional<Validable>>> commandHandler = commandHandlers.entrySet().stream()
                 .filter(entry -> entry.getValue().stream().anyMatch(commandList.toString()::matches))
@@ -93,11 +95,9 @@ public class MessageService {
 
         Optional<File> memeFile = retrieveMeme(subreddit);
         if (memeFile.isPresent()) {
-            return List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get()));
+            return List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get(), Optional.empty()));
         }
-
-        log.error("Meme file was not downloaded in the given time");
-        return List.of();
+        return List.of(messageBuilder.createMessage("No memes found or subreddit does not exist", chatId, update.getMessage().getFrom().getFirstName(), messageIdToReply));
     }
 
     private Optional<File> retrieveMeme(String subreddit) {
@@ -108,14 +108,10 @@ public class MessageService {
         return memeService.getMemeFromSubreddit(subreddit);
     }
 
-
     public List<Validable> processScheduledRandomMeme() {
         assert latestMessages.peek() != null;
-        String subreddit = memeProperties.getScheduledSubreddits().get(ThreadLocalRandom.current().nextInt(memeProperties.getScheduledSubreddits().size()));
-        List<Validable> messages = new ArrayList<>();
-        messages.add(messageBuilder.createMessage("Here's a random meme from subreddit: " + subreddit, latestMessages.peek().getMessage().getChatId(), latestMessages.peek().getMessage().getFrom().getFirstName(), Optional.empty()));
-        messages.add(processRandomMeme(List.of(subreddit), latestMessages.peek(), Optional.empty()).get(0));
-        return messages;
+        String subreddit = "From: " + memeProperties.getScheduledSubreddits().get(ThreadLocalRandom.current().nextInt(memeProperties.getScheduledSubreddits().size()));
+        return List.of(processRandomMeme(List.of(subreddit), latestMessages.peek(), Optional.empty()).get(0));
     }
 
     private Optional<Validable> handleStats(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
@@ -223,5 +219,4 @@ public class MessageService {
         allStats.forEach(stats -> stats.setIsWinner(Boolean.FALSE));
         statsService.updateStats(allStats);
     }
-
 }

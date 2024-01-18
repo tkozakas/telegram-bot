@@ -7,6 +7,7 @@ import org.churk.telegrampibot.service.DailyMessageService;
 import org.churk.telegrampibot.service.StatsService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
+import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
@@ -71,15 +72,28 @@ public class MessageBuilder {
         return sendSticker;
     }
 
-    public Validable createPhotoMessage(Optional<Integer> messageIdToReply, Long chatId, File memeFile) {
-        SendPhoto sendPhoto = new SendPhoto();
-        sendPhoto.setChatId(String.valueOf(chatId));
-        sendPhoto.setPhoto(new InputFile(memeFile));
-        messageIdToReply.ifPresent(sendPhoto::setReplyToMessageId);
-        memeFile.deleteOnExit();
-        return sendPhoto;
-    }
+    public Validable createPhotoMessage(Optional<Integer> messageIdToReply, Long chatId, File file, Optional<String> caption) {
+        String filename = file.getName().toLowerCase();
+        InputFile inputFile = new InputFile(file);
 
+        if (filename.endsWith(".gif")) {
+            SendAnimation sendAnimation = new SendAnimation();
+            sendAnimation.setChatId(String.valueOf(chatId));
+            sendAnimation.setAnimation(inputFile);
+            messageIdToReply.ifPresent(sendAnimation::setReplyToMessageId);
+            caption.ifPresent(sendAnimation::setCaption);
+            file.deleteOnExit();
+            return sendAnimation;
+        } else {
+            SendPhoto sendPhoto = new SendPhoto();
+            sendPhoto.setChatId(String.valueOf(chatId));
+            sendPhoto.setPhoto(inputFile);
+            messageIdToReply.ifPresent(sendPhoto::setReplyToMessageId);
+            caption.ifPresent(sendPhoto::setCaption);
+            file.deleteOnExit();
+            return sendPhoto;
+        }
+    }
 
     public Validable createMessage(String s, Long chatId, String firstName, Optional<Integer> messageIdToReply) {
         SendMessage sendMessage = (SendMessage) createMessage(s, chatId, firstName);

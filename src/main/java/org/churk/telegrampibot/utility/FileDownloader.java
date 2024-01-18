@@ -11,40 +11,46 @@ import java.net.URL;
 public class FileDownloader {
     private static final int timeOutSeconds = 30;
 
-    public static String waitForDownload(String downloadDirectory, String fileName) {
+    public static String waitForDownload(String downloadDirectory, String fileName, String extension) {
         long startTime = System.currentTimeMillis();
         while (true) {
             if (System.currentTimeMillis() - startTime > timeOutSeconds * 1000) {
                 log.error("Timeout while waiting for meme download");
                 return null;
             }
-            if (isDownloaded(downloadDirectory, fileName)) {
-                return downloadDirectory + fileName;
+            if (isDownloaded(downloadDirectory, fileName, extension)) {
+                return downloadDirectory + fileName + extension;
             }
         }
     }
 
-    private static boolean isDownloaded(String downloadDirectory, String fileName) {
-        String filePathString = downloadDirectory + fileName;
+    private static boolean isDownloaded(String downloadDirectory, String fileName, String extension) {
+        String filePathString = downloadDirectory + fileName + extension;
         File f = new File(filePathString);
         return f.exists() && !f.isDirectory();
     }
 
-    public static void downloadFileFromUrl(String apiUrl, String downloadDirectory, String fileName) {
-        String filePath = downloadDirectory + fileName;
+    public static void downloadFileFromUrl(String apiUrl, String downloadDirectory, String fileName, String extension) {
+        String filePath = downloadDirectory + fileName + extension;
         log.info("Downloading file from {}", apiUrl);
-        try (InputStream in = new BufferedInputStream(new URL(apiUrl).openStream())) {
-            try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
-                byte[] dataBuffer = new byte[1024];
-                int bytesRead;
 
-                while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                    fileOutputStream.write(dataBuffer, 0, bytesRead);
-                }
+        // Increase the buffer size for potentially faster downloads
+        // Adjust this size based on your specific requirements and resource constraints
+        int bufferSize = 256 * 1024; // 256 KB
+
+        try (InputStream in = new BufferedInputStream(new URL(apiUrl).openStream());
+             FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
+            byte[] dataBuffer = new byte[bufferSize];
+            int bytesRead;
+
+            while ((bytesRead = in.read(dataBuffer, 0, bufferSize)) != -1) {
+                fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
+            log.info("File downloaded successfully: {}", filePath);
         } catch (IOException e) {
-            log.error("Error while downloading meme", e);
+            log.error("Error while downloading file", e);
         }
-        log.info("Meme downloaded successfully");
     }
+
+
 }

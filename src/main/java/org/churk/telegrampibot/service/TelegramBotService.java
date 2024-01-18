@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
+import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
@@ -86,6 +87,8 @@ public class TelegramBotService extends TelegramLongPollingBot {
                     execute(sendsticker);
                 } else if (sendMessage instanceof SendPhoto sendphoto) {
                     execute(sendphoto);
+                } else if (sendMessage instanceof SendAnimation sendanimation) {
+                    execute(sendanimation);
                 }
                 sleep(1000);
             } catch (TelegramApiException e) {

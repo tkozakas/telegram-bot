@@ -10,7 +10,7 @@ import java.util.Map;
 public interface MemeClient {
 
     @GetMapping("/gimme")
-    Map<String, Object>  getMeme();
+    Map<String, Object> getMeme();
 
     @GetMapping("/gimme/{subreddit}")
     Map<String, Object> getMemeFromSubreddit(@PathVariable String subreddit);
