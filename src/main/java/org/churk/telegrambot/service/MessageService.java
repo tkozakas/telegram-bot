@@ -96,7 +96,7 @@ public class MessageService {
 
         Optional<File> memeFile = retrieveMeme(subreddit);
         return memeFile
-                .map(file -> List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, file, Optional.of("From r/%s".formatted(subreddit)))))
+                .map(file -> List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, file, subreddit == null ? Optional.empty() : Optional.of("From r/%s".formatted(subreddit)))))
                         .orElseGet(() -> List.of(messageBuilder.createMessage("No memes found or subreddit does not exist", chatId, update.getMessage().getFrom().getFirstName(), messageIdToReply)));
     }
 
