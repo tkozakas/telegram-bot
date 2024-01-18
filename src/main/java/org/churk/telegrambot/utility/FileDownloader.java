@@ -36,7 +36,7 @@ public class FileDownloader {
 
         // Increase the buffer size for potentially faster downloads
         // Adjust this size based on your specific requirements and resource constraints
-        int bufferSize = 256 * 1024; // 256 KB
+        int bufferSize = 512 * 1024; // 1014 KB
 
         try (InputStream in = new BufferedInputStream(new URL(apiUrl).openStream());
              FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
