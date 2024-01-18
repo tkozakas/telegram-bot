@@ -40,6 +40,22 @@ public class MessageService {
         List<String> commandList = processMessage(update);
 
         Map<Supplier<Optional<Validable>>, List<String>> commandHandlers = Map.of(
+                // Create Register Message
+                () -> Optional.of(messageBuilder.createRegisterMessage(update, messageIdToReply)),
+                List.of(".*/%sreg.*".formatted(botProperties.getWinnerName())),
+
+                // Handle Stats
+                () -> handleStats(commandList, update, Optional.empty()),
+                List.of(".*/%sstats.*".formatted(botProperties.getWinnerName())),
+
+                // Create Stats Message for All
+                () -> Optional.of(messageBuilder.createStatsMessageForAll(update, Optional.empty())),
+                List.of(".*/%sall.*".formatted(botProperties.getWinnerName())),
+
+                // Create Stats Message for User
+                () -> Optional.of(messageBuilder.createStatsMessageForUser(update, messageIdToReply)),
+                List.of(".*/%sme.*".formatted(botProperties.getWinnerName())),
+
                 // Process Random Fact
                 () -> Optional.of(processRandomFact(update, Optional.empty())),
                 List.of(".*/fact.*"),
@@ -48,28 +64,12 @@ public class MessageService {
                 () -> Optional.of(processRandomSticker(update, Optional.empty())),
                 List.of(".*/sticker.*"),
 
-                // Create Register Message
-                () -> Optional.of(messageBuilder.createRegisterMessage(update, messageIdToReply)),
-                List.of(".*/%sreg.*".formatted(botProperties.getWinnerName())),
-
-                // Handle Stats
-                () -> handleStats(commandList, update, Optional.empty()),
-                List.of(".*/%sstats.*"),
-
-                // Create Stats Message for All
-                () -> Optional.of(messageBuilder.createStatsMessageForAll(update, Optional.empty())),
-                List.of(".*/%sall.*"),
-
-                // Create Stats Message for User
-                () -> Optional.of(messageBuilder.createStatsMessageForUser(update, messageIdToReply)),
-                List.of(".*/%sme.*"),
-
                 // Process Daily Winner Message
                 () -> {
                     response.addAll(processDailyWinnerMessage());
                     return Optional.empty();
                 },
-                List.of(".*/%s.*"),
+                List.of(".*/%s.*".formatted(botProperties.getWinnerName())),
 
                 // Process Random Meme
                 () -> {
