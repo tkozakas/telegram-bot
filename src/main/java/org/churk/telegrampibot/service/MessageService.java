@@ -32,7 +32,12 @@ public class MessageService {
     private final FactService factService;
     private final MemeService memeService;
 
-    public MessageService(BotConfig botConfig, MessageBuilder messageBuilder, StatsService statsService, StickerService stickerService, DailyMessageService dailyMessageService, FactService factService, MemeService memeService) {
+    public MessageService(BotConfig botConfig,
+                          MessageBuilder messageBuilder,
+                          StatsService statsService,
+                          StickerService stickerService,
+                          DailyMessageService dailyMessageService,
+                          FactService factService, MemeService memeService) {
         this.botConfig = botConfig;
         this.messageBuilder = messageBuilder;
         this.statsService = statsService;

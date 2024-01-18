@@ -32,16 +32,16 @@ public class MessageBuilder {
 
     public Optional<Validable> createStatsMessageForAll(Update update, Optional<Integer> messageIdToReply) {
         List<Stats> statsList = statsService.getAggregatedStatsByChatId(update.getMessage().getChatId());
-        String header = dailyMessageService.getKeyNameSentence("pidorstats_all_header");
-        String footer = dailyMessageService.getKeyNameSentence("pidorstats_footer") + statsList.size();
+        String header = dailyMessageService.getKeyNameSentence("stats_all_header");
+        String footer = dailyMessageService.getKeyNameSentence("stats_footer") + statsList.size();
 
         return createStatsMessageForStat(statsList, update, header, footer, messageIdToReply);
     }
 
     public Optional<Validable> createStatsMessageForYear(Update update, int year, Optional<Integer> messageIdToReply) {
         List<Stats> statsList = statsService.getStatsByChatIdAndYear(update.getMessage().getChatId(), year);
-        String header = dailyMessageService.getKeyNameSentence("pidorstats_year_header").formatted(year);
-        String footer = dailyMessageService.getKeyNameSentence("pidorstats_footer") + statsList.size();
+        String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
+        String footer = dailyMessageService.getKeyNameSentence("stats_footer") + statsList.size();
 
         return createStatsMessageForStat(statsList, update, header, footer, messageIdToReply);
     }
@@ -115,10 +115,10 @@ public class MessageBuilder {
         List<Stats> statsByChatIdAndUserId = statsService.getStatsByChatIdAndUserId(chatId, user.getId());
         if (!statsByChatIdAndUserId.isEmpty()) {
             Stats stats = statsByChatIdAndUserId.get(0);
-            String header = dailyMessageService.getKeyNameSentence("pidorme_header").formatted(stats.getFirstName(), stats.getScore());
+            String header = dailyMessageService.getKeyNameSentence("me_header").formatted(stats.getFirstName(), stats.getScore());
             return createMessage(header, chatId, firstName, messageIdToReply);
         }
-        String header = dailyMessageService.getKeyNameSentence("pidor_not_registed_header") + firstName;
+        String header = dailyMessageService.getKeyNameSentence("not_registered_header") + firstName;
         return createMessage(header, chatId, firstName, messageIdToReply);
     }
 
@@ -129,12 +129,12 @@ public class MessageBuilder {
 
         if (statsService.existsByUserId(user.getId())) {
             log.info("User: " + user.getFirstName() + " (" + user.getId() + ")", " is already registered");
-            String header = dailyMessageService.getKeyNameSentence("pidor_registered_header") + firstName;
+            String header = dailyMessageService.getKeyNameSentence("registered_header") + firstName;
             return createMessage(header, chatId, firstName, messageIdToReply);
         }
         statsService.addStat(new Stats(UUID.randomUUID(), chatId, user.getId(), user.getFirstName(), 0L, LocalDateTime.now(), Boolean.FALSE));
         log.info("New user: " + user.getFirstName() + " (" + user.getId() + ")");
-        String header = dailyMessageService.getKeyNameSentence("pidor_registered_now_header") + firstName;
+        String header = dailyMessageService.getKeyNameSentence("registered_now_header") + firstName;
         return createMessage(header, chatId, firstName, messageIdToReply);
     }
 }

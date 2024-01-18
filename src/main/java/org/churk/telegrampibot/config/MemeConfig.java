@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties("bot.meme")
+@ConfigurationProperties("meme")
 public class MemeConfig {
     private String apiUrl;
     private String downloadPath;

@@ -3,28 +3,28 @@
     "key_name": "Согласно моей информации, по результатам сегодняшнего розыгрыша *пидор* дня - "
   },
   {
-    "pidorstats_all_header": "Топ-10 пидоров за все время:\n\n"
+    "stats_all_header": "Топ-10 пидоров за все время:\n\n"
   },
   {
-    "pidorstats_now_header": "Топ-10 пидоров за этот год:\n\n"
+    "stats_now_header": "Топ-10 пидоров за этот год:\n\n"
   },
   {
-    "pidorstats_year_header": "Топ-10 пидоров - %d\n\n"
+    "stats_year_header": "Топ-10 пидоров - %d\n\n"
   },
   {
-    "pidorstats_footer": "\nВсего участников — "
+    "stats_footer": "\nВсего участников — "
   },
   {
-    "pidor_registered_header": "Ты уже зарегистрирован, "
+    "registered_header": "Ты уже зарегистрирован, "
   },
   {
-    "pidor_not_registered_header": "Ты ещё не зарегистрирован, "
+    "not_registered_header": "Ты ещё не зарегистрирован, "
   },
   {
-    "pidor_registered_now_header": "Ты зарегистрирован "
+    "registered_now_header": "Ты зарегистрирован "
   },
   {
-    "pidorme_header": "%s, ты уже *пидор* дня %d раз"
+    "me_header": "%s, ты уже *пидор* дня %d раз"
   },
   {
     "stats_table": "%s. %s — *%d раз(а)*\n"
@@ -32,10 +32,10 @@
   {
     "sentences": [
       [
-        "Итак... кто же сегодня *пидор* дня?",
+        "Итак... кто же сегодня *%s* дня?",
         "_Военный спутник_ запущен, коды доступа внутри...",
         "_Не может быть!_",
-        "Няшный *пидор* дня - "
+        "Няшный *%s* дня - "
       ],
       [
         "*Woop-woop!* That's the sound of da *pidor-police*!",

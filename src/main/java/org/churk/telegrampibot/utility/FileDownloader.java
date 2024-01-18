@@ -30,10 +30,11 @@ public class FileDownloader {
         return f.exists() && !f.isDirectory();
     }
 
-    public static void downloadFileFromUrl(String apiUrl) {
+    public static void downloadFileFromUrl(String apiUrl, String downloadDirectory, String fileName) {
+        String filePath = downloadDirectory + fileName;
         log.info("Downloading file from {}", apiUrl);
         try (InputStream in = new BufferedInputStream(new URL(apiUrl).openStream())) {
-            try (FileOutputStream fileOutputStream = new FileOutputStream(apiUrl)) {
+            try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
                 byte[] dataBuffer = new byte[1024];
                 int bytesRead;
 

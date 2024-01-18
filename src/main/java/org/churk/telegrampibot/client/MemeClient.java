@@ -2,16 +2,16 @@ package org.churk.telegrampibot.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "memeClient", url = "https://meme-api.herokuapp.com")
+import java.util.Map;
+
+@FeignClient(name = "memeClient", url = "https://meme-api.com")
 public interface MemeClient {
 
     @GetMapping("/gimme")
-    String getMeme();
+    Map<String, Object>  getMeme();
 
-    @GetMapping("/gimme/${subreddit}")
-    String getMemeFromSubreddit(String subreddit);
-
-    @GetMapping("/gimme/${subreddit}/${count}")
-    String getMemeFromSubreddit(String subreddit, int count);
+    @GetMapping("/gimme/{subreddit}")
+    Map<String, Object> getMemeFromSubreddit(@PathVariable String subreddit);
 }

@@ -4,9 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrampibot.client.MemeClient;
 import org.churk.telegrampibot.config.MemeConfig;
 import org.churk.telegrampibot.utility.FileDownloader;
-import org.jvnet.hk2.annotations.Service;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -21,18 +22,18 @@ public class MemeService {
     }
 
     public Optional<File> getMemeFromSubreddit(String subreddit) {
-        String apiUrl = memeClient.getMemeFromSubreddit(subreddit);
-        FileDownloader.downloadFileFromUrl(apiUrl);
-        String downloadedFilePath = FileDownloader.waitForDownload(memeConfig.getDownloadPath(), memeConfig.getFileName());
-        if (downloadedFilePath == null) {
-            return Optional.empty();
-        }
-        return Optional.of(new File(downloadedFilePath));
+        Map<String, Object> map = memeClient.getMemeFromSubreddit(subreddit);
+        return getFile(map);
     }
 
     public Optional<File> getMeme() {
-        String apiUrl = memeClient.getMeme();
-        FileDownloader.downloadFileFromUrl(apiUrl);
+        Map<String, Object> map = memeClient.getMeme();
+        return getFile(map);
+    }
+
+    private Optional<File> getFile(Map<String, Object> map) {
+        String apiUrl = (String) map.get("url");
+        FileDownloader.downloadFileFromUrl(apiUrl, memeConfig.getDownloadPath(), memeConfig.getFileName());
         String downloadedFilePath = FileDownloader.waitForDownload(memeConfig.getDownloadPath(), memeConfig.getFileName());
         if (downloadedFilePath == null) {
             return Optional.empty();
