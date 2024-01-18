@@ -96,7 +96,9 @@ public class MessageService {
         String subreddit = (commandList.size() == 2) ? commandList.get(1) : null;
 
         Optional<File> memeFile = retrieveMeme(subreddit);
-        return memeFile.map(file -> List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, file, Optional.empty()))).orElseGet(() -> List.of(messageBuilder.createMessage("No memes found or subreddit does not exist", chatId, update.getMessage().getFrom().getFirstName(), messageIdToReply)));
+        return memeFile
+                .map(file -> List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, file, Optional.of("From r/%s".formatted(subreddit)))))
+                        .orElseGet(() -> List.of(messageBuilder.createMessage("No memes found or subreddit does not exist", chatId, update.getMessage().getFrom().getFirstName(), messageIdToReply)));
     }
 
     private Optional<File> retrieveMeme(String subreddit) {
@@ -109,7 +111,7 @@ public class MessageService {
 
     public List<Validable> processScheduledRandomMeme() {
         assert latestMessages.peek() != null;
-        String subreddit = "From: " + memeProperties.getScheduledSubreddits().get(ThreadLocalRandom.current().nextInt(memeProperties.getScheduledSubreddits().size()));
+        String subreddit = memeProperties.getScheduledSubreddits().get(ThreadLocalRandom.current().nextInt(memeProperties.getScheduledSubreddits().size()));
         return List.of(processRandomMeme(List.of(subreddit), latestMessages.peek(), Optional.empty()).get(0));
     }
 
