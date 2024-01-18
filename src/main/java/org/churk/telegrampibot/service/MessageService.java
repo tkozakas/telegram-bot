@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.churk.telegrampibot.builder.MessageBuilder;
 import org.churk.telegrampibot.config.BotConfig;
+import org.churk.telegrampibot.config.MemeConfig;
 import org.churk.telegrampibot.model.Sentence;
 import org.churk.telegrampibot.model.Stats;
 import org.springframework.stereotype.Service;
@@ -13,11 +14,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Supplier;
 
 @Slf4j
 @Service
@@ -25,6 +24,7 @@ public class MessageService {
     protected static final Queue<Update> latestMessages = new CircularFifoQueue<>(3);
     private static final boolean ENABLED = true;
     private final BotConfig botConfig;
+    private final MemeConfig memeConfig;
     private final MessageBuilder messageBuilder;
     private final StatsService statsService;
     private final StickerService stickerService;
@@ -32,13 +32,14 @@ public class MessageService {
     private final FactService factService;
     private final MemeService memeService;
 
-    public MessageService(BotConfig botConfig,
+    public MessageService(BotConfig botConfig, MemeConfig memeConfig,
                           MessageBuilder messageBuilder,
                           StatsService statsService,
                           StickerService stickerService,
                           DailyMessageService dailyMessageService,
                           FactService factService, MemeService memeService) {
         this.botConfig = botConfig;
+        this.memeConfig = memeConfig;
         this.messageBuilder = messageBuilder;
         this.statsService = statsService;
         this.stickerService = stickerService;
@@ -51,51 +52,86 @@ public class MessageService {
     public List<Validable> handleCommand(Update update) {
         Optional<Integer> messageIdToReply = Optional.of(update.getMessage().getMessageId());
         List<Validable> response = new ArrayList<>();
-
         List<String> commandList = processMessage(update);
-        String mainCommand = commandList.get(0);
 
-        if (mainCommand.equals("/pidorstats") || mainCommand.equals("/pidorstats@" + botConfig.getUsername())) {
-            response.add(handleStats(commandList, update, Optional.empty()).orElse(null));
-        } else if (mainCommand.equals("/pidorall") || mainCommand.equals("/pidorall@" + botConfig.getUsername())) {
-            response.add(messageBuilder.createStatsMessageForAll(update, Optional.empty()).orElse(null));
-        } else if (mainCommand.equals("/pidorme") || mainCommand.equals("/pidorme@" + botConfig.getUsername())) {
-            response.add(messageBuilder.createStatsMessageForUser(update, messageIdToReply));
-        } else if (mainCommand.equals("/pidoreg") || mainCommand.equals("/pidoreg@" + botConfig.getUsername())) {
-            response.add(messageBuilder.createRegisterMessage(update, messageIdToReply));
-        } else if (mainCommand.contains("/fact") || mainCommand.equals("/fact@" + botConfig.getUsername())) {
-            response.add(processRandomFact(update, Optional.empty()));
-        } else if (mainCommand.contains("/pidor") || mainCommand.contains("/pidor@" + botConfig.getUsername())) {
-            response.addAll(processDailyWinnerMessage());
-        } else if (mainCommand.contains("/sticker") || mainCommand.equals("/sticker@" + botConfig.getUsername())) {
-            response.add(processRandomSticker(update, messageIdToReply));
-        } else if (mainCommand.contains("/meme") || mainCommand.equals("/meme@" + botConfig.getUsername())) {
-            response.add(processRandomMeme(commandList, update, messageIdToReply).orElse(null));
-        } else {
-            response.add(processRandomSticker().orElse(null));
-        }
+        Map<Supplier<Optional<Validable>>, List<String>> commandHandlers = Map.of(
+                // Process Random Fact
+                () -> Optional.of(processRandomFact(update, Optional.empty())),
+                List.of(".*fact.*"),
+
+                // Process Random Sticker
+                () -> Optional.of(processRandomSticker(update, Optional.empty())),
+                List.of(".*sticker.*"),
+
+                // Process Random Meme
+                () -> Optional.ofNullable(processRandomMeme(commandList, update, Optional.empty()).get(0)),
+                List.of(".*meme.*"),
+
+                // Create Register Message
+                () -> Optional.of(messageBuilder.createRegisterMessage(update, messageIdToReply)),
+                List.of(".*pidorreg.*"),
+
+                // Handle Stats
+                () -> handleStats(commandList, update, Optional.empty()),
+                List.of(".*pidorstats.*"),
+
+                // Create Stats Message for All
+                () -> Optional.of(messageBuilder.createStatsMessageForAll(update, Optional.empty())),
+                List.of(".*pidorall.*"),
+
+                // Create Stats Message for User
+                () -> Optional.of(messageBuilder.createStatsMessageForUser(update, messageIdToReply)),
+                List.of(".*pidorme.*"),
+
+                // Process Daily Winner Message
+                () -> {
+                    response.addAll(processDailyWinnerMessage());
+                    return Optional.empty();
+                },
+                List.of(".*pidor.*")
+        );
+
+
+        Optional<Supplier<Optional<Validable>>> commandHandler = commandHandlers.entrySet().stream()
+                .filter(entry -> entry.getValue().stream().anyMatch(commandList.toString()::matches))
+                .map(Map.Entry::getKey)
+                .findFirst();
+
+        commandHandler.orElse(this::processRandomSticker)
+                .get()
+                .ifPresent(response::add);
+
         return response;
     }
 
-    private Optional<Validable> processRandomMeme(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
+    public List<Validable> processRandomMeme(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
         String subreddit = (commandList.size() == 2) ? commandList.get(1) : null;
         if (subreddit == null) {
             log.info("Sending random meme");
             Optional<File> memeFile = memeService.getMeme();
             if (memeFile.isPresent()) {
-                return messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get());
+                return List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get()));
             }
             log.error("Meme file was not downloaded in the given time");
-            return Optional.empty();
+            return List.of();
         }
 
         Optional<File> memeFile = memeService.getMemeFromSubreddit(subreddit);
         if (memeFile.isPresent()) {
-            return messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get());
+            return List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get()));
         }
         log.error("Meme file was not downloaded in the given time");
-        return Optional.empty();
+        return List.of();
+    }
+
+    public List<Validable> processScheduledRandomMeme() {
+        assert latestMessages.peek() != null;
+        String subreddit = memeConfig.getScheduledSubreddits().get(ThreadLocalRandom.current().nextInt(memeConfig.getScheduledSubreddits().size()));
+        List<Validable> messages = new ArrayList<>();
+        messages.add(messageBuilder.createMessage("Here's a random meme from subreddit: " + subreddit, latestMessages.peek().getMessage().getChatId(), latestMessages.peek().getMessage().getFrom().getFirstName(), Optional.empty()));
+        messages.add(processRandomMeme(List.of(subreddit), latestMessages.peek(), Optional.empty()).get(0));
+        return messages;
     }
 
     private Optional<Validable> handleStats(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
@@ -105,7 +141,7 @@ public class MessageService {
         }
         int year = (commandList.size() == 2) ? Integer.parseInt(commandList.get(1)) : LocalDateTime.now().getYear();
 
-        return messageBuilder.createStatsMessageForYear(update, year, messageIdToReply);
+        return Optional.of(messageBuilder.createStatsMessageForYear(update, year, messageIdToReply));
     }
 
 

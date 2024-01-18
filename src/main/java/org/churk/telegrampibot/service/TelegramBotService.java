@@ -3,6 +3,7 @@ package org.churk.telegrampibot.service;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrampibot.config.BotConfig;
+import org.churk.telegrampibot.config.MemeConfig;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -25,10 +26,12 @@ import static java.lang.Thread.sleep;
 public class TelegramBotService extends TelegramLongPollingBot {
     private static final boolean ENABLED = true;
     private final BotConfig botConfig;
+    private final MemeConfig memeConfig;
     private final MessageService messageService;
 
-    public TelegramBotService(BotConfig botConfig, MessageService messageService) {
+    public TelegramBotService(BotConfig botConfig, MemeConfig memeConfig, MessageService messageService) {
         this.botConfig = botConfig;
+        this.memeConfig = memeConfig;
         this.messageService = messageService;
 
         List<BotCommand> botCommandList = List.of(
@@ -74,7 +77,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
         }
     }
 
-    private void executeMessages(List<Validable> sendMessages) {
+    private void executeMessages(List<Validable> sendMessages) throws InterruptedException {
         for (Validable sendMessage : sendMessages) {
             try {
                 if (sendMessage == null) {
@@ -90,20 +93,24 @@ public class TelegramBotService extends TelegramLongPollingBot {
                 sleep(1000);
             } catch (TelegramApiException e) {
                 log.error("Error while sending message", e);
-            } catch (InterruptedException e) {
-                log.error("Error while sleeping", e);
             }
         }
     }
 
     @SneakyThrows
-    @Scheduled(cron = "0 0 11 * * ?") // 11 am
+    @Scheduled(cron = "#{@botConfig.schedule}") // 11 am
     public void sendScheduledMessage() {
         executeMessages(messageService.processDailyWinnerMessage());
     }
 
     @SneakyThrows
-    @Scheduled(cron = "0 0 0 * * ?") // midnight
+    @Scheduled(cron = "#{@memeConfig.schedule}") // hourly memes
+    public void sendScheduledSticker() {
+        executeMessages(messageService.processScheduledRandomMeme());
+    }
+
+    @SneakyThrows
+    @Scheduled(cron = "#{@botConfig.resetSchedule}")  // midnight
     public void resetWinner() {
         messageService.resetWinner();
     }

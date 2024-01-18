@@ -30,7 +30,7 @@ public class MessageBuilder {
         this.dailyMessageService = dailyMessageService;
     }
 
-    public Optional<Validable> createStatsMessageForAll(Update update, Optional<Integer> messageIdToReply) {
+    public Validable createStatsMessageForAll(Update update, Optional<Integer> messageIdToReply) {
         List<Stats> statsList = statsService.getAggregatedStatsByChatId(update.getMessage().getChatId());
         String header = dailyMessageService.getKeyNameSentence("stats_all_header");
         String footer = dailyMessageService.getKeyNameSentence("stats_footer") + statsList.size();
@@ -38,7 +38,7 @@ public class MessageBuilder {
         return createStatsMessageForStat(statsList, update, header, footer, messageIdToReply);
     }
 
-    public Optional<Validable> createStatsMessageForYear(Update update, int year, Optional<Integer> messageIdToReply) {
+    public Validable createStatsMessageForYear(Update update, int year, Optional<Integer> messageIdToReply) {
         List<Stats> statsList = statsService.getStatsByChatIdAndYear(update.getMessage().getChatId(), year);
         String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
         String footer = dailyMessageService.getKeyNameSentence("stats_footer") + statsList.size();
@@ -46,7 +46,7 @@ public class MessageBuilder {
         return createStatsMessageForStat(statsList, update, header, footer, messageIdToReply);
     }
 
-    public Optional<Validable> createStatsMessageForStat(List<Stats> statsList, Update update, String header, String footer, Optional<Integer> messageIdToReply) {
+    public Validable createStatsMessageForStat(List<Stats> statsList, Update update, String header, String footer, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
         String firstName = update.getMessage().getFrom().getFirstName();
 
@@ -62,7 +62,7 @@ public class MessageBuilder {
                         modifiableList.get(i).getScore()))
                 .collect(Collectors.joining("", header, footer));
 
-        return Optional.of(createMessage(stringBuilder, chatId, firstName, messageIdToReply));
+        return createMessage(stringBuilder, chatId, firstName, messageIdToReply);
     }
 
     public Validable createStickerMessage(String stickerId, Long chatId, String firstName, Optional<Integer> messageIdToReply) {
@@ -74,13 +74,13 @@ public class MessageBuilder {
         return sendSticker;
     }
 
-    public Optional<Validable> createPhotoMessage(Optional<Integer> messageIdToReply, Long chatId, File memeFile) {
+    public Validable createPhotoMessage(Optional<Integer> messageIdToReply, Long chatId, File memeFile) {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(String.valueOf(chatId));
         sendPhoto.setPhoto(new InputFile(memeFile));
         messageIdToReply.ifPresent(sendPhoto::setReplyToMessageId);
         memeFile.deleteOnExit();
-        return Optional.of(sendPhoto);
+        return sendPhoto;
     }
 
 

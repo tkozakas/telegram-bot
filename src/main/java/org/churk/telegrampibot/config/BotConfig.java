@@ -13,5 +13,7 @@ public class BotConfig {
     private String username;
     private String token;
     private String winnerName;
+    private String schedule;
+    private String resetSchedule;
     private List<String> stickerSets;
 }
