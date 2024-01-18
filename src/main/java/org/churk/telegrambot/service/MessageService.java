@@ -94,10 +94,7 @@ public class MessageService {
         String subreddit = (commandList.size() == 2) ? commandList.get(1) : null;
 
         Optional<File> memeFile = retrieveMeme(subreddit);
-        if (memeFile.isPresent()) {
-            return List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get(), Optional.empty()));
-        }
-        return List.of(messageBuilder.createMessage("No memes found or subreddit does not exist", chatId, update.getMessage().getFrom().getFirstName(), messageIdToReply));
+        return memeFile.map(file -> List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, file, Optional.empty()))).orElseGet(() -> List.of(messageBuilder.createMessage("No memes found or subreddit does not exist", chatId, update.getMessage().getFrom().getFirstName(), messageIdToReply)));
     }
 
     private Optional<File> retrieveMeme(String subreddit) {
