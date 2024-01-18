@@ -13,6 +13,12 @@ bot:
   username: SheepLoverBot
   token: 6808027276:AAHear-Y_VmdZXnjOz10Gg0zWcs0YuBscv8
   winner_name: pidor
+
+  # daily schedule of pidor
+  schedule: 0 0 12 * * *
+  # daily schedule of reset
+  resetSchedule: 0 0 0 * * *
+
   sticker_sets:
     - primates_uffchat
     - greatchurkobesfbi_by_fStikBot
@@ -22,3 +28,10 @@ meme:
   fileName: meme.jpg
   # hourly schedule of memes
   schedule: 0 0 * * * *
+  # every minute schedule # commented
+  #  schedule: 0 * * * * *
+  # list of subredits to get memes from
+  scheduledSubreddits:
+    - wordington
+    - wunkus
+    - clamworks
