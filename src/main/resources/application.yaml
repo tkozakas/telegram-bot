@@ -24,7 +24,7 @@ bot:
     - greatchurkobesfbi_by_fStikBot
 meme:
   apiUrl: https://meme-api.herokuapp.com/gimme
-  downloadPath: src/main/resources/temp
+  downloadPath: src/main/resources/temp/
   fileName: meme.jpg
   # hourly schedule of memes
   schedule: 0 0 * * * *
