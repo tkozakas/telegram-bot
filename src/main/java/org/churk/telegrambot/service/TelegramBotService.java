@@ -28,7 +28,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
     private final BotProperties botConfig;
     private final MessageService messageService;
 
-    public TelegramBotService(BotProperties botConfig, MessageService messageService) {
+    public TelegramBotService(BotProperties botConfig, MessageService messageService) throws TelegramApiException {
         this.botConfig = botConfig;
         this.messageService = messageService;
 
@@ -45,8 +45,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
         registerBotCommands(botCommandList);
     }
 
-    @SneakyThrows
-    private void registerBotCommands(List<BotCommand> botCommandList) {
+    private void registerBotCommands(List<BotCommand> botCommandList) throws TelegramApiException {
         this.execute(new SetMyCommands(botCommandList, new BotCommandScopeDefault(), null));
     }
 
@@ -97,13 +96,13 @@ public class TelegramBotService extends TelegramLongPollingBot {
         }
     }
 
-    @Scheduled(cron = "${meme.schedule}") // 11 am
+    @Scheduled(cron = "${bot.schedule}") // 12 am
     public void sendScheduledMessage() throws InterruptedException {
         executeMessages(messageService.processDailyWinnerMessage());
     }
 
     @Scheduled(cron = "${meme.schedule}") // hourly memes
-    public void sendScheduledSticker() throws InterruptedException {
+    public void sendScheduledRandomMeme() throws InterruptedException {
         executeMessages(messageService.processScheduledRandomMeme());
     }
 
