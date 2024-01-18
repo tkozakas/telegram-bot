@@ -5,16 +5,16 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 ## Deployment
 ```bash
   # Clone repository
-  git clone https://github.com/tomas6446/telegram-pibot
+  git clone https://github.com/tomas6446/telegram-api-bot
   # Enter the directory
-  cd telegram-pibot
+  cd telegram-api-bot
 
   # Run Postgres container
   docker compose up -d
 
   # Copy and run the script inside container
-  docker cp init-db.sql telegram-pibot-postgres:/init-db.sql
-  docker exec -u postgres telegram-pibot-postgres psql -d telegram_pibot -f /init-db.sql
+  docker cp init-db.sql telegram-bot-postgres:/init-db.sql
+  docker exec -u postgres telegram-bot-postgres psql -d telegram_bot -f /init-db.sql
 
   # Build and run project
   mvn clean install
@@ -31,14 +31,10 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
   - `/pidorall`: Get all-time stats.
   - `/pidorme`: Get personal stats.
 
-### Other features
-- Sends scheduled message for daily updates of who is the winner of the day.
-- Manages 'Stats' objects representing the users' game statistics.
-- Functions include registering users, updating scores, and selecting winners.
+### Features
+- Sends scheduled message for daily updates of who is the winner of the day and memes.
 - Multiple Messages Typing Animation
-- Custom Winner Name in Configuration
-- Allows setting a custom title for the winner in YAML configuration.
-
+  
 ## Implementation Details
 - Developed using Java and Spring Boot framework.
 - Integrates with Telegram Bot API for messaging and user interaction.
