@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.churk</groupId>
-    <artifactId>telegram-pibot</artifactId>
+    <artifactId>telegram-bot</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>telegram-pibot</name>
-    <description>telegram-pibot</description>
+    <name>telegram-bot</name>
+    <description>telegram-bot</description>
     <properties>
         <java.version>17</java.version>
     </properties>

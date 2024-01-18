@@ -10,10 +10,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableFeignClients
 @ConfigurationPropertiesScan
-public class TelegramPibotApplication {
+public class TelegramApiBotApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(TelegramPibotApplication.class, args);
+        SpringApplication.run(TelegramApiBotApplication.class, args);
     }
 
 }

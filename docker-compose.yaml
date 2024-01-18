@@ -1,5 +1,5 @@
 services:
-  telegram-pibot-spring-postgres:
+  telegram-bot-spring-postgres:
     container_name: telegram-bot-postgres
     image: postgres:16
     ports:
