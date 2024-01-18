@@ -45,9 +45,3 @@ CREATE TABLE IF NOT EXISTS sentence
     text             VARCHAR(1000),
     FOREIGN KEY (daily_message_id) REFERENCES daily_message (daily_message_id)
 );
-
-DROP TABLE IF EXISTS sentence;
-DROP TABLE IF EXISTS daily_message
-
-
-DROP TABLE IF EXISTS sentence;

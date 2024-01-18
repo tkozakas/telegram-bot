@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/telegram_pibot
+    url: jdbc:postgresql://localhost:5433/telegram_bot
     username: postgres
     password: postgres
   jpa:
@@ -30,7 +30,7 @@ bot:
 meme:
   api-url: https://meme-api.herokuapp.com/gimme
   download-path: src/main/resources/temp/
-  file-name: meme.jpg
+  file-name: meme
   # hourly schedule of memes
   schedule: 0 0 * * * *
   # every minute schedule # commented
