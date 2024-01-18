@@ -34,11 +34,11 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 
 ### User Interaction and Command Handling
 - Handles various commands:
-  - `/pidoreg`: Register yourself a game.
-  - `/pidor`: Get today's winner.
-  - `/pidorstats`: Get stats (use /pidorstats [year] for specific year).
-  - `/pidorall`: Get all-time stats.
-  - `/pidorme`: Get personal stats.
+  - `/commandreg`: Register yourself a game.
+  - `/command`: Get today's winner.
+  - `/commandstats`: Get stats (use /pidorstats [year] for specific year).
+  - `/commandall`: Get all-time stats.
+  - `/commandme`: Get personal stats.
 
 ### Features
 - Sends scheduled message for daily updates of who is the winner of the day and memes.
