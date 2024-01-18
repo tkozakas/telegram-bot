@@ -6,7 +6,6 @@ import org.churk.telegrampibot.builder.MessageBuilder;
 import org.churk.telegrampibot.config.BotConfig;
 import org.churk.telegrampibot.model.Sentence;
 import org.churk.telegrampibot.model.Stats;
-import org.churk.telegrampibot.utility.MemeDownloader;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -23,23 +22,26 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 @Service
 public class MessageService {
-    public static final Queue<Update> latestMessages = new CircularFifoQueue<>(3);
+    protected static final Queue<Update> latestMessages = new CircularFifoQueue<>(3);
     private static final boolean ENABLED = true;
     private final BotConfig botConfig;
-    private final StatsService statsService;
     private final MessageBuilder messageBuilder;
+    private final StatsService statsService;
     private final StickerService stickerService;
     private final DailyMessageService dailyMessageService;
     private final FactService factService;
+    private final MemeService memeService;
 
-    public MessageService(BotConfig botConfig, StatsService statsService, org.churk.telegrampibot.utility.JSONLoader jsonLoader, MessageBuilder messageBuilder, MemeDownloader memeDownloader, StickerService stickerService, DailyMessageService dailyMessageService, FactService factService) {
+    public MessageService(BotConfig botConfig, MessageBuilder messageBuilder, StatsService statsService, StickerService stickerService, DailyMessageService dailyMessageService, FactService factService, MemeService memeService) {
         this.botConfig = botConfig;
-        this.statsService = statsService;
         this.messageBuilder = messageBuilder;
+        this.statsService = statsService;
         this.stickerService = stickerService;
         this.dailyMessageService = dailyMessageService;
         this.factService = factService;
+        this.memeService = memeService;
     }
+
 
     public List<Validable> handleCommand(Update update) {
         Optional<Integer> messageIdToReply = Optional.of(update.getMessage().getMessageId());
@@ -73,14 +75,19 @@ public class MessageService {
     private Optional<Validable> processRandomMeme(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
         String subreddit = (commandList.size() == 2) ? commandList.get(1) : null;
+        if (subreddit == null) {
+            log.info("Sending random meme");
+            Optional<File> memeFile = memeService.getMeme();
+            if (memeFile.isPresent()) {
+                return messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get());
+            }
+            log.error("Meme file was not downloaded in the given time");
+            return Optional.empty();
+        }
 
-        log.info("Sending meme");
-        MemeDownloader.downloadMeme(subreddit);
-        String downloadedFilePath = MemeDownloader.waitForDownload();
-
-        if (downloadedFilePath != null) {
-            File memeFile = new File(downloadedFilePath);
-            return messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile);
+        Optional<File> memeFile = memeService.getMemeFromSubreddit(subreddit);
+        if (memeFile.isPresent()) {
+            return messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get());
         }
         log.error("Meme file was not downloaded in the given time");
         return Optional.empty();

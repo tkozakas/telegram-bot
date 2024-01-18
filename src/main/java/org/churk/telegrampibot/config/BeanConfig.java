@@ -11,4 +11,13 @@ public class BeanConfig {
         return new RestTemplate();
     }
 
+    @Bean
+    public BotConfig botConfig() {
+        return new BotConfig();
+    }
+
+    @Bean
+    public MemeConfig memeConfig() {
+        return new MemeConfig();
+    }
 }
