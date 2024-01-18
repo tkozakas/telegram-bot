@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS facts
 CREATE TABLE IF NOT EXISTS daily_message
 (
     daily_message_id UUID PRIMARY KEY,
-    key_name         VARCHAR(1000)
+    key_name         VARCHAR(255),
+    text             VARCHAR(2500)
 );
 
 CREATE TABLE IF NOT EXISTS sentence

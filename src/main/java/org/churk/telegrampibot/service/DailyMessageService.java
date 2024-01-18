@@ -43,10 +43,11 @@ public class DailyMessageService {
             dataList.stream().filter(dataObject -> dataObject instanceof Map).map(dataObject -> (Map<String, Object>) dataObject).forEachOrdered(dataMap -> {
                 DailyMessage dailyMessage = new DailyMessage();
                 dailyMessage.setDailyMessageId(UUID.randomUUID());
-                if (dataMap.containsKey("key_name")) {
-                    dailyMessage.setKeyName((String) dataMap.get("key_name"));
-                }
-
+                // iterate over all keys in the map and put inside dailyMessage all keys that they belong to
+                dataMap.forEach((key, value) -> {
+                    dailyMessage.setKeyName(key);
+                    dailyMessage.setText(value.toString());
+                });
                 if (dataMap.containsKey("sentences")) {
                     List<List<String>> sentences = (List<List<String>>) dataMap.get("sentences");
                     for (List<String> strings : sentences) {
@@ -71,7 +72,7 @@ public class DailyMessageService {
 
     @Transactional
     public List<Sentence> getRandomGroupSentences() {
-        Optional<DailyMessage> dailyMessage = dailyMessageRepository.findNullKeyname();
+        Optional<DailyMessage> dailyMessage = dailyMessageRepository.findDailyMessageByKeyName("sentences");
         if (dailyMessage.isEmpty()) {
             return Collections.emptyList();
         }
@@ -93,10 +94,11 @@ public class DailyMessageService {
 
 
     public String getKeyNameSentence(String keyName) {
-        Optional<DailyMessage> dailyMessage = dailyMessageRepository.findByKeyName(keyName);
+        Optional<DailyMessage> dailyMessage = dailyMessageRepository.findDailyMessageByKeyName(keyName);
         if (dailyMessage.isEmpty()) {
+            log.error("Key name not found: " + keyName);
             return "";
         }
-        return dailyMessage.get().getKeyName();
+        return dailyMessage.get().getText();
     }
 }

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
@@ -59,5 +60,12 @@ public class FactService {
         } catch (Exception e) {
             log.error("Error while processing CSV file: " + filePath, e);
         }
+    }
+
+    public String getRandomFact() {
+        List<Fact> factList = factRepository.findAll();
+        int randomIndex = ThreadLocalRandom.current().nextInt(0, factList.size());
+        Fact fact = factList.get(randomIndex);
+        return fact.getComment();
     }
 }

@@ -17,8 +17,10 @@ public class DailyMessage {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID dailyMessageId;
 
-    @Column(length = 1000)
     private String keyName;
+
+    @Column(length = 2500)
+    private String text;
 
     @OneToMany(mappedBy = "dailyMessage", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Sentence> sentences = new ArrayList<>();

@@ -1,17 +1,19 @@
 package org.churk.telegrampibot.builder;
 
 import lombok.extern.slf4j.Slf4j;
-import org.churk.telegrampibot.config.BotConfig;
 import org.churk.telegrampibot.model.Stats;
+import org.churk.telegrampibot.service.DailyMessageService;
 import org.churk.telegrampibot.service.StatsService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,26 +22,26 @@ import java.util.stream.IntStream;
 @Slf4j
 @Service
 public class MessageBuilder {
-    private final BotConfig botConfig;
     private final StatsService statsService;
+    private final DailyMessageService dailyMessageService;
 
-    public MessageBuilder(BotConfig botConfig, StatsService statsService) {
-        this.botConfig = botConfig;
+    public MessageBuilder(StatsService statsService, DailyMessageService dailyMessageService) {
         this.statsService = statsService;
+        this.dailyMessageService = dailyMessageService;
     }
 
     public Optional<Validable> createStatsMessageForAll(Update update, Optional<Integer> messageIdToReply) {
         List<Stats> statsList = statsService.getAggregatedStatsByChatId(update.getMessage().getChatId());
-        String header = String.format("*All time " + botConfig.getWinnerName() + "s*%n%n");
-        String footer = String.format("%n*Total Participants — %d*", statsList.size());
+        String header = dailyMessageService.getKeyNameSentence("pidorstats_all_header");
+        String footer = dailyMessageService.getKeyNameSentence("pidorstats_footer") + statsList.size();
 
         return createStatsMessageForStat(statsList, update, header, footer, messageIdToReply);
     }
 
     public Optional<Validable> createStatsMessageForYear(Update update, int year, Optional<Integer> messageIdToReply) {
         List<Stats> statsList = statsService.getStatsByChatIdAndYear(update.getMessage().getChatId(), year);
-        String header = String.format("*" + botConfig.getWinnerName() + "s of %d*%n%n", year);
-        String footer = String.format("%n*Total Participants — %d*", statsList.size());
+        String header = dailyMessageService.getKeyNameSentence("pidorstats_year_header").formatted(year);
+        String footer = dailyMessageService.getKeyNameSentence("pidorstats_footer") + statsList.size();
 
         return createStatsMessageForStat(statsList, update, header, footer, messageIdToReply);
     }
@@ -54,13 +56,24 @@ public class MessageBuilder {
 
         String stringBuilder = IntStream
                 .iterate(0, i -> i < modifiableList.size() && i < 10, i -> i + 1)
-                .mapToObj(i -> String.format("%" + maxIndexLength + "d. *%s* — *%d* times%n",
+                .mapToObj(i -> String.format("%" + maxIndexLength + "d. *%s* — *%d*%n",
                         i + 1,
                         modifiableList.get(i).getFirstName(),
                         modifiableList.get(i).getScore()))
                 .collect(Collectors.joining("", header, footer));
 
         return Optional.of(createMessage(stringBuilder, chatId, firstName, messageIdToReply));
+    }
+
+    public Optional<Validable> createPhotoMessage(Optional<Integer> messageIdToReply, String firstName, String downloadedFilePath, Long chatId) {
+        log.info("Photo sent: [%s] to [%s (%d)]".formatted(downloadedFilePath, firstName, chatId));
+        File memeFile = new File(downloadedFilePath);
+        SendPhoto sendPhoto = new SendPhoto();
+        sendPhoto.setChatId(String.valueOf(chatId));
+        sendPhoto.setPhoto(new InputFile(memeFile));
+        messageIdToReply.ifPresent(sendPhoto::setReplyToMessageId);
+        memeFile.deleteOnExit();
+        return Optional.of(sendPhoto);
     }
 
     public Validable createStickerMessage(String stickerId, Long chatId, String firstName, Optional<Integer> messageIdToReply) {
@@ -104,9 +117,11 @@ public class MessageBuilder {
         List<Stats> statsByChatIdAndUserId = statsService.getStatsByChatIdAndUserId(chatId, user.getId());
         if (!statsByChatIdAndUserId.isEmpty()) {
             Stats stats = statsByChatIdAndUserId.get(0);
-            return createMessage("You have been *" + botConfig.getWinnerName() + "* " + stats.getScore() + " times, " + firstName + "!", chatId, firstName, messageIdToReply);
+            String header = dailyMessageService.getKeyNameSentence("pidorme_header").formatted(stats.getFirstName(), stats.getScore());
+            return createMessage(header, chatId, firstName, messageIdToReply);
         }
-        return createMessage("You are not registered for the *%s* game, *%s*!".formatted(botConfig.getWinnerName(), user.getFirstName()), chatId, firstName, messageIdToReply);
+        String header = dailyMessageService.getKeyNameSentence("pidor_not_registed_header") + firstName;
+        return createMessage(header, chatId, firstName, messageIdToReply);
     }
 
     public Validable createRegisterMessage(Update update, Optional<Integer> messageIdToReply) {
@@ -116,10 +131,12 @@ public class MessageBuilder {
 
         if (statsService.existsByUserId(user.getId())) {
             log.info("User: " + user.getFirstName() + " (" + user.getId() + ")", " is already registered");
-            return createMessage("You are already in the " + botConfig.getWinnerName() + " game, " + firstName + "!", chatId, firstName, messageIdToReply);
+            String header = dailyMessageService.getKeyNameSentence("pidor_registered_header") + firstName;
+            return createMessage(header, chatId, firstName, messageIdToReply);
         }
         statsService.addStat(new Stats(UUID.randomUUID(), chatId, user.getId(), user.getFirstName(), 0L, LocalDateTime.now(), Boolean.FALSE));
         log.info("New user: " + user.getFirstName() + " (" + user.getId() + ")");
-        return createMessage("You have been registered to the " + botConfig.getWinnerName() + " game, " + firstName + "!", chatId, firstName, messageIdToReply);
+        String header = dailyMessageService.getKeyNameSentence("pidor_registered_now_header") + firstName;
+        return createMessage(header, chatId, firstName, messageIdToReply);
     }
 }

@@ -3,6 +3,30 @@
     "key_name": "Согласно моей информации, по результатам сегодняшнего розыгрыша *пидор* дня - "
   },
   {
+    "pidorstats_all_header": "Топ-10 пидоров за все время:\n"
+  },
+  {
+    "pidorstats_now_header": "Топ-10 пидоров за этот год:\n"
+  },
+  {
+    "pidorstats_year_header": "Топ-10 пидоров - %d\n"
+  },
+  {
+    "pidorstats_footer": "Всего участников — "
+  },
+  {
+    "pidor_registered_header": "Ты уже зарегистрирован, "
+  },
+  {
+    "pidor_not_registered_header": "Ты ещё не зарегистрирован, "
+  },
+  {
+    "pidor_registered_now_header": "Ты зарегистрирован "
+  },
+  {
+    "pidorme_header": "%s, ты уже *пидор* дня %d раз"
+  },
+  {
     "sentences": [
       [
         "Итак... кто же сегодня *пидор* дня?",

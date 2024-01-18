@@ -28,15 +28,15 @@ public class BotInitializer {
     }
 
     @EventListener({ContextRefreshedEvent.class})
-    public void init() throws TelegramApiException {
+    public void init() {
         stickerPackService.loadStickers();
         dailyMessageService.loadMessages();
         factService.loadFacts();
-        TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         try {
+            TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             telegramBotsApi.registerBot(telegramBotService);
         } catch (TelegramApiException e) {
-            log.error("Error while initializing bot", e);
+            log.error("Error while initializing the bot", e);
         }
     }
 }

@@ -6,42 +6,38 @@ import org.churk.telegrampibot.builder.MessageBuilder;
 import org.churk.telegrampibot.config.BotConfig;
 import org.churk.telegrampibot.model.Sentence;
 import org.churk.telegrampibot.model.Stats;
-import org.churk.telegrampibot.utility.CSVLoader;
-import org.churk.telegrampibot.utility.JSONLoader;
 import org.churk.telegrampibot.utility.MemeDownloader;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.io.File;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
 public class MessageService {
     public static final Queue<Update> latestMessages = new CircularFifoQueue<>(3);
-    private static final boolean ENABLED = false;
+    private static final boolean ENABLED = true;
     private final BotConfig botConfig;
     private final StatsService statsService;
-    private final CSVLoader csvLoader;
-    private final JSONLoader jsonLoader;
     private final MessageBuilder messageBuilder;
     private final StickerService stickerService;
     private final DailyMessageService dailyMessageService;
+    private final FactService factService;
 
-    public MessageService(BotConfig botConfig, StatsService statsService, CSVLoader csvLoader, org.churk.telegrampibot.utility.JSONLoader jsonLoader, MessageBuilder messageBuilder, MemeDownloader memeDownloader, StickerService stickerService, DailyMessageService dailyMessageService) {
+    public MessageService(BotConfig botConfig, StatsService statsService, org.churk.telegrampibot.utility.JSONLoader jsonLoader, MessageBuilder messageBuilder, MemeDownloader memeDownloader, StickerService stickerService, DailyMessageService dailyMessageService, FactService factService) {
         this.botConfig = botConfig;
         this.statsService = statsService;
-        this.csvLoader = csvLoader;
-        this.jsonLoader = jsonLoader;
         this.messageBuilder = messageBuilder;
         this.stickerService = stickerService;
         this.dailyMessageService = dailyMessageService;
+        this.factService = factService;
     }
 
     public List<Validable> handleCommand(Update update) {
@@ -75,6 +71,7 @@ public class MessageService {
 
     private Optional<Validable> processRandomMeme(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
+        String firstName = update.getMessage().getFrom().getFirstName();
         String subreddit = (commandList.size() == 2) ? commandList.get(1) : null;
 
         log.info("Sending meme");
@@ -82,16 +79,9 @@ public class MessageService {
         String downloadedFilePath = MemeDownloader.waitForDownload();
 
         if (downloadedFilePath != null) {
-            File memeFile = new File(downloadedFilePath);
-            SendPhoto sendPhoto = new SendPhoto();
-            sendPhoto.setChatId(String.valueOf(chatId));
-            sendPhoto.setPhoto(new InputFile(memeFile));
-            messageIdToReply.ifPresent(sendPhoto::setReplyToMessageId);
-            memeFile.deleteOnExit();
-            return Optional.of(sendPhoto);
-        } else {
-            log.error("Meme file was not downloaded in the given time");
+            return messageBuilder.createPhotoMessage(messageIdToReply, downloadedFilePath, firstName, chatId);
         }
+        log.error("Meme file was not downloaded in the given time");
         return Optional.empty();
     }
 
@@ -128,7 +118,11 @@ public class MessageService {
         }
         if (statsService.existsWinnerToday()) {
             Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
-            String winnerExistsMessage = dailyMessageService.getKeyNameSentence("key_name");
+            if (winner == null) {
+                log.error("Winner exists but not found in the database");
+                return List.of();
+            }
+            String winnerExistsMessage = dailyMessageService.getKeyNameSentence("key_name") + winner.getFirstName();
             return messageBuilder.createMessages(List.of(winnerExistsMessage), winner.getChatId(), winner.getFirstName());
         }
         Stats winner = allStats.get(ThreadLocalRandom.current().nextInt(allStats.size()));
@@ -137,21 +131,22 @@ public class MessageService {
             winner.setIsWinner(Boolean.TRUE);
             statsService.updateStats(winner);
         }
-        List<String> sentenceList = dailyMessageService.getRandomGroupSentences().stream().map(Sentence::getText).toList();
+        List<String> sentenceList = new ArrayList<>(dailyMessageService.getRandomGroupSentences().stream().map(Sentence::getText).toList());
         if (sentenceList.isEmpty()) {
             return List.of();
         }
-        sentenceList.set(sentenceList.size() - 1, sentenceList.get(sentenceList.size() - 1) + winner.getFirstName());
+        int lastSentenceIndex = sentenceList.size() - 1;
+        sentenceList.set(lastSentenceIndex, sentenceList.get(lastSentenceIndex) + winner.getFirstName());
         return messageBuilder.createMessages(sentenceList, winner.getChatId(), winner.getFirstName());
     }
 
     private Validable processRandomFact(Update update, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
         String firstName = update.getMessage().getFrom().getFirstName();
+        String randomFact = factService.getRandomFact();
+        log.info("Sending fact: {}", randomFact);
 
-        List<List<String>> records = csvLoader.readFromCSV("src/main/resources/facts.csv");
-        List<String> randomFact = records.get(ThreadLocalRandom.current().nextInt(records.size()));
-        return messageBuilder.createMessage(randomFact.get(0), chatId, firstName, messageIdToReply);
+        return messageBuilder.createMessage(randomFact, chatId, firstName, messageIdToReply);
     }
 
     private Validable processRandomSticker(Update update, Optional<Integer> messageIdToReply) {
@@ -177,30 +172,6 @@ public class MessageService {
         log.info("Sending sticker: {}", stickerId);
 
         return Optional.of(messageBuilder.createStickerMessage(stickerId, chatId, firstName, messageIdToReply));
-    }
-
-    private List<Validable> processDailyMessage(Stats winner, String key) {
-        List<Map<String, Object>> jsonData = jsonLoader.readFromJSON("src/main/resources/daily-messages.json");
-        List<Map<String, Object>> sentencesData = jsonData.stream()
-                .filter(data -> data.containsKey(key))
-                .toList();
-        if (sentencesData.isEmpty()) {
-            return Collections.emptyList();
-        }
-        if (key.equals("already_exists")) {
-
-            String message = (String) sentencesData.get(0).get(key);
-            return messageBuilder.createMessages(List.of(message + winner.getFirstName()), winner.getChatId(), winner.getFirstName());
-        }
-
-        List<List<String>> sentencesList = (List<List<String>>) sentencesData.get(0).get("sentences");
-        List<String> randomSentences = sentencesList.get(ThreadLocalRandom.current().nextInt(sentencesList.size()));
-
-        if (!randomSentences.isEmpty()) {
-            int lastSentenceIndex = randomSentences.size() - 1;
-            randomSentences.set(lastSentenceIndex, randomSentences.get(lastSentenceIndex) + winner.getFirstName());
-        }
-        return messageBuilder.createMessages(randomSentences, winner.getChatId(), winner.getFirstName());
     }
 
     public void resetWinner() {

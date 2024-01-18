@@ -9,8 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface DailyMessageRepository extends JpaRepository<DailyMessage, Long> {
-    @Query("SELECT dm FROM DailyMessage dm WHERE dm.keyName IS NULL")
-    Optional<DailyMessage> findNullKeyname();
     @Query("SELECT dm FROM DailyMessage dm WHERE dm.keyName = ?1")
-    Optional<DailyMessage> findByKeyName(String keyName);
+    Optional<DailyMessage> findDailyMessageByKeyName(String keyName);
 }
