@@ -14,5 +14,4 @@ public class Fact {
     @Id
     private UUID factId;
     private String comment;
-    private Double isHate;
 }

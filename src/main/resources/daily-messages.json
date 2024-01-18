@@ -1,88 +1,88 @@
 [
   {
-    "key_name": "Согласно моей информации, по результатам сегодняшнего розыгрыша *пидор* дня - "
+    "key_name": "According to my information, as a result of today's draw, the *winner* of the day is - "
   },
   {
-    "stats_all_header": "Топ-10 пидоров за все время:\n\n"
+    "stats_all_header": "Top 10 winners of all time:\n\n"
   },
   {
-    "stats_now_header": "Топ-10 пидоров за этот год:\n\n"
+    "stats_now_header": "Top 10 winners of this year:\n\n"
   },
   {
-    "stats_year_header": "Топ-10 пидоров - %d\n\n"
+    "stats_year_header": "Top 10 winners - %d\n\n"
   },
   {
-    "stats_footer": "\nВсего участников — "
+    "stats_footer": "\nTotal participants — "
   },
   {
-    "registered_header": "Ты уже зарегистрирован, "
+    "registered_header": "You are already registered, "
   },
   {
-    "not_registered_header": "Ты ещё не зарегистрирован, "
+    "not_registered_header": "You are not registered yet, "
   },
   {
-    "registered_now_header": "Ты зарегистрирован "
+    "registered_now_header": "You are registered now "
   },
   {
-    "me_header": "%s, ты уже *пидор* дня %d раз"
+    "me_header": "%s, you are already the *winner* of the day %d times"
   },
   {
-    "stats_table": "%s. %s — *%d раз(а)*\n"
+    "stats_table": "%s. %s — *%d times*\n"
   },
   {
     "sentences": [
       [
-        "Итак... кто же сегодня *%s* дня?",
-        "_Военный спутник_ запущен, коды доступа внутри...",
-        "_Не может быть!_",
-        "Няшный *%s* дня - "
+        "So... who is the *%s* of the day today?",
+        "_The military satellite_ is launched, access codes inside...",
+        "_It can't be!_",
+        "The lovely *%s* of the day - "
       ],
       [
-        "*Woop-woop!* That's the sound of da *pidor-police*!",
-        "(Ворчит) А могли бы на работе делом заниматься",
-        "_Ведётся захват подозреваемого..._",
-        ".∧＿∧ \n( ･ω･｡)つ━☆・*。 \n⊂  ノ    ・゜+. \nしーＪ   °。+ *´¨) \n         .· ´¸.·*´¨) \n          (¸.·´ (¸.·'* ☆ ВЖУХ И ТЫ *пидор*, "
+        "*Woop-woop!* That's the sound of da *winner-police*!",
+        "(Grumbles) Could have been working at work instead",
+        "_The capture of the suspect is in progress..._",
+        ".∧＿∧ \n( ･ω･｡)つ━☆・*。 \n⊂  ノ    ・゜+. \nしーＪ   °。+ *´¨) \n         .· ´¸.·*´¨) \n          (¸.·´ (¸.·'* ☆ WHOOSH AND YOU'RE A *WINNER*, "
       ],
       [
-        "_Инициирую поиск_ *пидора* дня..",
-        "_Военный спутник_ запущен, коды доступа внутри...",
-        "_Что с нами стало..._",
-        "Что? Где? Когда? А ты *пидор* дня - "
+        "_Initiating the search_ for the *winner* of the day...",
+        "_The military satellite_ is launched, access codes inside...",
+        "_What has happened to us..._",
+        "What? Where? When? And you are the *winner* of the day - "
       ],
       [
-        "_Сейчас поколдуем..._",
-        "_Сонно смотрит на бумаги_",
-        "_Ведётся захват подозреваемого..._",
-        "Ну ты и *пидор*, "
+        "_Let's do some magic now..._",
+        "_Gazing sleepily at the papers_",
+        "_The capture of the suspect is in progress..._",
+        "Well, you are a *winner*, "
       ],
       [
-        "_Опять в эти ваши игрульки играете? Ну ладно..._",
-        "_Я в опасности, системы повреждены!_",
-        "Ага! Поздравляю! Сегодня ты *пидор* - "
+        "_Playing these games again? Alright then..._",
+        "_I'm in danger, systems are damaged!_",
+        "Aha! Congratulations! Today you are a *winner* - "
       ],
       [
-        "_Зачем вы меня разбудили..._",
-        "_Где-же он..._",
-        "_Ого-го..._",
-        "И прекрасный человек дня сегодня... а нет, ошибка, всего-лишь *пидор* - "
+        "_Why did you wake me up..._",
+        "_Where is he..._",
+        "_Oh my..._",
+        "And the wonderful person of the day today... oh, sorry, just a *winner* - "
       ],
       [
-        "_Система взломана. Нанесён урон. Запущено планирование контрмер._",
-        "_Сонно смотрит на бумаги_",
-        "_Что с нами стало..._",
-        ".∧＿∧ \n( ･ω･｡)つ━☆・*。 \n⊂  ノ    ・゜+. \nしーＪ   °。+ *´¨) \n         .· ´¸.·*´¨) \n          (¸.·´ (¸.·'* ☆ ВЖУХ И ТЫ *ПИДОР*, "
+        "_System compromised. Damage inflicted. Countermeasures planning initiated._",
+        "_Gazing sleepily at the papers_",
+        "_What has happened to us..._",
+        ".∧＿∧ \n( ･ω･｡)つ━☆・*。 \n⊂  ノ    ・゜+. \nしーＪ   °。+ *´¨) \n         .· ´¸.·*´¨) \n          (¸.·´ (¸.·'* ☆ WHOOSH AND YOU'RE A *WINNER*, "
       ],
       [
-        "### _RUNNING 'TYPIDOR.SH'_...",
-        "_Военный спутник_ запущен, коды доступа внутри...",
-        "_Высокий приоритет мобильному юниту._",
-        "Ага! Поздравляю! Сегодня ты *пидор* - "
+        "### _RUNNING 'WINNER.SH'_...",
+        "_The military satellite_ is launched, access codes inside...",
+        "_High priority to the mobile unit._",
+        "Aha! Congratulations! Today you are a *winner* - "
       ],
       [
-        "_Что тут у нас?_",
-        "_Ну давай, посмотрим кто тут классный..._",
-        "_Что с нами стало..._",
-        ".∧＿∧ \n( ･ω･｡)つ━☆・*。 \n⊂  ノ    ・゜+. \nしーＪ   °。+ *´¨) \n         .· ´¸.·*´¨) \n          (¸.·´ (¸.·'* ☆ ВЖУХ И ТЫ *ПИДОР*, "
+        "_What do we have here?_",
+        "_Come on, let's see who's cool here..._",
+        "_What has happened to us..._",
+        ".∧＿∧ \n( ･ω･｡)つ━☆・*。 \n⊂  ノ    ・゜+. \nしーＪ   °。+ *´¨) \n         .· ´¸.·*´¨) \n          (¸.·´ (¸.·'* ☆ WHOOSH AND YOU'RE A *WINNER*, "
       ]
     ]
   }

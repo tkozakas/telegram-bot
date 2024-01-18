@@ -178,14 +178,14 @@ public class MessageService {
         return messageBuilder.createMessages(sentenceList, winner.getChatId(), winner.getFirstName());
     }
 
-
     private Validable processRandomFact(Update update, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
         String firstName = update.getMessage().getFrom().getFirstName();
         String randomFact = factService.getRandomFact();
         log.info("Sending fact: {}", randomFact);
 
-        return messageBuilder.createMessage(randomFact, chatId, firstName, messageIdToReply);
+        return messageBuilder.createMessage(Objects.requireNonNullElse(randomFact, "No facts found in database"), chatId, firstName, messageIdToReply);
+
     }
 
     private Validable processRandomSticker(Update update, Optional<Integer> messageIdToReply) {

@@ -15,6 +15,10 @@ import java.util.concurrent.ThreadLocalRandom;
 public class FactService {
     private final FactRepository factRepository;
     public String getRandomFact() {
+        if (factRepository.count() == 0) {
+            log.warn("No facts found in database");
+            return null;
+        }
         List<Fact> factList = factRepository.findAll();
         int randomIndex = ThreadLocalRandom.current().nextInt(0, factList.size());
         Fact fact = factList.get(randomIndex);

@@ -26,8 +26,7 @@ CREATE TABLE IF NOT EXISTS stickers
 CREATE TABLE IF NOT EXISTS facts
 (
     fact_id UUID PRIMARY KEY,
-    comment VARCHAR(3500) NOT NULL,
-    is_hate DECIMAL       NOT NULL DEFAULT 0
+    comment VARCHAR(3500) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS daily_message

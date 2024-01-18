@@ -37,8 +37,7 @@ public class FactLoader {
             return;
         }
         Map<String, String> columnMapping = Map.of(
-                "comment", "comment",
-                "isHate", "isHate"
+                "comment", "comment"
         );
 
         HeaderColumnNameTranslateMappingStrategy<Fact> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
@@ -52,6 +51,10 @@ public class FactLoader {
                     .build();
 
             List<Fact> factList = csvToBean.parse();
+            if (factList.isEmpty()) {
+                log.warn("No facts found in file: " + FILE_PATH);
+                return;
+            }
             factList.forEach(fact -> fact.setFactId(UUID.randomUUID()));
             factRepository.saveAll(factList);
         } catch (FileNotFoundException e) {
