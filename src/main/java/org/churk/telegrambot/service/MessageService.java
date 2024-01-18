@@ -83,11 +83,39 @@ public class MessageService {
                 .map(Map.Entry::getKey)
                 .findFirst();
 
-        commandHandler.orElse(this::processRandomSticker)
+        commandHandler.orElse(this::processRandomResponse)
                 .get()
                 .ifPresent(response::add);
 
         return response;
+    }
+
+    private Optional<Validable> processRandomResponse() {
+        List<Supplier<Optional<Validable>>> randomResponseHandlers = List.of(
+                this::processRandomSticker,
+                this::processRandomFact,
+                this::processRandomMeme
+        );
+
+        if (ThreadLocalRandom.current().nextInt(100) > 2) {
+            return Optional.empty();
+        }
+
+        return randomResponseHandlers.stream()
+                .map(Supplier::get)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst();
+    }
+
+    private Optional<Validable> processRandomMeme() {
+        assert latestMessages.peek() != null;
+        return processRandomMeme(List.of(), latestMessages.peek(), Optional.of(latestMessages.peek().getMessage().getMessageId())).stream().findFirst();
+    }
+
+    private Optional<Validable> processRandomFact() {
+        assert latestMessages.peek() != null;
+        return Optional.of(processRandomFact(latestMessages.peek(), Optional.of(latestMessages.peek().getMessage().getMessageId())));
     }
 
     public List<Validable> processRandomMeme(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
@@ -199,9 +227,6 @@ public class MessageService {
     }
 
     private Optional<Validable> processRandomSticker() {
-        if (ThreadLocalRandom.current().nextInt(100) > 2) {
-            return Optional.empty();
-        }
         assert latestMessages.peek() != null;
         Message message = latestMessages.peek().getMessage();
         Optional<Integer> messageIdToReply = Optional.of(message.getMessageId());
