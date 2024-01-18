@@ -17,6 +17,12 @@ public class StatsService {
         this.statsRepository = statsRepository;
     }
 
+    /**
+     * Get all stats from all years and filter by chatId
+     *
+     * @param chatId
+     * @return List<Stats>
+     */
     public List<Stats> getAggregatedStatsByChatId(Long chatId) {
         return statsRepository.findAll().stream()
                 .filter(stats -> stats.getChatId().equals(chatId))
@@ -35,25 +41,19 @@ public class StatsService {
     }
 
     public List<Stats> getStatsByChatIdAndYear(Long chatId, int year) {
-        return statsRepository.findAll().stream()
-                .filter(stats -> stats.getChatId().equals(chatId) && stats.getCreatedAt().getYear() == year)
-                .toList();
+        return statsRepository.findStatsByChatIdAndYear(chatId, year);
     }
 
     public List<Stats> getStatsByChatIdAndUserId(Long chatId, Long userId) {
-        return statsRepository.findAll().stream()
-                .filter(stats -> stats.getChatId().equals(chatId) && stats.getUserId().equals(userId))
-                .toList();
+        return statsRepository.findStatsByChatIdAndUserId(chatId, userId);
     }
 
     public boolean existsByUserId(Long userId) {
-        return statsRepository.findAll().stream()
-                .anyMatch(stats -> stats.getUserId().equals(userId));
+        return statsRepository.existsByUserId(userId);
     }
 
-    public boolean existsWinnerToday() {
-        return statsRepository.findAll().stream()
-                .anyMatch(stats -> stats.getIsWinner() == Boolean.TRUE);
+    public boolean existsByWinnerToday() {
+        return statsRepository.existsIsWinner();
     }
 
     public List<Stats> getAllStats() {
