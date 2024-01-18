@@ -1,10 +1,10 @@
 package org.churk.telegrampibot.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.churk.telegrampibot.builder.MessageBuilder;
-import org.churk.telegrampibot.config.BotConfig;
-import org.churk.telegrampibot.config.MemeConfig;
+import org.churk.telegrampibot.config.MemeProperties;
 import org.churk.telegrampibot.model.Sentence;
 import org.churk.telegrampibot.model.Stats;
 import org.springframework.stereotype.Service;
@@ -20,34 +20,17 @@ import java.util.function.Supplier;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class MessageService {
     protected static final Queue<Update> latestMessages = new CircularFifoQueue<>(3);
     private static final boolean ENABLED = true;
-    private final BotConfig botConfig;
-    private final MemeConfig memeConfig;
+    private final MemeProperties memeProperties;
     private final MessageBuilder messageBuilder;
     private final StatsService statsService;
     private final StickerService stickerService;
     private final DailyMessageService dailyMessageService;
     private final FactService factService;
     private final MemeService memeService;
-
-    public MessageService(BotConfig botConfig, MemeConfig memeConfig,
-                          MessageBuilder messageBuilder,
-                          StatsService statsService,
-                          StickerService stickerService,
-                          DailyMessageService dailyMessageService,
-                          FactService factService, MemeService memeService) {
-        this.botConfig = botConfig;
-        this.memeConfig = memeConfig;
-        this.messageBuilder = messageBuilder;
-        this.statsService = statsService;
-        this.stickerService = stickerService;
-        this.dailyMessageService = dailyMessageService;
-        this.factService = factService;
-        this.memeService = memeService;
-    }
-
 
     public List<Validable> handleCommand(Update update) {
         Optional<Integer> messageIdToReply = Optional.of(update.getMessage().getMessageId());
@@ -57,38 +40,38 @@ public class MessageService {
         Map<Supplier<Optional<Validable>>, List<String>> commandHandlers = Map.of(
                 // Process Random Fact
                 () -> Optional.of(processRandomFact(update, Optional.empty())),
-                List.of(".*fact.*"),
+                List.of(".*/fact.*"),
 
                 // Process Random Sticker
                 () -> Optional.of(processRandomSticker(update, Optional.empty())),
-                List.of(".*sticker.*"),
+                List.of(".*/sticker.*"),
 
                 // Process Random Meme
                 () -> Optional.ofNullable(processRandomMeme(commandList, update, Optional.empty()).get(0)),
-                List.of(".*meme.*"),
+                List.of(".*/meme.*"),
 
                 // Create Register Message
                 () -> Optional.of(messageBuilder.createRegisterMessage(update, messageIdToReply)),
-                List.of(".*pidorreg.*"),
+                List.of(".*/pidorreg.*"),
 
                 // Handle Stats
                 () -> handleStats(commandList, update, Optional.empty()),
-                List.of(".*pidorstats.*"),
+                List.of(".*/pidorstats.*"),
 
                 // Create Stats Message for All
                 () -> Optional.of(messageBuilder.createStatsMessageForAll(update, Optional.empty())),
-                List.of(".*pidorall.*"),
+                List.of(".*/pidorall.*"),
 
                 // Create Stats Message for User
                 () -> Optional.of(messageBuilder.createStatsMessageForUser(update, messageIdToReply)),
-                List.of(".*pidorme.*"),
+                List.of(".*/pidorme.*"),
 
                 // Process Daily Winner Message
                 () -> {
                     response.addAll(processDailyWinnerMessage());
                     return Optional.empty();
                 },
-                List.of(".*pidor.*")
+                List.of(".*/pidor.*")
         );
 
 
@@ -128,7 +111,7 @@ public class MessageService {
 
     public List<Validable> processScheduledRandomMeme() {
         assert latestMessages.peek() != null;
-        String subreddit = memeConfig.getScheduledSubreddits().get(ThreadLocalRandom.current().nextInt(memeConfig.getScheduledSubreddits().size()));
+        String subreddit = memeProperties.getScheduledSubreddits().get(ThreadLocalRandom.current().nextInt(memeProperties.getScheduledSubreddits().size()));
         List<Validable> messages = new ArrayList<>();
         messages.add(messageBuilder.createMessage("Here's a random meme from subreddit: " + subreddit, latestMessages.peek().getMessage().getChatId(), latestMessages.peek().getMessage().getFrom().getFirstName(), Optional.empty()));
         messages.add(processRandomMeme(List.of(subreddit), latestMessages.peek(), Optional.empty()).get(0));

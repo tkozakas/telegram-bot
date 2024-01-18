@@ -1,5 +1,6 @@
 package org.churk.telegrampibot.builder;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrampibot.model.Stats;
 import org.churk.telegrampibot.service.DailyMessageService;
@@ -21,14 +22,10 @@ import java.util.stream.IntStream;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class MessageBuilder {
     private final StatsService statsService;
     private final DailyMessageService dailyMessageService;
-
-    public MessageBuilder(StatsService statsService, DailyMessageService dailyMessageService) {
-        this.statsService = statsService;
-        this.dailyMessageService = dailyMessageService;
-    }
 
     public Validable createStatsMessageForAll(Update update, Optional<Integer> messageIdToReply) {
         List<Stats> statsList = statsService.getAggregatedStatsByChatId(update.getMessage().getChatId());

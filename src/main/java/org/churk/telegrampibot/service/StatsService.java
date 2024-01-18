@@ -1,5 +1,6 @@
 package org.churk.telegrampibot.service;
 
+import lombok.RequiredArgsConstructor;
 import org.churk.telegrampibot.model.Stats;
 import org.churk.telegrampibot.repository.StatsRepository;
 import org.springframework.stereotype.Service;
@@ -10,13 +11,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class StatsService {
     private final StatsRepository statsRepository;
-
-    public StatsService(StatsRepository statsRepository) {
-        this.statsRepository = statsRepository;
-    }
-
     /**
      * Get all stats from all years and filter by chatId
      *

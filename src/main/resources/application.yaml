@@ -9,6 +9,11 @@ spring:
         ddl-auto: update
       show-sql: true
 
+loader:
+  sticker-set: true
+  daily-messages: true
+  facts: true
+
 bot:
   username: SheepLoverBot
   token: 6808027276:AAHear-Y_VmdZXnjOz10Gg0zWcs0YuBscv8
@@ -17,21 +22,21 @@ bot:
   # daily schedule of pidor
   schedule: 0 0 12 * * *
   # daily schedule of reset
-  resetSchedule: 0 0 0 * * *
+  reset-schedule: 0 0 0 * * *
 
   sticker_sets:
     - primates_uffchat
     - greatchurkobesfbi_by_fStikBot
 meme:
-  apiUrl: https://meme-api.herokuapp.com/gimme
-  downloadPath: src/main/resources/temp/
-  fileName: meme.jpg
+  api-url: https://meme-api.herokuapp.com/gimme
+  download-path: src/main/resources/temp/
+  file-name: meme.jpg
   # hourly schedule of memes
   schedule: 0 0 * * * *
   # every minute schedule # commented
   #  schedule: 0 * * * * *
   # list of subredits to get memes from
-  scheduledSubreddits:
+  scheduled-subreddits:
     - wordington
     - wunkus
     - clamworks

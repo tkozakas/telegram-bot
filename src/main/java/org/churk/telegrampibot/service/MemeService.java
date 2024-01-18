@@ -1,8 +1,9 @@
 package org.churk.telegrampibot.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrampibot.client.MemeClient;
-import org.churk.telegrampibot.config.MemeConfig;
+import org.churk.telegrampibot.config.MemeProperties;
 import org.churk.telegrampibot.utility.FileDownloader;
 import org.springframework.stereotype.Service;
 
@@ -12,15 +13,10 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class MemeService {
-    private final MemeConfig memeConfig;
+    private final MemeProperties memeProperties;
     private final MemeClient memeClient;
-
-    public MemeService(MemeConfig memeConfig, MemeClient memeClient) {
-        this.memeConfig = memeConfig;
-        this.memeClient = memeClient;
-    }
-
     public Optional<File> getMemeFromSubreddit(String subreddit) {
         Map<String, Object> map = memeClient.getMemeFromSubreddit(subreddit);
         return getFile(map);
@@ -33,8 +29,8 @@ public class MemeService {
 
     private Optional<File> getFile(Map<String, Object> map) {
         String apiUrl = (String) map.get("url");
-        FileDownloader.downloadFileFromUrl(apiUrl, memeConfig.getDownloadPath(), memeConfig.getFileName());
-        String downloadedFilePath = FileDownloader.waitForDownload(memeConfig.getDownloadPath(), memeConfig.getFileName());
+        FileDownloader.downloadFileFromUrl(apiUrl, memeProperties.getDownloadPath(), memeProperties.getFileName());
+        String downloadedFilePath = FileDownloader.waitForDownload(memeProperties.getDownloadPath(), memeProperties.getFileName());
         if (downloadedFilePath == null) {
             return Optional.empty();
         }

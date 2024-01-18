@@ -1,10 +1,11 @@
 package org.churk.telegrampibot.config;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.churk.telegrampibot.service.DailyMessageService;
-import org.churk.telegrampibot.service.FactService;
-import org.churk.telegrampibot.service.StickerService;
 import org.churk.telegrampibot.service.TelegramBotService;
+import org.churk.telegrampibot.utility.DailyMessageLoader;
+import org.churk.telegrampibot.utility.FactLoader;
+import org.churk.telegrampibot.utility.StickerLoader;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -14,24 +15,18 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class BotInitializer {
     private final TelegramBotService telegramBotService;
-    private final StickerService stickerPackService;
-    private final DailyMessageService dailyMessageService;
-    private final FactService factService;
-
-    public BotInitializer(TelegramBotService telegramBotService, StickerService stickerPackService, DailyMessageService dailyMessageService, FactService factService) {
-        this.telegramBotService = telegramBotService;
-        this.stickerPackService = stickerPackService;
-        this.dailyMessageService = dailyMessageService;
-        this.factService = factService;
-    }
+    private final StickerLoader stickerLoader;
+    private final DailyMessageLoader dailyMessageLoader;
+    private final FactLoader factLoader;
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() {
-        stickerPackService.loadStickers();
-        dailyMessageService.loadMessages();
-        factService.loadFacts();
+        stickerLoader.loadStickers();
+        dailyMessageLoader.loadMessages();
+        factLoader.loadFacts();
         try {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             telegramBotsApi.registerBot(telegramBotService);
