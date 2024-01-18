@@ -47,3 +47,7 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 ## Implementation Details
 - Developed using Java and Spring Boot framework.
 - Integrates with Telegram Bot API for messaging and user interaction.
+- Uses Postgres database for storing data.
+- Uses Docker for deployment.
+- Uses Maven for dependency management.
+- Uses Meme API for memes.
