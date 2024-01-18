@@ -19,8 +19,6 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static java.lang.Thread.sleep;
 
@@ -30,9 +28,6 @@ public class TelegramBotService extends TelegramLongPollingBot {
     private static final boolean ENABLED = true;
     private final BotProperties botProperties;
     private final MessageService messageService;
-
-    private final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
 
     public TelegramBotService(BotProperties botProperties, MessageService messageService) throws TelegramApiException {
         this.botProperties = botProperties;
@@ -85,25 +80,23 @@ public class TelegramBotService extends TelegramLongPollingBot {
 
     private void executeMessages(List<Validable> sendMessages) {
         for (Validable sendMessage : sendMessages) {
-            executorService.submit(() -> {
-                try {
-                    if (sendMessage == null) {
-                        return;
-                    }
-                    if (sendMessage instanceof SendMessage sendmessage) {
-                        execute(sendmessage);
-                    } else if (sendMessage instanceof SendSticker sendsticker) {
-                        execute(sendsticker);
-                    } else if (sendMessage instanceof SendPhoto sendphoto) {
-                        execute(sendphoto);
-                    } else if (sendMessage instanceof SendAnimation sendanimation) {
-                        execute(sendanimation);
-                    }
-                    sleep(1000);
-                } catch (TelegramApiException | InterruptedException e) {
-                    log.error("Error while sending message", e);
+            try {
+                if (sendMessage == null) {
+                    return;
                 }
-            });
+                if (sendMessage instanceof SendMessage sendmessage) {
+                    execute(sendmessage);
+                } else if (sendMessage instanceof SendSticker sendsticker) {
+                    execute(sendsticker);
+                } else if (sendMessage instanceof SendPhoto sendphoto) {
+                    execute(sendphoto);
+                } else if (sendMessage instanceof SendAnimation sendanimation) {
+                    execute(sendanimation);
+                }
+                sleep(1000);
+            } catch (TelegramApiException | InterruptedException e) {
+                log.error("Error while sending message", e);
+            }
         }
     }
 

@@ -6,7 +6,6 @@ import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.churk.telegrambot.builder.MessageBuilder;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.config.MemeProperties;
-import org.churk.telegrambot.model.Sentence;
 import org.churk.telegrambot.model.Stats;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -171,7 +170,7 @@ public class MessageService {
             winner.setIsWinner(Boolean.TRUE);
             statsService.updateStats(winner);
         }
-        List<String> sentenceList = new ArrayList<>(dailyMessageService.getRandomGroupSentences().stream().map(Sentence::getText).toList());
+        List<String> sentenceList = new ArrayList<>(dailyMessageService.getRandomGroupSentences().stream().map(sentence -> sentence.getText().formatted(botProperties.getWinnerName())).toList());
         if (sentenceList.isEmpty()) {
             return List.of();
         }
