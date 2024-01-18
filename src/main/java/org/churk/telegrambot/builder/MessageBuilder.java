@@ -2,6 +2,7 @@ package org.churk.telegrambot.builder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.model.Stats;
 import org.churk.telegrambot.service.DailyMessageService;
 import org.churk.telegrambot.service.StatsService;
@@ -27,10 +28,11 @@ import java.util.stream.IntStream;
 public class MessageBuilder {
     private final StatsService statsService;
     private final DailyMessageService dailyMessageService;
+    private final BotProperties botProperties;
 
     public Validable createStatsMessageForAll(Update update, Optional<Integer> messageIdToReply) {
         List<Stats> statsList = statsService.getAggregatedStatsByChatId(update.getMessage().getChatId());
-        String header = dailyMessageService.getKeyNameSentence("stats_all_header");
+        String header = dailyMessageService.getKeyNameSentence("stats_all_header").formatted(botProperties.getWinnerName());
         String footer = dailyMessageService.getKeyNameSentence("stats_footer") + statsList.size();
 
         return createStatsMessageForStat(statsList, update, header, footer, messageIdToReply);
@@ -38,10 +40,46 @@ public class MessageBuilder {
 
     public Validable createStatsMessageForYear(Update update, int year, Optional<Integer> messageIdToReply) {
         List<Stats> statsList = statsService.getStatsByChatIdAndYear(update.getMessage().getChatId(), year);
-        String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
+        String header;
+        if (year == LocalDateTime.now().getYear()) {
+            header = dailyMessageService.getKeyNameSentence("stats_now_header").formatted(botProperties.getWinnerName(), year);
+        } else {
+            header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(botProperties.getWinnerName(), year);
+        }
         String footer = dailyMessageService.getKeyNameSentence("stats_footer") + statsList.size();
 
         return createStatsMessageForStat(statsList, update, header, footer, messageIdToReply);
+    }
+
+    public Validable createStatsMessageForUser(Update update, Optional<Integer> messageIdToReply) {
+        User user = update.getMessage().getFrom();
+        Long chatId = update.getMessage().getChatId();
+        String firstName = update.getMessage().getFrom().getFirstName();
+
+        List<Stats> statsByChatIdAndUserId = statsService.getStatsByChatIdAndUserId(chatId, user.getId());
+        if (!statsByChatIdAndUserId.isEmpty()) {// get how many wons by now for this user
+            long totalScore = statsByChatIdAndUserId.stream().mapToLong(Stats::getScore).sum();
+            String header = dailyMessageService.getKeyNameSentence("me_header").formatted(firstName, botProperties.getWinnerName(), totalScore);
+            return createMessage(header, chatId, firstName, messageIdToReply);
+        }
+        String header = dailyMessageService.getKeyNameSentence("not_registered_header") + firstName;
+        return createMessage(header, chatId, firstName, messageIdToReply);
+    }
+
+    public Validable createRegisterMessage(Update update, Optional<Integer> messageIdToReply) {
+        User user = update.getMessage().getFrom();
+        String firstName = update.getMessage().getFrom().getFirstName();
+        Long chatId = update.getMessage().getChatId();
+
+        if (statsService.existsByUserId(user.getId())) {
+            log.info("User: " + user.getFirstName() + " (" + user.getId() + ")", " is already registered");
+            String header = dailyMessageService.getKeyNameSentence("registered_header") + firstName;
+            return createMessage(header, chatId, firstName, messageIdToReply);
+        }
+        statsService.addStat(new Stats(UUID.randomUUID(), chatId, user.getId(), user.getFirstName(), 0L, LocalDateTime.now(), Boolean.FALSE));
+        log.info("New user: " + user.getFirstName() + " (" + user.getId() + ")");
+        String header = dailyMessageService.getKeyNameSentence("registered_now_header") + firstName;
+        return createMessage(header, chatId, firstName, messageIdToReply);
     }
 
     public Validable createStatsMessageForStat(List<Stats> statsList, Update update, String header, String footer, Optional<Integer> messageIdToReply) {
@@ -116,36 +154,5 @@ public class MessageBuilder {
         List<Validable> sendMessage = new ArrayList<>();
         s.forEach(str -> sendMessage.add(createMessage(str, chatId, firstName)));
         return sendMessage;
-    }
-
-    public Validable createStatsMessageForUser(Update update, Optional<Integer> messageIdToReply) {
-        User user = update.getMessage().getFrom();
-        Long chatId = update.getMessage().getChatId();
-        String firstName = update.getMessage().getFrom().getFirstName();
-
-        List<Stats> statsByChatIdAndUserId = statsService.getStatsByChatIdAndUserId(chatId, user.getId());
-        if (!statsByChatIdAndUserId.isEmpty()) {
-            Stats stats = statsByChatIdAndUserId.get(0);
-            String header = dailyMessageService.getKeyNameSentence("me_header").formatted(stats.getFirstName(), stats.getScore());
-            return createMessage(header, chatId, firstName, messageIdToReply);
-        }
-        String header = dailyMessageService.getKeyNameSentence("not_registered_header") + firstName;
-        return createMessage(header, chatId, firstName, messageIdToReply);
-    }
-
-    public Validable createRegisterMessage(Update update, Optional<Integer> messageIdToReply) {
-        User user = update.getMessage().getFrom();
-        String firstName = update.getMessage().getFrom().getFirstName();
-        Long chatId = update.getMessage().getChatId();
-
-        if (statsService.existsByUserId(user.getId())) {
-            log.info("User: " + user.getFirstName() + " (" + user.getId() + ")", " is already registered");
-            String header = dailyMessageService.getKeyNameSentence("registered_header") + firstName;
-            return createMessage(header, chatId, firstName, messageIdToReply);
-        }
-        statsService.addStat(new Stats(UUID.randomUUID(), chatId, user.getId(), user.getFirstName(), 0L, LocalDateTime.now(), Boolean.FALSE));
-        log.info("New user: " + user.getFirstName() + " (" + user.getId() + ")");
-        String header = dailyMessageService.getKeyNameSentence("registered_now_header") + firstName;
-        return createMessage(header, chatId, firstName, messageIdToReply);
     }
 }

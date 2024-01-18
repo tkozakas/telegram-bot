@@ -16,8 +16,8 @@ loader:
 
 bot:
   username: SheepLoverBot
-  token: 6808027276:AAHear-Y_VmdZXnjOz10Gg0zWcs0YuBscv8
-  winner_name: pidor
+  token: 6808027276:AAGHwE2MptRu7oB5ipe3o_g0sboYW2z1Qb8
+  winner_name: winner
 
   # daily schedule of winner
   schedule: 0 0 12 * * *

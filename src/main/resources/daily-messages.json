@@ -1,15 +1,15 @@
 [
   {
-    "key_name": "According to my information, as a result of today's draw, the *winner* of the day is - "
+    "key_name": "According to my information, as a result of today's draw, the *%s* of the day is - %s"
   },
   {
-    "stats_all_header": "Top 10 winners of all time:\n\n"
+    "stats_all_header": "Top 10 %s of all time:\n\n"
   },
   {
-    "stats_now_header": "Top 10 winners of this year:\n\n"
+    "stats_now_header": "Top 10 %s of this year:\n\n"
   },
   {
-    "stats_year_header": "Top 10 winners - %d\n\n"
+    "stats_year_header": "Top 10 %s - %d\n\n"
   },
   {
     "stats_footer": "\nTotal participants — "
@@ -24,7 +24,7 @@
     "registered_now_header": "You are registered now "
   },
   {
-    "me_header": "%s, you are already the *winner* of the day %d times"
+    "me_header": "%s, you are already the *%s* of the day %d times"
   },
   {
     "stats_table": "%s. %s — *%d times*\n"

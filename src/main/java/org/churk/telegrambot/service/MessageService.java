@@ -42,34 +42,34 @@ public class MessageService {
         Map<Supplier<Optional<Validable>>, List<String>> commandHandlers = Map.of(
                 // Create Register Message
                 () -> Optional.of(messageBuilder.createRegisterMessage(update, messageIdToReply)),
-                List.of(".*/%sreg.*".formatted(botProperties.getWinnerName())),
+                List.of(".*/%sreg\\b.*".formatted(botProperties.getWinnerName())),
 
                 // Handle Stats
                 () -> handleStats(commandList, update, Optional.empty()),
-                List.of(".*/%sstats.*".formatted(botProperties.getWinnerName())),
+                List.of(".*/%sstats\\b.*".formatted(botProperties.getWinnerName())),
 
                 // Create Stats Message for All
                 () -> Optional.of(messageBuilder.createStatsMessageForAll(update, Optional.empty())),
-                List.of(".*/%sall.*".formatted(botProperties.getWinnerName())),
+                List.of(".*/%sall\\b.*".formatted(botProperties.getWinnerName())),
 
                 // Create Stats Message for User
                 () -> Optional.of(messageBuilder.createStatsMessageForUser(update, messageIdToReply)),
-                List.of(".*/%sme.*".formatted(botProperties.getWinnerName())),
+                List.of(".*/%sme\\b.*".formatted(botProperties.getWinnerName())),
 
                 // Process Random Fact
                 () -> Optional.of(processRandomFact(update, Optional.empty())),
-                List.of(".*/fact.*"),
+                List.of(".*/fact\\b.*"),
 
                 // Process Random Sticker
                 () -> Optional.of(processRandomSticker(update, Optional.empty())),
-                List.of(".*/sticker.*"),
+                List.of(".*/sticker\\b.*"),
 
                 // Process Daily Winner Message
                 () -> {
                     response.addAll(processDailyWinnerMessage());
                     return Optional.empty();
                 },
-                List.of(".*/%s.*".formatted(botProperties.getWinnerName())),
+                List.of(".*/%s\\b.*".formatted(botProperties.getWinnerName())),
 
                 // Process Random Meme
                 () -> {
@@ -158,7 +158,7 @@ public class MessageService {
             log.error("Winner exists but not found in the database");
             return List.of();
         }
-        String winnerExistsMessage = dailyMessageService.getKeyNameSentence("key_name") + winner.getFirstName();
+        String winnerExistsMessage = dailyMessageService.getKeyNameSentence("key_name").formatted(botProperties.getWinnerName(), winner.getFirstName());
         return messageBuilder.createMessages(List.of(winnerExistsMessage), winner.getChatId(), winner.getFirstName());
     }
 
