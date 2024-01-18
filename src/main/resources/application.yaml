@@ -10,9 +10,9 @@ spring:
       show-sql: true
 
 loader:
-  load-stickers: false
-  load-daily-messages: false
-  load-facts: false
+  load-stickers: true
+  load-daily-messages: true
+  load-facts: true
 
 bot:
   username: SheepLoverBot
