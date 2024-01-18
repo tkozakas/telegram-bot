@@ -2,6 +2,7 @@ package org.churk.telegrambot.service;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.churk.telegrambot.config.BotProperties;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -25,23 +26,26 @@ import static java.lang.Thread.sleep;
 @Component
 public class TelegramBotService extends TelegramLongPollingBot {
     private static final boolean ENABLED = true;
-    private final BotProperties botConfig;
+    private final BotProperties botProperties;
     private final MessageService messageService;
 
-    public TelegramBotService(BotProperties botConfig, MessageService messageService) throws TelegramApiException {
-        this.botConfig = botConfig;
+    public TelegramBotService(BotProperties botProperties, MessageService messageService) throws TelegramApiException {
+        this.botProperties = botProperties;
         this.messageService = messageService;
 
-        List<BotCommand> botCommandList = List.of(
-                new BotCommand("/pidorreg", "Register yourself as a " + botConfig.getWinnerName()),
-                new BotCommand("/pidor", "Get today's " + botConfig.getWinnerName()),
-                new BotCommand("/pidorstats", "Get stats (use /pidorstats [year] for specific year)"),
-                new BotCommand("/pidorall", "Get all-time stats"),
-                new BotCommand("/pidorme", "Get personal stats"),
-                new BotCommand("/fact", "Random fact of the day"),
-                new BotCommand("/sticker", "Random sticker from a churka"),
-                new BotCommand("/meme", "Random meme (use /meme [year] for specific subreddit)")
+        List<Pair<String, String>> commands = List.of(
+                Pair.of("/%sreg".formatted(botProperties.getWinnerName()), "Register yourself as a " + botProperties.getWinnerName()),
+                Pair.of("/%s".formatted(botProperties.getWinnerName()), "Get today's " + botProperties.getWinnerName()),
+                Pair.of("/%sstats".formatted(botProperties.getWinnerName()), "Get stats (use %sstats [year] for specific year)".formatted(botProperties.getWinnerName())),
+                Pair.of("/%sall".formatted(botProperties.getWinnerName()), "Get all-time stats"),
+                Pair.of("/%sme".formatted(botProperties.getWinnerName()), "Get personal stats"),
+                Pair.of("/fact", "Random fact of the day"),
+                Pair.of("/sticker", "Random sticker from a " + botProperties.getWinnerName() + " sticker set"),
+                Pair.of("/meme", "Random meme (use /meme [year] for specific subreddit)")
         );
+        List<BotCommand> botCommandList = commands.stream()
+                .map(command -> new BotCommand(command.getLeft(), command.getRight()))
+                .toList();
         registerBotCommands(botCommandList);
     }
 
@@ -51,12 +55,12 @@ public class TelegramBotService extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return botConfig.getUsername();
+        return botProperties.getUsername();
     }
 
     @Override
     public String getBotToken() {
-        return botConfig.getToken();
+        return botProperties.getToken();
     }
 
     @SneakyThrows

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.churk.telegrambot.builder.MessageBuilder;
+import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.config.MemeProperties;
 import org.churk.telegrambot.model.Sentence;
 import org.churk.telegrambot.model.Stats;
@@ -31,6 +32,7 @@ public class MessageService {
     private final DailyMessageService dailyMessageService;
     private final FactService factService;
     private final MemeService memeService;
+    private final BotProperties botProperties;
 
     public List<Validable> handleCommand(Update update) {
         Optional<Integer> messageIdToReply = Optional.of(update.getMessage().getMessageId());
@@ -48,33 +50,33 @@ public class MessageService {
 
                 // Create Register Message
                 () -> Optional.of(messageBuilder.createRegisterMessage(update, messageIdToReply)),
-                List.of(".*/pidorreg.*"),
+                List.of(".*/%sreg.*".formatted(botProperties.getWinnerName())),
 
                 // Handle Stats
                 () -> handleStats(commandList, update, Optional.empty()),
-                List.of(".*/pidorstats.*"),
+                List.of(".*/%sstats.*"),
 
                 // Create Stats Message for All
                 () -> Optional.of(messageBuilder.createStatsMessageForAll(update, Optional.empty())),
-                List.of(".*/pidorall.*"),
+                List.of(".*/%sall.*"),
 
                 // Create Stats Message for User
                 () -> Optional.of(messageBuilder.createStatsMessageForUser(update, messageIdToReply)),
-                List.of(".*/pidorme.*"),
-
-                // Process Random Meme
-                () -> {
-                    List<Validable> memeResponse = processRandomMeme(commandList, update, Optional.empty());
-                    return memeResponse.isEmpty() ? Optional.empty() : Optional.ofNullable(memeResponse.get(0));
-                },
-                List.of(".*/meme.*"),
+                List.of(".*/%sme.*"),
 
                 // Process Daily Winner Message
                 () -> {
                     response.addAll(processDailyWinnerMessage());
                     return Optional.empty();
                 },
-                List.of(".*/pidor.*")
+                List.of(".*/%s.*"),
+
+                // Process Random Meme
+                () -> {
+                    List<Validable> memeResponse = processRandomMeme(commandList, update, Optional.empty());
+                    return memeResponse.isEmpty() ? Optional.empty() : Optional.ofNullable(memeResponse.get(0));
+                },
+                List.of(".*/meme.*")
         );
 
         Optional<Supplier<Optional<Validable>>> commandHandler = commandHandlers.entrySet().stream()
