@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +72,6 @@ public class MessageService {
 
     private Optional<Validable> processRandomMeme(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
-        String firstName = update.getMessage().getFrom().getFirstName();
         String subreddit = (commandList.size() == 2) ? commandList.get(1) : null;
 
         log.info("Sending meme");
@@ -79,7 +79,8 @@ public class MessageService {
         String downloadedFilePath = MemeDownloader.waitForDownload();
 
         if (downloadedFilePath != null) {
-            return messageBuilder.createPhotoMessage(messageIdToReply, downloadedFilePath, firstName, chatId);
+            File memeFile = new File(downloadedFilePath);
+            return messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile);
         }
         log.error("Meme file was not downloaded in the given time");
         return Optional.empty();
@@ -116,7 +117,7 @@ public class MessageService {
             log.info("No stats available to pick a winner.");
             return List.of();
         }
-        if (statsService.existsWinnerToday()) {
+        if (statsService.existsByWinnerToday()) {
             Stats winner = allStats.stream().filter(Stats::getIsWinner).findFirst().orElse(null);
             if (winner == null) {
                 log.error("Winner exists but not found in the database");

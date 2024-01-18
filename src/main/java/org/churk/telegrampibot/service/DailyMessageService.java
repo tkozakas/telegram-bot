@@ -40,7 +40,7 @@ public class DailyMessageService {
             List<Object> dataList = mapper.readValue(new File(jsonPath), new TypeReference<>() {
             });
 
-            dataList.stream().filter(dataObject -> dataObject instanceof Map).map(dataObject -> (Map<String, Object>) dataObject).forEachOrdered(dataMap -> {
+            dataList.stream().filter(Map.class::isInstance).map(dataObject -> (Map<String, Object>) dataObject).forEachOrdered(dataMap -> {
                 DailyMessage dailyMessage = new DailyMessage();
                 dailyMessage.setDailyMessageId(UUID.randomUUID());
                 // iterate over all keys in the map and put inside dailyMessage all keys that they belong to

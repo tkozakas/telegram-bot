@@ -56,24 +56,13 @@ public class MessageBuilder {
 
         String stringBuilder = IntStream
                 .iterate(0, i -> i < modifiableList.size() && i < 10, i -> i + 1)
-                .mapToObj(i -> String.format("%" + maxIndexLength + "d. *%s* — *%d*%n",
-                        i + 1,
+                .mapToObj(i -> dailyMessageService.getKeyNameSentence("stats_table").formatted(
+                        String.format("%" + maxIndexLength + "d", i + 1),
                         modifiableList.get(i).getFirstName(),
                         modifiableList.get(i).getScore()))
                 .collect(Collectors.joining("", header, footer));
 
         return Optional.of(createMessage(stringBuilder, chatId, firstName, messageIdToReply));
-    }
-
-    public Optional<Validable> createPhotoMessage(Optional<Integer> messageIdToReply, String firstName, String downloadedFilePath, Long chatId) {
-        log.info("Photo sent: [%s] to [%s (%d)]".formatted(downloadedFilePath, firstName, chatId));
-        File memeFile = new File(downloadedFilePath);
-        SendPhoto sendPhoto = new SendPhoto();
-        sendPhoto.setChatId(String.valueOf(chatId));
-        sendPhoto.setPhoto(new InputFile(memeFile));
-        messageIdToReply.ifPresent(sendPhoto::setReplyToMessageId);
-        memeFile.deleteOnExit();
-        return Optional.of(sendPhoto);
     }
 
     public Validable createStickerMessage(String stickerId, Long chatId, String firstName, Optional<Integer> messageIdToReply) {
@@ -83,6 +72,15 @@ public class MessageBuilder {
         sendSticker.setSticker(new InputFile(stickerId));
         messageIdToReply.ifPresent(sendSticker::setReplyToMessageId);
         return sendSticker;
+    }
+
+    public Optional<Validable> createPhotoMessage(Optional<Integer> messageIdToReply, Long chatId, File memeFile) {
+        SendPhoto sendPhoto = new SendPhoto();
+        sendPhoto.setChatId(String.valueOf(chatId));
+        sendPhoto.setPhoto(new InputFile(memeFile));
+        messageIdToReply.ifPresent(sendPhoto::setReplyToMessageId);
+        memeFile.deleteOnExit();
+        return Optional.of(sendPhoto);
     }
 
 
