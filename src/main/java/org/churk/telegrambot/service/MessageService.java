@@ -142,7 +142,7 @@ public class MessageService {
     public List<Validable> processScheduledRandomMeme() {
         assert latestMessages.peek() != null;
         String subreddit = memeProperties.getScheduledSubreddits().get(ThreadLocalRandom.current().nextInt(memeProperties.getScheduledSubreddits().size()));
-        return List.of(processRandomMeme(List.of(subreddit), latestMessages.peek(), Optional.empty()).get(0));
+        return List.of(processRandomMeme(List.of(subreddit, subreddit), latestMessages.peek(), Optional.empty()).get(0));
     }
 
     private Optional<Validable> handleStats(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
