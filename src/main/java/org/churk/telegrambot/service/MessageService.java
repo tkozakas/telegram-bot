@@ -110,19 +110,33 @@ public class MessageService {
     public List<Validable> processRandomMeme(List<String> commandList, Update update, Optional<Integer> messageIdToReply) {
         Long chatId = update.getMessage().getChatId();
         String subreddit = (commandList.size() == 2) ? commandList.get(1) : null;
-
-        Optional<File> memeFile = retrieveMeme(subreddit);
-        return memeFile
-                .map(file -> List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, file, subreddit == null ? Optional.empty() : Optional.of("From r/%s".formatted(subreddit)))))
-                        .orElseGet(() -> List.of(messageBuilder.createMessage("No memes found or subreddit does not exist", chatId, update.getMessage().getFrom().getFirstName(), messageIdToReply)));
+        Optional<File> memeFile;
+        try {
+            memeFile = retrieveMeme(subreddit);
+            if (memeFile.isPresent()) {
+                Optional<String> caption = Optional.of("From r/%s".formatted(subreddit));
+                String filename = memeFile.get().getName().toLowerCase();
+                Optional<String> isSubreddit = subreddit == null ? Optional.empty() : caption;
+                return filename.endsWith(".gif") ?
+                        List.of(messageBuilder.createAnimationMessage(messageIdToReply, chatId, memeFile.get(), isSubreddit)) :
+                        List.of(messageBuilder.createPhotoMessage(messageIdToReply, chatId, memeFile.get(), isSubreddit));
+            }
+        } catch (feign.FeignException.NotFound e) {
+            log.error("Subreddit not found: {}", e.getMessage());
+            return List.of(messageBuilder.createMessage("Subreddit does not exist", chatId, update.getMessage().getFrom().getFirstName(), messageIdToReply));
+        } catch (Exception e) {
+            log.error("Error fetching meme from subreddit: {}", e.getMessage());
+            return List.of(messageBuilder.createMessage("Error fetching meme from subreddit", chatId, update.getMessage().getFrom().getFirstName(), messageIdToReply));
+        }
+        return List.of();
     }
 
-    private Optional<File> retrieveMeme(String subreddit) {
-        if (subreddit == null) {
+    private Optional<File> retrieveMeme(String subreddit) throws feign.FeignException.NotFound {
+        if (subreddit != null) {
+            return memeService.getMemeFromSubreddit(subreddit);
+        }
             log.info("Sending random meme");
             return memeService.getMeme();
-        }
-        return memeService.getMemeFromSubreddit(subreddit);
     }
 
     public List<Validable> processScheduledRandomMeme() {
@@ -187,7 +201,10 @@ public class MessageService {
             winner.setIsWinner(Boolean.TRUE);
             statsService.updateStats(winner);
         }
-        List<String> sentenceList = new ArrayList<>(dailyMessageService.getRandomGroupSentences().stream().map(sentence -> sentence.getText().formatted(botProperties.getWinnerName())).toList());
+        List<String> sentenceList = new ArrayList<>(dailyMessageService.getRandomGroupSentences().stream()
+                .map(sentence -> sentence.getText()
+                        .formatted(botProperties.getWinnerName()))
+                .toList());
         if (sentenceList.isEmpty()) {
             return List.of();
         }

@@ -111,26 +111,23 @@ public class MessageBuilder {
     }
 
     public Validable createPhotoMessage(Optional<Integer> messageIdToReply, Long chatId, File file, Optional<String> caption) {
-        String filename = file.getName().toLowerCase();
-        InputFile inputFile = new InputFile(file);
+        SendPhoto sendPhoto = new SendPhoto();
+        sendPhoto.setChatId(String.valueOf(chatId));
+        sendPhoto.setPhoto(new InputFile(file));
+        messageIdToReply.ifPresent(sendPhoto::setReplyToMessageId);
+        caption.ifPresent(sendPhoto::setCaption);
+        file.deleteOnExit();
+        return sendPhoto;
+    }
 
-        if (filename.endsWith(".gif")) {
-            SendAnimation sendAnimation = new SendAnimation();
-            sendAnimation.setChatId(String.valueOf(chatId));
-            sendAnimation.setAnimation(inputFile);
-            messageIdToReply.ifPresent(sendAnimation::setReplyToMessageId);
-            caption.ifPresent(sendAnimation::setCaption);
-            file.deleteOnExit();
-            return sendAnimation;
-        } else {
-            SendPhoto sendPhoto = new SendPhoto();
-            sendPhoto.setChatId(String.valueOf(chatId));
-            sendPhoto.setPhoto(inputFile);
-            messageIdToReply.ifPresent(sendPhoto::setReplyToMessageId);
-            caption.ifPresent(sendPhoto::setCaption);
-            file.deleteOnExit();
-            return sendPhoto;
-        }
+    public Validable createAnimationMessage(Optional<Integer> messageIdToReply, Long chatId, File file, Optional<String> caption) {
+        SendAnimation sendAnimation = new SendAnimation();
+        sendAnimation.setChatId(String.valueOf(chatId));
+        sendAnimation.setAnimation(new InputFile(file));
+        messageIdToReply.ifPresent(sendAnimation::setReplyToMessageId);
+        caption.ifPresent(sendAnimation::setCaption);
+        file.deleteOnExit();
+        return sendAnimation;
     }
 
     public Validable createMessage(String s, Long chatId, String firstName, Optional<Integer> messageIdToReply) {

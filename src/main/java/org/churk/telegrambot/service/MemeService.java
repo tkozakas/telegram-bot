@@ -17,17 +17,10 @@ import java.util.Optional;
 public class MemeService {
     private final MemeProperties memeProperties;
     private final MemeClient memeClient;
-    public Optional<File> getMemeFromSubreddit(String subreddit) {
-        try {
-            Map<String, Object> map = memeClient.getMemeFromSubreddit(subreddit);
-            return getFile(map);
-        } catch (feign.FeignException.NotFound e) {
-            log.error("Subreddit not found: {}", e.getMessage());
-            return Optional.empty();
-        } catch (Exception e) {
-            log.error("Error fetching meme from subreddit: {}", e.getMessage());
-            return Optional.empty();
-        }
+
+    public Optional<File> getMemeFromSubreddit(String subreddit) throws feign.FeignException.NotFound {
+        Map<String, Object> map = memeClient.getMemeFromSubreddit(subreddit);
+        return getFile(map);
     }
 
     public Optional<File> getMeme() {
