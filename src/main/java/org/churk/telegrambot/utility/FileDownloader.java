@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 public class FileDownloader {
     private static final int TIME_OUT_SECONDS = 30;
     private static final int WIDTH = 320;
-    private  static final int HEIGHT = 240;
+    private  static final int HEIGHT = 320;
 
     public static String waitForDownload(String downloadDirectory, String fileName, String extension) {
         String filePath = downloadDirectory + fileName + "_compressed" + extension;
@@ -27,6 +27,9 @@ public class FileDownloader {
             }
             if (isDownloaded(filePath)) {
                 log.info("File downloaded successfully: {}", filePath);
+                long endTime = System.currentTimeMillis();
+                long elapsedTimeInSeconds = (endTime - startTime) / 1000;
+                log.info("File download time: " + elapsedTimeInSeconds + " seconds");
                 return filePath;
             }
         }

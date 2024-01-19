@@ -32,13 +32,8 @@ public class MemeService {
         String apiUrl = (String) map.get("url");
         String extension = apiUrl.substring(apiUrl.lastIndexOf("."));
 
-        long startTime = System.currentTimeMillis();
         FileDownloader.downloadFileFromUrl(apiUrl, memeProperties.getDownloadPath(), memeProperties.getFileName(), extension);
         String downloadedFilePath = FileDownloader.waitForDownload(memeProperties.getDownloadPath(), memeProperties.getFileName(), extension);
-        long endTime = System.currentTimeMillis();
-        long elapsedTimeInSeconds = (endTime - startTime) / 1000;
-
-        log.info("File download time: " + elapsedTimeInSeconds + " seconds");
 
         if (downloadedFilePath == null) {
             return Optional.empty();
