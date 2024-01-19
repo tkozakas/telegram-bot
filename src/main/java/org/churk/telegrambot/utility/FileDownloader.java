@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Slf4j
@@ -69,6 +71,7 @@ public class FileDownloader {
 
     private static void compressImage(String filePath, String compressedFilePath) {
         try {
+            deleteIfExists(compressedFilePath);
             FFmpeg.atPath()
                     .addInput(UrlInput.fromPath(Paths.get(filePath)))
                     .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
@@ -85,17 +88,29 @@ public class FileDownloader {
     }
 
     private static void compressGif(String filePath, String compressedFilePath) {
-        FFmpeg.atPath()
-                .addInput(UrlInput.fromPath(Paths.get(filePath)))
-                .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
-                .setComplexFilter(FilterGraph.of(
-                        FilterChain.of(
-                                Filter.withName("fps").addArgument("fps=8"),
-                                Filter.withName("scale").addArgument(WIDTH + ":" + HEIGHT),
-                                Filter.withName("setpts").addArgument("4/10*PTS")
-                        )
-                ))
-                .execute();
-        log.info("File compressed and saved as: {}", compressedFilePath);
+        try {
+            deleteIfExists(compressedFilePath);
+            FFmpeg.atPath()
+                    .addInput(UrlInput.fromPath(Paths.get(filePath)))
+                    .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
+                    .setComplexFilter(FilterGraph.of(
+                            FilterChain.of(
+                                    Filter.withName("fps").addArgument("fps=8"),
+                                    Filter.withName("scale").addArgument(WIDTH + ":" + HEIGHT),
+                                    Filter.withName("setpts").addArgument("4/10*PTS")
+                            )
+                    ))
+                    .execute();
+            log.info("File compressed and saved as: {}", compressedFilePath);
+        } catch (IOException e) {
+            log.error("Error compressing the gif: {}", e.getMessage());
+        }
+    }
+
+    private static void deleteIfExists(String filePath) throws IOException {
+        Path compressedPath = Paths.get(filePath);
+        if (Files.exists(compressedPath)) {
+            Files.delete(compressedPath);
+        }
     }
 }
