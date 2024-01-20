@@ -96,7 +96,7 @@ public class MessageService {
                 this::processRandomFact
         );
 
-        if (ThreadLocalRandom.current().nextInt(100) > 2) {
+        if (ThreadLocalRandom.current().nextDouble(100) > 0.5) {
             return Optional.empty();
         }
         return randomResponseHandlers.get(ThreadLocalRandom.current().nextInt(randomResponseHandlers.size())).get();
