@@ -1,4 +1,19 @@
 services:
+  telegram-bot:
+    build: .
+    depends_on:
+      - telegram-bot-spring-postgres
+    environment:
+      DATABASE_HOST: telegram-bot-spring-postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: telegram_bot
+    ports:
+      - "8080:8080"
+    networks:
+      - telegram-bot-network
+
   telegram-bot-spring-postgres:
     container_name: telegram-bot-postgres
     image: postgres:16
@@ -9,3 +24,9 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: telegram_bot
     restart: unless-stopped
+    networks:
+      - telegram-bot-network
+
+networks:
+  telegram-bot-network:
+    driver: bridge

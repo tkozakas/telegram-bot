@@ -3,6 +3,15 @@
 Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 
 ## Deployment
+### Environment Variables
+```bash    
+  export DATABASE_HOST="telegram-bot-spring-postgres"
+  export DATABASE_PORT="5432"
+  export DATABASE_NAME="telegram_bot"
+  export DATABASE_USER="postgres"
+  export DATABASE_PASSWORD="postgres"
+```
+
 ```bash
   # Clone repository
   git clone https://github.com/tomas6446/telegram-api-bot
