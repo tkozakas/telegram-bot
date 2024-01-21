@@ -1,5 +1,9 @@
 # Stage 1: Build the application
 FROM maven:3.8.7-openjdk-18 AS builder
+
+LABEL maintainer="Tomas Kozakas <tomas.kozakas@gmail.com>"
+LABEL description="Telegram API Bot"
+
 WORKDIR /app
 COPY src src
 COPY pom.xml .

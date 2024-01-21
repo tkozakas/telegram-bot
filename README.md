@@ -15,28 +15,16 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 
 ### Development
 ```bash
-  cd docker && docker-compose --profile dev up -d && cd ..
-  
-  # Run the script
-  docker cp init-db.sql telegram-bot-postgres:/init-db.sql
-  docker exec -u postgres telegram-bot-postgres psql -d telegram_bot -f /init-db.sql
-  
+  cd docker && docker-compose docker-compose.yaml up && cd ..
+
   # Build and run project
   mvn clean install
   mvn spring-boot:run
 ```
-#### Updating the database
-If the PostgreSQL container has been initialized before and you want to re-run the init-db.sql script, 
-you'll need to reset the database by removing the container and its volume (docker-compose down -v), 
-but be cautious as this will erase your existing database.
-```bash
-  docker-compose down -v
-  docker-compose --profile dev up -d
-```
 
 ## Production
 ```bash
-  cd docker && docker-compose --profile prod up -d && cd .. 
+  cd docker && docker-compose -f docker-compose.prod.yaml up -d && cd .. 
 ```
 
 ## Features
@@ -62,3 +50,4 @@ but be cautious as this will erase your existing database.
 - Uses Docker for deployment.
 - Uses Maven for dependency management.
 - Uses Meme API for memes.
+- Uses openjdk:21
