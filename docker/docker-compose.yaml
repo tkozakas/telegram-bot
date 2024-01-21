@@ -1,31 +1,39 @@
 services:
   telegram-bot:
-    build: .
+    build: ..
     depends_on:
       - telegram-bot-spring-postgres
     environment:
+      BOT_TOKEN: ${BOT_TOKEN}
       DATABASE_HOST: telegram-bot-spring-postgres
-      DATABASE_PORT: 5432
+      DATABASE_PORT: 5433
+      DATABASE_DB: telegram_bot
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
-      DATABASE_NAME: telegram_bot
     ports:
       - "8080:8080"
     networks:
       - telegram-bot-network
+    profiles:
+      - prod  # Only include in production profile
 
   telegram-bot-spring-postgres:
     container_name: telegram-bot-postgres
     image: postgres:16
     ports:
-      - 5433:5432
+      - "5433:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: telegram_bot
     restart: unless-stopped
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
       - telegram-bot-network
+    profiles:
+      - dev   # Include in development profile
+      - prod  # Also include in production profile
 
 networks:
   telegram-bot-network:

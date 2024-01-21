@@ -1,13 +1,12 @@
 # Start with Amazon Corretto JDK 17
-FROM amazoncorretto:17 as build
+FROM amazoncorretto:17 AS build
 
 # Install Maven
 RUN yum update -y && \
     yum install -y maven
 
 # Copy the project files into the container
-COPY src /usr/src/app/src
-COPY pom.xml /usr/src/app
+COPY .. /usr/src/app
 
 # Set the working directory
 WORKDIR /usr/src/app

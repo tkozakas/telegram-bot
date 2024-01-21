@@ -1,44 +1,58 @@
 spring:
+  config:
+    activate:
+      on-profile: dev
   datasource:
-    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
+    url: jdbc:postgresql://localhost:5433/telegram_bot
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
   jpa:
     properties:
       hibernate:
         ddl-auto: update
+        dialect: org.hibernate.dialect.PostgreSQLDialect
       show-sql: true
 
 loader:
-  load-stickers: true
+  daily-messages-path: data/daily-messages.json
   load-daily-messages: true
+
+  sticker-sets-path: data/sticker_sets.txt
+  load-stickers: true
+
+  subreddits-path: data/subreddits.txt
+  load-subreddits: true
+
+  facts-path: data/facts.csv
   load-facts: true
 
 bot:
   username: SheepLoverBot
-  token: 6808027276:AAGHwE2MptRu7oB5ipe3o_g0sboYW2z1Qb8
-  winner_name: winner
+  token: ${BOT_TOKEN}
+  winner_name: pidor
 
   # daily schedule of winner
   schedule: 0 0 12 * * *
   # daily schedule of reset
   reset-schedule: 0 0 0 * * *
 
-  sticker_sets:
-    - primates_uffchat
-    - greatchurkobesfbi_by_fStikBot
-
 meme:
   api-url: https://meme-api.herokuapp.com/gimme
-  download-path: src/main/resources/temp/
+  download-path: temp/
   file-name: meme
 
   # hourly schedule of memes
   schedule: 0 0 * * * *
   # every minute schedule # commented
   #  schedule: 0 * * * * *
-  # list of subredits to get memes from
-  scheduled-subreddits:
-    - wordington
-    - wunkus
-    - clamworks
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}
+  jpa:
+    show-sql: false
