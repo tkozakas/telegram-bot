@@ -2,34 +2,6 @@
 
 Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 
-## Deployment
-### Environment Variables
-```bash    
-  export DATABASE_HOST="telegram-bot-spring-postgres"
-  export DATABASE_PORT="5432"
-  export DATABASE_NAME="telegram_bot"
-  export DATABASE_USER="postgres"
-  export DATABASE_PASSWORD="postgres"
-```
-
-```bash
-  # Clone repository
-  git clone https://github.com/tomas6446/telegram-api-bot
-  # Enter the directory
-  cd telegram-api-bot
-
-  # Run Postgres container
-  docker compose up -d
-
-  # Copy and run the script inside container
-  docker cp init-db.sql telegram-bot-postgres:/init-db.sql
-  docker exec -u postgres telegram-bot-postgres psql -d telegram_bot -f /init-db.sql
-
-  # Build and run project
-  mvn clean install
-  mvn spring-boot:run
-```
-
 ## Configuration
 - Create a bot using [BotFather](https://t.me/botfather) and get the token.
 - Create a group and add the bot to the group.
@@ -38,6 +10,36 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 - Add facts to the database using the .csv file in the resources folder.
 - Add daily scheduled messages to the database using the .csv file in the resources folder.
 - Change the winner message in the application.yaml in the resources folder (changes the commands).
+
+## Deployment
+
+### Development
+```bash
+  # Create a docker container for development
+  cd docker && docker-compose --profile dev up -d && cd ..
+  
+  # Run the script
+  docker cp init-db.sql telegram-bot-postgres:/init-db.sql
+  docker exec -u postgres telegram-bot-postgres psql -d telegram_bot -f /init-db.sql
+  
+  # Build and run project
+  mvn clean install
+  mvn spring-boot:run
+```
+#### Updating the database
+If the PostgreSQL container has been initialized before and you want to re-run the init-db.sql script, 
+you'll need to reset the database by removing the container and its volume (docker-compose down -v), 
+but be cautious as this will erase your existing database.
+```bash
+  docker-compose down -v
+  docker-compose --profile dev up -d
+```
+
+## Production
+```bash
+  ## Create a docker container for production
+  cd docker && docker-compose --profile prod up -d && cd .. 
+```
 
 ## Features
 
