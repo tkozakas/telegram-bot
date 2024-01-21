@@ -13,7 +13,7 @@ RUN mvn -f pom.xml clean package
 FROM openjdk:21-slim
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar","/app/app.jar"]
 
 # to build the image see the following command
 # docker build -f docker/Dockerfile -t telegram-api-bot .

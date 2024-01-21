@@ -1,17 +1,3 @@
-spring:
-  datasource:
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        format_sql: true
-    show-sql: true
-
-server:
-  port: 8080
-
 loader:
   daily-messages-path: data/daily-messages.json
   load-daily-messages: true
@@ -36,8 +22,9 @@ bot:
   reset-schedule: 0 0 0 * * *
 
 meme:
+
   api-url: https://meme-api.herokuapp.com/gimme
-  download-path: /temp
+  download-path: temp/
   file-name: meme
 
   # hourly schedule of memes

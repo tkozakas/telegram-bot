@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 public class FileDownloader {
     private static final int TIME_OUT_SECONDS = 30;
     private static final int WIDTH = 320;
-    private  static final int HEIGHT = 320;
+    private static final int HEIGHT = 320;
 
     public static String waitForDownload(String downloadDirectory, String fileName, String extension) {
         String filePath = downloadDirectory + fileName + "_compressed" + extension;
@@ -80,7 +80,8 @@ public class FileDownloader {
                     .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
                     .setComplexFilter(FilterGraph.of(
                             FilterChain.of(
-                                    Filter.withName("scale").addArgument(320 + ":" + 240)
+                                    Filter.withName("scale").addArgument(WIDTH + ":" + HEIGHT),
+                                    Filter.withName("setpts").addArgument("4/10*PTS")
                             )
                     ))
                     .execute();

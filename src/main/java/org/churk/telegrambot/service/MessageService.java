@@ -216,7 +216,6 @@ public class MessageService {
         Long chatId = update.getMessage().getChatId();
         String firstName = update.getMessage().getFrom().getFirstName();
         String randomFact = factService.getRandomFact();
-        log.info("Sending fact: {}", randomFact);
 
         return messageBuilder.createMessage(Objects.requireNonNullElse(randomFact, "No facts found in database"), chatId, firstName, messageIdToReply);
     }
@@ -225,7 +224,6 @@ public class MessageService {
         Long chatId = update.getMessage().getChatId();
         String firstName = update.getMessage().getFrom().getFirstName();
         String stickerId = stickerService.getRandomStickerId();
-        log.info("Sending sticker: {}", stickerId);
 
         return messageBuilder.createStickerMessage(stickerId, chatId, firstName, messageIdToReply);
     }
