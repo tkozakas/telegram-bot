@@ -15,7 +15,6 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 
 ### Development
 ```bash
-  # Create a docker container for development
   cd docker && docker-compose --profile dev up -d && cd ..
   
   # Run the script
@@ -37,7 +36,6 @@ but be cautious as this will erase your existing database.
 
 ## Production
 ```bash
-  ## Create a docker container for production
   cd docker && docker-compose --profile prod up -d && cd .. 
 ```
 
@@ -50,6 +48,8 @@ but be cautious as this will erase your existing database.
   - `/commandstats`: Get stats (use /pidorstats [year] for specific year).
   - `/commandall`: Get all-time stats.
   - `/commandme`: Get personal stats.
+  - `/meme`: Get a random meme.
+  - `/fact`: Get a random fact.
 
 ### Features
 - Sends scheduled message for daily updates of who is the winner of the day and memes.
