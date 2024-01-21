@@ -6,6 +6,7 @@ import org.churk.telegrambot.service.TelegramBotService;
 import org.churk.telegrambot.utility.DailyMessageLoader;
 import org.churk.telegrambot.utility.FactLoader;
 import org.churk.telegrambot.utility.StickerLoader;
+import org.churk.telegrambot.utility.SubredditLoader;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -21,12 +22,14 @@ public class BotInitializer {
     private final StickerLoader stickerLoader;
     private final DailyMessageLoader dailyMessageLoader;
     private final FactLoader factLoader;
+    private final SubredditLoader subredditLoader;
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() {
         stickerLoader.loadStickers();
         dailyMessageLoader.loadMessages();
         factLoader.loadFacts();
+        subredditLoader.loadSubredits();
         try {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             telegramBotsApi.registerBot(telegramBotService);

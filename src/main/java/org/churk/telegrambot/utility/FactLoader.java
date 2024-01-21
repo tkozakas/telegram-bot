@@ -23,7 +23,6 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class FactLoader {
-    private static final String FILE_PATH = "src/main/resources/facts.csv";
     private final LoaderProperties loaderProperties;
     private final FactRepository factRepository;
 
@@ -40,11 +39,12 @@ public class FactLoader {
                 "comment", "comment"
         );
 
+        String path = loaderProperties.getFactsPath();
         HeaderColumnNameTranslateMappingStrategy<Fact> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
         strategy.setType(Fact.class);
         strategy.setColumnMapping(columnMapping);
         CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
-        try (CSVReader csvReader = new CSVReaderBuilder(new FileReader(FILE_PATH)).withCSVParser(parser).build()) {
+        try (CSVReader csvReader = new CSVReaderBuilder(new FileReader(path)).withCSVParser(parser).build()) {
             CsvToBean<Fact> csvToBean = new CsvToBeanBuilder<Fact>(csvReader)
                     .withMappingStrategy(strategy)
                     .withIgnoreLeadingWhiteSpace(true)
@@ -52,17 +52,17 @@ public class FactLoader {
 
             List<Fact> factList = csvToBean.parse();
             if (factList.isEmpty()) {
-                log.warn("No facts found in file: " + FILE_PATH);
+                log.warn("No facts found in file: " + path);
                 return;
             }
             factList.forEach(fact -> fact.setFactId(UUID.randomUUID()));
             factRepository.saveAll(factList);
         } catch (FileNotFoundException e) {
-            log.error("File not found: " + FILE_PATH, e);
+            log.error("File not found: " + path, e);
         } catch (IOException e) {
-            log.error("IO Exception while reading the file: " + FILE_PATH, e);
+            log.error("IO Exception while reading the file: " + path, e);
         } catch (Exception e) {
-            log.error("Error while processing CSV file: " + FILE_PATH, e);
+            log.error("Error while processing CSV file: " + path, e);
         }
     }
 }

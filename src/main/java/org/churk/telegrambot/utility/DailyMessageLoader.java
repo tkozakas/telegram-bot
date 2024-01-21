@@ -21,7 +21,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DailyMessageLoader {
-    private static final String JSON_PATH = "src/main/resources/daily-messages.json";
     private final LoaderProperties loaderProperties;
     private final DailyMessageRepository dailyMessageRepository;
     private final SentenceRepository sentenceRepository;
@@ -34,8 +33,9 @@ public class DailyMessageLoader {
         sentenceRepository.deleteAll();
         dailyMessageRepository.deleteAll();
         ObjectMapper mapper = new ObjectMapper();
+        String path = loaderProperties.getDailyMessagesPath();
         try {
-            List<Object> dataList = mapper.readValue(new File(JSON_PATH), new TypeReference<>() {
+            List<Object> dataList = mapper.readValue(new File(path), new TypeReference<>() {
             });
 
             dataList.stream().filter(Map.class::isInstance).map(dataObject -> (Map<String, Object>) dataObject).forEachOrdered(dataMap -> {
@@ -64,7 +64,7 @@ public class DailyMessageLoader {
             });
 
         } catch (IOException e) {
-            log.error("Error while loading JSON file: " + JSON_PATH, e);
+            log.error("Error while loading JSON file: " + path, e);
         }
     }
 }

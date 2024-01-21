@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.churk.telegrambot.builder.MessageBuilder;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.config.MemeProperties;
 import org.churk.telegrambot.model.Stats;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -24,7 +23,6 @@ import java.util.function.Supplier;
 public class MessageService {
     protected static final Queue<Update> latestMessages = new CircularFifoQueue<>(3);
     private static final boolean ENABLED = true;
-    private final MemeProperties memeProperties;
     private final MessageBuilder messageBuilder;
     private final StatsService statsService;
     private final StickerService stickerService;
@@ -32,6 +30,7 @@ public class MessageService {
     private final FactService factService;
     private final MemeService memeService;
     private final BotProperties botProperties;
+    private final SubredditService subredditService;
 
     public List<Validable> handleCommand(Update update) {
         Optional<Integer> messageIdToReply = Optional.of(update.getMessage().getMessageId());
@@ -141,7 +140,7 @@ public class MessageService {
 
     public List<Validable> processScheduledRandomMeme() {
         assert latestMessages.peek() != null;
-        String subreddit = memeProperties.getScheduledSubreddits().get(ThreadLocalRandom.current().nextInt(memeProperties.getScheduledSubreddits().size()));
+        String subreddit = subredditService.getSubreddits().get(ThreadLocalRandom.current().nextInt(subredditService.getSubreddits().size())).getName();
         return List.of(processRandomMeme(List.of(subreddit, subreddit), latestMessages.peek(), Optional.empty()).get(0));
     }
 
