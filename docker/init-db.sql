@@ -44,3 +44,9 @@ CREATE TABLE IF NOT EXISTS sentence
     text             VARCHAR(1000),
     FOREIGN KEY (daily_message_id) REFERENCES daily_message (daily_message_id)
 );
+
+CREATE TABLE IF NOT EXISTS subreddits
+(
+    subreddit_id UUID PRIMARY KEY,
+    name         VARCHAR(255) NOT NULL
+);
