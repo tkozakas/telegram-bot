@@ -1,10 +1,12 @@
 services:
   telegram-bot:
-    build: ..
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
     depends_on:
       - telegram-bot-spring-postgres
     environment:
-      BOT_TOKEN: ${BOT_TOKEN}
+      BOT_TOKEN: 6808027276:AAFZKgaZkt0mitiIK2A25YAosqAjN4qXoxM
       DATABASE_HOST: telegram-bot-spring-postgres
       DATABASE_PORT: 5433
       DATABASE_DB: telegram_bot

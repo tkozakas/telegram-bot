@@ -1,27 +1,15 @@
-# Start with Amazon Corretto JDK 17
-FROM amazoncorretto:17 AS build
+# Stage 1: Build the application
+FROM maven:3.8.7-openjdk-18 AS builder
+WORKDIR /app
+COPY src src
+COPY pom.xml .
+RUN mvn -f pom.xml clean package
 
-# Install Maven
-RUN yum update -y && \
-    yum install -y maven
+# Stage 2: Create the runtime image
+FROM openjdk:21-slim
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
+ENTRYPOINT ["java","-jar","/app/app.jar"]
 
-# Copy the project files into the container
-COPY .. /usr/src/app
-
-# Set the working directory
-WORKDIR /usr/src/app
-
-# Build the application
-RUN mvn clean package
-
-# Use Corretto 17 for the final image as well
-FROM amazoncorretto:17
-
-# Copy the JAR file from the build stage
-COPY --from=build /usr/src/app/target/telegram-bot-0.0.1-SNAPSHOT.jar /usr/app/telegram-api-bot.jar
-
-# Set the working directory
-WORKDIR /usr/app
-
-# Command to run the application
-ENTRYPOINT ["java", "-jar", "telegram-api-bot.jar"]
+# to build the image see the following command
+# docker build -f docker/Dockerfile -t telegram-api-bot .
