@@ -34,6 +34,5 @@ build/
 .vscode/
 
 ### custom ###
-data/facts.csv
-data/daily-messages.json
+data/
 temp
