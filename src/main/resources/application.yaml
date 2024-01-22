@@ -28,7 +28,7 @@ bot:
   schedule: 0 0 12 * * *
   reset-schedule: 0 0 0 * * *
 
-meme:
+reddit:
   api-url: https://meme-api.herokuapp.com/gimme
   download-path: /tmp/
   file-name: meme
