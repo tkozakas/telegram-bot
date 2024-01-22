@@ -28,7 +28,7 @@ public class MessageService {
     private final StickerService stickerService;
     private final DailyMessageService dailyMessageService;
     private final FactService factService;
-    private final MemeService memeService;
+    private final RedditService redditService;
     private final BotProperties botProperties;
     private final SubredditService subredditService;
 
@@ -95,7 +95,7 @@ public class MessageService {
                 this::processRandomFact
         );
 
-        if (ThreadLocalRandom.current().nextDouble(100) > 0.5) {
+        if (ThreadLocalRandom.current().nextInt(100) > 1) {
             return Optional.empty();
         }
         return randomResponseHandlers.get(ThreadLocalRandom.current().nextInt(randomResponseHandlers.size())).get();
@@ -132,13 +132,13 @@ public class MessageService {
 
     private Optional<File> retrieveMeme(String subreddit) throws feign.FeignException.NotFound {
         if (subreddit != null) {
-            return memeService.getMemeFromSubreddit(subreddit);
+            return redditService.getMemeFromSubreddit(subreddit);
         }
             log.info("Sending random meme");
-            return memeService.getMeme();
+            return redditService.getMeme();
     }
 
-    public List<Validable> processScheduledRandomMeme() {
+    public List<Validable> processScheduledRandomRedditMeme() {
         assert latestMessages.peek() != null;
         String subreddit = subredditService.getSubreddits().get(ThreadLocalRandom.current().nextInt(subredditService.getSubreddits().size())).getName();
         return List.of(processRandomMeme(List.of(subreddit, subreddit), latestMessages.peek(), Optional.empty()).get(0));

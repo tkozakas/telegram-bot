@@ -36,7 +36,7 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
   - `/commandstats`: Get stats (use /pidorstats [year] for specific year).
   - `/commandall`: Get all-time stats.
   - `/commandme`: Get personal stats.
-  - `/meme`: Get a random meme.
+  - `/reddit`: Get a random picture from subreddits.
   - `/fact`: Get a random fact.
 
 ### Features

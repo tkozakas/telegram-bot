@@ -2,8 +2,8 @@ package org.churk.telegrambot.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.churk.telegrambot.client.MemeClient;
-import org.churk.telegrambot.config.MemeProperties;
+import org.churk.telegrambot.client.RedditClient;
+import org.churk.telegrambot.config.RedditProperties;
 import org.churk.telegrambot.utility.FileDownloader;
 import org.springframework.stereotype.Service;
 
@@ -14,17 +14,17 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MemeService {
-    private final MemeProperties memeProperties;
-    private final MemeClient memeClient;
+public class RedditService {
+    private final RedditProperties redditProperties;
+    private final RedditClient redditClient;
 
     public Optional<File> getMemeFromSubreddit(String subreddit) throws feign.FeignException.NotFound {
-        Map<String, Object> map = memeClient.getMemeFromSubreddit(subreddit);
+        Map<String, Object> map = redditClient.getRedditMemeFromSubreddit(subreddit);
         return getFile(map);
     }
 
     public Optional<File> getMeme() {
-        Map<String, Object> map = memeClient.getMeme();
+        Map<String, Object> map = redditClient.getRedditMeme();
         return getFile(map);
     }
 
@@ -32,8 +32,8 @@ public class MemeService {
         String apiUrl = (String) map.get("url");
         String extension = apiUrl.substring(apiUrl.lastIndexOf("."));
 
-        FileDownloader.downloadFileFromUrl(apiUrl, memeProperties.getDownloadPath(), memeProperties.getFileName(), extension);
-        String downloadedFilePath = FileDownloader.waitForDownload(memeProperties.getDownloadPath(), memeProperties.getFileName(), extension);
+        FileDownloader.downloadFileFromUrl(apiUrl, redditProperties.getDownloadPath(), redditProperties.getFileName(), extension);
+        String downloadedFilePath = FileDownloader.waitForDownload(redditProperties.getDownloadPath(), redditProperties.getFileName(), extension);
 
         if (downloadedFilePath == null) {
             return Optional.empty();

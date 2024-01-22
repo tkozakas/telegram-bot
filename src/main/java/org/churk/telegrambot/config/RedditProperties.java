@@ -4,8 +4,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-@ConfigurationProperties("meme")
-public class MemeProperties {
+@ConfigurationProperties("reddit")
+public class RedditProperties {
     private String apiUrl;
     private String downloadPath;
     private String fileName;

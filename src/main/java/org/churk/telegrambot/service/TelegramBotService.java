@@ -41,7 +41,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
                 Pair.of("/%sme".formatted(botProperties.getWinnerName()), "Get personal stats"),
                 Pair.of("/fact", "Random fact of the day"),
                 Pair.of("/sticker", "Random sticker from a " + botProperties.getWinnerName() + " sticker set"),
-                Pair.of("/meme", "Random meme (use /meme [year] for specific subreddit)")
+                Pair.of("/reddit", "Random reddit picture (use /reddit [year] for specific subreddit)")
         );
         List<BotCommand> botCommandList = commands.stream()
                 .map(command -> new BotCommand(command.getLeft(), command.getRight()))
@@ -106,9 +106,9 @@ public class TelegramBotService extends TelegramLongPollingBot {
         executeMessages(messageService.processDailyWinnerMessage());
     }
 
-    @Scheduled(cron = "${meme.schedule}") // hourly memes
-    public void sendScheduledRandomMeme() {
-        executeMessages(messageService.processScheduledRandomMeme());
+    @Scheduled(cron = "${reddit.schedule}") // hourly reddit memes
+    public void sendScheduledRedditMeme() {
+        executeMessages(messageService.processScheduledRandomRedditMeme());
     }
 
     @Scheduled(cron = "${bot.reset-schedule}")  // midnight
