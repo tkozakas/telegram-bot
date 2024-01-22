@@ -14,17 +14,26 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 ## Deployment
 
 ### Development
+#### Start Postgres
 ```bash
-  cd docker && docker-compose docker-compose.yaml up && cd ..
-
-  # Build and run project
+  cd docker && docker-compose -f dev-compose.example.yaml up -d && cd ..
+```
+#### Start the application using Maven
+```bash
   mvn clean install
   mvn spring-boot:run
 ```
+#### Start the application using IntelliJ
+- Create a new run configuration with the following parameters:
+  - Main class: `com.tomaszoboza.telegramapi.TelegramApiApplication`
+  - Environment variables: `BOT_USERNAME=<your_bot_username>`
+  - Environment variables: `BOT_TOKEN=<your_bot_token>`
+  - Environment variables: `BOT_WINNER_NAME=<your_bot_winner_name>`
 
 ## Production
 ```bash
-  cd docker && docker-compose -f docker-compose.prod.yaml up -d && cd .. 
+  docker build -t tomas6446/telegram-api-bot .
+  cd docker && docker-compose -f prod-compose.example.yaml up -d && cd .. 
 ```
 
 ## Features
