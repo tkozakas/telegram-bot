@@ -1,0 +1,12 @@
+services:
+  telegram-bot-posgres-dev:
+    container_name: telegram-bot-postgres-dev
+    image: postgres:16
+    ports:
+      - "6969:5432"
+    environment:
+      POSTGRES_DB: telegram_bot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
