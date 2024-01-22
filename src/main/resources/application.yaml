@@ -1,3 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:6969/telegram_bot
+    username: postgres
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        ddl-auto: update
+
 loader:
   daily-messages-path: data/daily-messages.json
   load-daily-messages: true
@@ -12,22 +22,14 @@ loader:
   load-facts: true
 
 bot:
-  username: SheepLoverBot
-  token: ${BOT_TOKEN}
-  winner_name: pidor
-
-  # daily schedule of winner
+  # username: <<PROVIDE USING ENVIRONMENT VARIABLES>>
+  # token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
+  # winner_name: <<PROVIDE USING ENVIRONMENT VARIABLES>>
   schedule: 0 0 12 * * *
-  # daily schedule of reset
   reset-schedule: 0 0 0 * * *
 
 meme:
-
   api-url: https://meme-api.herokuapp.com/gimme
-  download-path: temp/
+  download-path: /tmp/
   file-name: meme
-
-  # hourly schedule of memes
   schedule: 0 0 * * * *
-  # every minute schedule # commented
-  #  schedule: 0 * * * * *
