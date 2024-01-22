@@ -121,15 +121,7 @@ public class FileDownloader {
 
 
     private static String getScaleArgument(int width, int height) {
-        if (width <= MAX_WIDTH && height <= MAX_HEIGHT) {
-            return "iw:ih"; // keep original size
-        } else {
-            if (width > height) {
-                return MAX_WIDTH + ":-1"; // scale width to MAX_WIDTH, height automatically
-            } else {
-                return "-1:" + MAX_HEIGHT; // scale height to MAX_HEIGHT, width automatically
-            }
-        }
+        return width <= MAX_WIDTH && height <= MAX_HEIGHT ? "iw:ih" : width > height ? MAX_WIDTH + ":-1" : "-1:" + MAX_HEIGHT;
     }
 
     private static void deleteIfExists(String filePath) throws IOException {
