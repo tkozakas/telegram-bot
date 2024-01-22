@@ -4,6 +4,8 @@ import com.github.kokorin.jaffree.ffmpeg.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
@@ -14,8 +16,8 @@ import java.nio.file.Paths;
 @Component
 public class FileDownloader {
     private static final int TIME_OUT_SECONDS = 30;
-    private static final int WIDTH = 320;
-    private static final int HEIGHT = 320;
+    private static final int MAX_WIDTH = 320;
+    private static final int MAX_HEIGHT = 320;
 
     public static String waitForDownload(String downloadDirectory, String fileName, String extension) {
         String filePath = downloadDirectory + fileName + "_compressed" + extension;
@@ -75,12 +77,15 @@ public class FileDownloader {
     private static void compressImage(String filePath, String compressedFilePath) {
         try {
             deleteIfExists(compressedFilePath);
+            BufferedImage image = ImageIO.read(new File(filePath));
+            String scaleArg = getScaleArgument(image.getWidth(), image.getHeight());
+
             FFmpeg.atPath()
                     .addInput(UrlInput.fromPath(Paths.get(filePath)))
                     .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
                     .setComplexFilter(FilterGraph.of(
                             FilterChain.of(
-                                    Filter.withName("scale").addArgument(WIDTH + ":" + HEIGHT),
+                                    Filter.withName("scale").addArgument(scaleArg),
                                     Filter.withName("setpts").addArgument("4/10*PTS")
                             )
                     ))
@@ -94,13 +99,16 @@ public class FileDownloader {
     private static void compressGif(String filePath, String compressedFilePath) {
         try {
             deleteIfExists(compressedFilePath);
+            BufferedImage image = ImageIO.read(new File(filePath));
+            String scaleArg = getScaleArgument(image.getWidth(), image.getHeight());
+
             FFmpeg.atPath()
                     .addInput(UrlInput.fromPath(Paths.get(filePath)))
                     .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
                     .setComplexFilter(FilterGraph.of(
                             FilterChain.of(
                                     Filter.withName("fps").addArgument("fps=8"),
-                                    Filter.withName("scale").addArgument(WIDTH + ":" + HEIGHT),
+                                    Filter.withName("scale").addArgument(scaleArg),
                                     Filter.withName("setpts").addArgument("4/10*PTS")
                             )
                     ))
@@ -108,6 +116,19 @@ public class FileDownloader {
             log.info("File compressed and saved as: {}", compressedFilePath);
         } catch (IOException e) {
             log.error("Error compressing the gif: {}", e.getMessage());
+        }
+    }
+
+
+    private static String getScaleArgument(int width, int height) {
+        if (width <= MAX_WIDTH && height <= MAX_HEIGHT) {
+            return "iw:ih"; // keep original size
+        } else {
+            if (width > height) {
+                return MAX_WIDTH + ":-1"; // scale width to MAX_WIDTH, height automatically
+            } else {
+                return "-1:" + MAX_HEIGHT; // scale height to MAX_HEIGHT, width automatically
+            }
         }
     }
 
