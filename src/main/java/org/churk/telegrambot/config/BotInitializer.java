@@ -29,7 +29,7 @@ public class BotInitializer {
         stickerLoader.loadStickers();
         dailyMessageLoader.loadMessages();
         factLoader.loadFacts();
-        subredditLoader.loadSubredits();
+        subredditLoader.loadSubreddits();
         try {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             telegramBotsApi.registerBot(telegramBotService);
