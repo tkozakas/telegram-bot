@@ -9,6 +9,12 @@ import org.churk.telegrambot.repository.SentenceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
