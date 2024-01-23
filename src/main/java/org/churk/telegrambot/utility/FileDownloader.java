@@ -75,25 +75,7 @@ public class FileDownloader {
     }
 
     private static void compressImage(String filePath, String compressedFilePath) {
-        try {
-            deleteIfExists(compressedFilePath);
-            BufferedImage image = ImageIO.read(new File(filePath));
-            String scaleArg = getScaleArgument(image.getWidth(), image.getHeight());
-
-            FFmpeg.atPath()
-                    .addInput(UrlInput.fromPath(Paths.get(filePath)))
-                    .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
-                    .setComplexFilter(FilterGraph.of(
-                            FilterChain.of(
-                                    Filter.withName("scale").addArgument(scaleArg),
-                                    Filter.withName("setpts").addArgument("4/10*PTS")
-                            )
-                    ))
-                    .execute();
-            log.info("File compressed and saved as: {}", compressedFilePath);
-        } catch (Exception e) {
-            log.error("Error compressing the image: {}", e.getMessage());
-        }
+        
     }
 
     private static void compressGif(String filePath, String compressedFilePath) {
@@ -108,7 +90,7 @@ public class FileDownloader {
                     .setComplexFilter(FilterGraph.of(
                             FilterChain.of(
                                     Filter.withName("fps").addArgument("fps=8"),
-                                    Filter.withName("scale").addArgument(scaleArg),
+                                    Filter.withName("scale").addArgument(WIDTH + ":" + HEIGHT),
                                     Filter.withName("setpts").addArgument("4/10*PTS")
                             )
                     ))
