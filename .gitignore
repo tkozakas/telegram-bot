@@ -11,3 +11,4 @@ prod-compose.yaml
 .direnv
 nix
 result
+deploy.sh
