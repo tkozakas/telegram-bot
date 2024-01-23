@@ -72,7 +72,7 @@ public class MessageService {
                 // Process Random Meme
                 () -> {
                     List<Validable> memeResponse = processRandomMeme(commandList, update, Optional.empty());
-                    return memeResponse.isEmpty() ? Optional.empty() : Optional.ofNullable(memeResponse.get(0));
+                    return memeResponse.isEmpty() ? Optional.empty() : Optional.ofNullable(memeResponse.getFirst());
                 },
                 List.of(".*/reddit.*")
         );
