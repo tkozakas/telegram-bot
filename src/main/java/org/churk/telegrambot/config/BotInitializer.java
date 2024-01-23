@@ -2,7 +2,7 @@ package org.churk.telegrambot.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.churk.telegrambot.service.TelegramBotService;
+import org.churk.telegrambot.TelegramBot;
 import org.churk.telegrambot.utility.StickerLoader;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -15,7 +15,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Slf4j
 @RequiredArgsConstructor
 public class BotInitializer {
-    private final TelegramBotService telegramBotService;
+    private final TelegramBot telegramBot;
     private final StickerLoader stickerLoader;
 
     @EventListener({ContextRefreshedEvent.class})
@@ -23,7 +23,7 @@ public class BotInitializer {
         stickerLoader.loadStickers();
         try {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-            telegramBotsApi.registerBot(telegramBotService);
+            telegramBotsApi.registerBot(telegramBot);
         } catch (TelegramApiException e) {
             log.error("Error while initializing the bot", e);
         }

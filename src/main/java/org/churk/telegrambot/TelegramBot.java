@@ -1,4 +1,4 @@
-package org.churk.telegrambot.service;
+package org.churk.telegrambot;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -6,7 +6,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.churk.telegrambot.config.BotProperties;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.churk.telegrambot.handler.CommandProcessor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -27,10 +27,10 @@ import static java.lang.Thread.sleep;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TelegramBotService extends TelegramLongPollingBot {
+public class TelegramBot extends TelegramLongPollingBot {
     private static final boolean ENABLED = true;
     private final BotProperties botProperties;
-    private final MessageService messageService;
+    private final CommandProcessor messageService;
 
     @PostConstruct
     private void registerBotCommands() throws TelegramApiException {
@@ -94,18 +94,18 @@ public class TelegramBotService extends TelegramLongPollingBot {
     }
 
 
-    @Scheduled(cron = "${schedule.daily-message}") // 12 am
-    public void sendScheduledMessage() {
-        executeMessages(messageService.processDailyWinnerMessage());
-    }
-
-    @Scheduled(cron = "${schedule.meme-post}") // hourly reddit memes
-    public void sendScheduledRedditMeme() {
-        executeMessages(messageService.processScheduledRandomRedditMeme());
-    }
-
-    @Scheduled(cron = "${schedule.winner-reset}")  // midnight
-    public void resetWinner() {
-        messageService.resetWinner();
-    }
+//    @Scheduled(cron = "${schedule.daily-message}") // 12 am
+//    public void sendScheduledMessage() {
+//        executeMessages(messageService.processDailyWinnerMessage());
+//    }
+//
+//    @Scheduled(cron = "${schedule.meme-post}") // hourly reddit memes
+//    public void sendScheduledRedditMeme() {
+//        executeMessages(messageService.processScheduledRandomRedditMeme());
+//    }
+//
+//    @Scheduled(cron = "${schedule.winner-reset}")  // midnight
+//    public void resetWinner() {
+//        messageService.resetWinner();
+//    }
 }
