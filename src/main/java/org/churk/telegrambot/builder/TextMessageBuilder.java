@@ -7,6 +7,7 @@ public class TextMessageBuilder {
     public TextMessageBuilder(Long chatId) {
         this.message = new SendMessage();
         this.message.setChatId(String.valueOf(chatId));
+        this.message.enableMarkdown(true);
     }
 
     public TextMessageBuilder withText(String text) {

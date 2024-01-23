@@ -21,9 +21,7 @@ public class CommandProcessor {
 
     public List<Validable> handleCommand(Update update) {
         List<String> arguments = List.of(update.getMessage().getText().split(" "));
-        String commandName = arguments.getFirst().formatted(botProperties.getWinnerName());
-        Command command = Command.getCommand(commandName);
-        arguments.removeFirst();
+        Command command = Command.getCommand(arguments.getFirst(), botProperties.getWinnerName());
 
         CommandHandler handler = handlerFactory.getHandler(command, arguments);
         return handler.handle(update);

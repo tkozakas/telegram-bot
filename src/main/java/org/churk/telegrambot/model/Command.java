@@ -12,15 +12,16 @@ public enum Command {
     STATS(".*/%sstats\\b.*"),
     STATS_ALL(".*/%sall\\b.*"),
     STATS_USER(".*/%sme\\b.*"),
+    DAILY_MESSAGE(".*/%s\\b.*"),
     FACT(".*/fact\\b.*"),
     STICKER(".*/sticker\\b.*"),
-    DAILY_MESSAGE(".*/%s\\b.*"),
-    MEME(".*/reddit.*");
+    MEME(".*/reddit\\b.*");
 
     private final String pattern;
-    public static Command getCommand(String text) {
+
+    public static Command getCommand(String text, String botName) {
         return Arrays.stream(Command.values())
-                .filter(command -> text.matches(command.getPattern()))
+                .filter(command -> text.matches(command.getPattern().formatted(botName)))
                 .findFirst()
                 .orElse(null);
     }
