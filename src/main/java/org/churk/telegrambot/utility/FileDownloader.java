@@ -4,8 +4,6 @@ import com.github.kokorin.jaffree.ffmpeg.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
@@ -92,7 +90,6 @@ public class FileDownloader {
     private static void compressGif(String filePath, String compressedFilePath) {
         try {
             deleteIfExists(compressedFilePath);
-            BufferedImage image = ImageIO.read(new File(filePath));
             FFmpeg.atPath()
                     .addInput(UrlInput.fromPath(Paths.get(filePath)))
                     .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
