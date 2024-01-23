@@ -74,7 +74,7 @@ public class MessageService {
                     List<Validable> memeResponse = processRandomMeme(commandList, update, Optional.empty());
                     return memeResponse.isEmpty() ? Optional.empty() : Optional.ofNullable(memeResponse.get(0));
                 },
-                List.of(".*/meme.*")
+                List.of(".*/reddit.*")
         );
 
         Optional<Supplier<Optional<Validable>>> commandHandler = commandHandlers.entrySet().stream()
