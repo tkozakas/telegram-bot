@@ -5,6 +5,9 @@ target/
 *.iml
 *.ipr
 .vscode/
-data/
+docker/data/
 .run
 prod-compose.yaml
+.direnv
+nix
+result
