@@ -84,14 +84,13 @@ public class TelegramBotService extends TelegramLongPollingBot {
                 if (sendMessage == null) {
                     return;
                 }
-                if (sendMessage instanceof SendMessage sendmessage) {
-                    execute(sendmessage);
-                } else if (sendMessage instanceof SendSticker sendsticker) {
-                    execute(sendsticker);
-                } else if (sendMessage instanceof SendPhoto sendphoto) {
-                    execute(sendphoto);
-                } else if (sendMessage instanceof SendAnimation sendanimation) {
-                    execute(sendanimation);
+                switch (sendMessage) {
+                    case SendMessage sendmessage -> execute(sendmessage);
+                    case SendSticker sendsticker -> execute(sendsticker);
+                    case SendPhoto sendphoto -> execute(sendphoto);
+                    case SendAnimation sendanimation -> execute(sendanimation);
+                    default -> {
+                    }
                 }
                 sleep(1000);
             } catch (TelegramApiException | InterruptedException e) {
@@ -101,17 +100,17 @@ public class TelegramBotService extends TelegramLongPollingBot {
     }
 
 
-    @Scheduled(cron = "${bot.schedule}") // 12 am
+    @Scheduled(cron = "${schedule.daily-message}") // 12 am
     public void sendScheduledMessage() {
         executeMessages(messageService.processDailyWinnerMessage());
     }
 
-    @Scheduled(cron = "${reddit.schedule}") // hourly reddit memes
+    @Scheduled(cron = "${schedule.meme-post}") // hourly reddit memes
     public void sendScheduledRedditMeme() {
         executeMessages(messageService.processScheduledRandomRedditMeme());
     }
 
-    @Scheduled(cron = "${bot.reset-schedule}")  // midnight
+    @Scheduled(cron = "${schedule.winner-reset}")  // midnight
     public void resetWinner() {
         messageService.resetWinner();
     }
