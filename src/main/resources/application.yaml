@@ -24,11 +24,13 @@ bot:
   # username: <<PROVIDE USING ENVIRONMENT VARIABLES>>
   # token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
   # winner_name: <<PROVIDE USING ENVIRONMENT VARIABLES>>
-  schedule: 0 0 12 * * *
-  reset-schedule: 0 0 0 * * *
 
 reddit:
   api-url: https://meme-api.herokuapp.com/gimme
   download-path: /tmp/
   file-name: meme
-  schedule: 0 0 * * * *
+
+schedule:
+  daily-message: 0 0 12 * * *
+  winner-reset: 0 0 0 * * *
+  meme-post: 0 0 * * * *

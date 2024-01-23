@@ -9,6 +9,4 @@ public class BotProperties {
     private String username;
     private String token;
     private String winnerName;
-    private String schedule;
-    private String resetSchedule;
 }
