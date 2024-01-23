@@ -1,8 +1,5 @@
-# Ignore all files in the root directory
+# ignore all files in the root directory
 *
-# Include the src directory
+# except
 !src/
-# Include the pom.xml file
 !pom.xml
-# Exclude the target directory and its contents
-target/

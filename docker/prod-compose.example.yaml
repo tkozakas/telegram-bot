@@ -9,8 +9,13 @@ services:
       SPRING_DATASOURCE_PASSWORD: "postgres"
       BOT_USERNAME: "<<bot_username>>"
       BOT_TOKEN: "<<bot_token>>"
+      BOT_WINNER_NAME: "<<winner_name>>"
+      LOADER_DAILY_MESSAGES_PATH: /app/data/daily-messages.json
+      LOADER_STICKER_SETS_PATH: /app/data/sticker_sets.txt
+      LOADER_SUBREDDITS_PATH: /app/data/subreddits.txt
+      LOADER_FACTS_PATH: /app/data/facts.csv
     volumes:
-      - ./data:/data
+      - ./data:/app/data
 
   telegram-bot-postgres-prod:
     container_name: telegram-bot-postgres-prod
