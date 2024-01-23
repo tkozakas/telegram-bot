@@ -19,7 +19,7 @@ public class SubredditLoader {
     private final LoaderProperties loaderProperties;
     private final SubredditRepository subredditRepository;
 
-    public void loadSubredits() {
+    public void loadSubreddits() {
         if (!loaderProperties.isLoadSubreddits()) {
             return;
         }
