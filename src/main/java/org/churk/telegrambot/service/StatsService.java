@@ -27,10 +27,10 @@ public class StatsService {
                 .entrySet().stream()
                 .map(entry -> {
                     Long userId = entry.getKey();
-                    UUID statsId = entry.getValue().get(0).getStatsId();
-                    String firstName = entry.getValue().get(0).getFirstName();
-                    LocalDateTime createdAt = entry.getValue().get(0).getCreatedAt();
-                    Boolean isWinner = entry.getValue().get(0).getIsWinner();
+                    UUID statsId = entry.getValue().getFirst().getStatsId();
+                    String firstName = entry.getValue().getFirst().getFirstName();
+                    LocalDateTime createdAt = entry.getValue().getFirst().getCreatedAt();
+                    Boolean isWinner = entry.getValue().getFirst().getIsWinner();
                     long totalScore = entry.getValue().stream().mapToLong(Stats::getScore).sum();
                     return new Stats(statsId, chatId, userId, firstName, totalScore, createdAt, isWinner);
                 })
