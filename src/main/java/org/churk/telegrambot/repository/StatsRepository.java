@@ -6,9 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface StatsRepository extends JpaRepository<Stats, Long> {
+public interface StatsRepository extends JpaRepository<Stats, UUID> {
     @Query("SELECT s FROM Stats s WHERE s.chatId = ?1 AND s.userId = ?2")
     List<Stats> findStatsByChatIdAndUserId(Long chatId, Long userId);
 

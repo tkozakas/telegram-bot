@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface SentenceRepository extends JpaRepository<Sentence, Long> {
+public interface SentenceRepository extends JpaRepository<Sentence, UUID> {
 
     @Query("SELECT s FROM Sentence s WHERE s.groupId = ?1 AND s.dailyMessage.dailyMessageId = ?2")
     List<Sentence> findAllByGroupIdAndDailyMessageId(UUID groupId, UUID dailyMessageId);
