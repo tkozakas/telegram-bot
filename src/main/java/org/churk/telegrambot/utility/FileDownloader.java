@@ -16,8 +16,8 @@ import java.nio.file.Paths;
 @Component
 public class FileDownloader {
     private static final int TIME_OUT_SECONDS = 30;
-    private static final int MAX_WIDTH = 320;
-    private static final int MAX_HEIGHT = 320;
+    private static final String COMPRESSION_QUALITY = "10";
+
 
     public static String waitForDownload(String downloadDirectory, String fileName, String extension) {
         String filePath = downloadDirectory + fileName + "_compressed" + extension;
@@ -75,22 +75,30 @@ public class FileDownloader {
     }
 
     private static void compressImage(String filePath, String compressedFilePath) {
-        
+        try {
+            deleteIfExists(compressedFilePath);
+            FFmpeg.atPath()
+                    .addInput(UrlInput.fromPath(Paths.get(filePath)))
+                    .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath))
+                            .addArguments("-c:v", "mjpeg")
+                            .addArguments("-q:v", COMPRESSION_QUALITY))
+                    .execute();
+            log.info("File compressed and saved as: {}", compressedFilePath);
+        } catch (IOException e) {
+            log.error("Error compressing the image: {}", e.getMessage());
+        }
     }
 
     private static void compressGif(String filePath, String compressedFilePath) {
         try {
             deleteIfExists(compressedFilePath);
             BufferedImage image = ImageIO.read(new File(filePath));
-            String scaleArg = getScaleArgument(image.getWidth(), image.getHeight());
-
             FFmpeg.atPath()
                     .addInput(UrlInput.fromPath(Paths.get(filePath)))
                     .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
                     .setComplexFilter(FilterGraph.of(
                             FilterChain.of(
                                     Filter.withName("fps").addArgument("fps=8"),
-                                    Filter.withName("scale").addArgument(WIDTH + ":" + HEIGHT),
                                     Filter.withName("setpts").addArgument("4/10*PTS")
                             )
                     ))
@@ -99,11 +107,6 @@ public class FileDownloader {
         } catch (IOException e) {
             log.error("Error compressing the gif: {}", e.getMessage());
         }
-    }
-
-
-    private static String getScaleArgument(int width, int height) {
-        return width <= MAX_WIDTH && height <= MAX_HEIGHT ? "iw:ih" : width > height ? MAX_WIDTH + ":-1" : "-1:" + MAX_HEIGHT;
     }
 
     private static void deleteIfExists(String filePath) throws IOException {
