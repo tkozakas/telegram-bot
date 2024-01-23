@@ -7,19 +7,6 @@ spring:
     hibernate:
       ddl-auto: update
 
-loader:
-  daily-messages-path: data/daily-messages.json
-  load-daily-messages: true
-
-  sticker-sets-path: data/sticker_sets.txt
-  load-stickers: true
-
-  subreddits-path: data/subreddits.txt
-  load-subreddits: true
-
-  facts-path: data/facts.csv
-  load-facts: true
-
 bot:
   # username: <<PROVIDE USING ENVIRONMENT VARIABLES>>
   # token: <<PROVIDE USING ENVIRONMENT VARIABLES>>

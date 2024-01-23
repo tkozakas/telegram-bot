@@ -5,7 +5,6 @@ import org.churk.telegrambot.model.Stats;
 import org.churk.telegrambot.repository.StatsRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,10 +28,10 @@ public class StatsService {
                     Long userId = entry.getKey();
                     UUID statsId = entry.getValue().getFirst().getStatsId();
                     String firstName = entry.getValue().getFirst().getFirstName();
-                    LocalDateTime createdAt = entry.getValue().getFirst().getCreatedAt();
+                    Integer year = entry.getValue().getFirst().getYear();
                     Boolean isWinner = entry.getValue().getFirst().getIsWinner();
                     long totalScore = entry.getValue().stream().mapToLong(Stats::getScore).sum();
-                    return new Stats(statsId, chatId, userId, firstName, totalScore, createdAt, isWinner);
+                    return new Stats(statsId, chatId, userId, firstName, totalScore, year, isWinner);
                 })
                 .toList();
     }

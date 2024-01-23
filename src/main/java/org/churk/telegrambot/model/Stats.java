@@ -3,16 +3,17 @@ package org.churk.telegrambot.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
 @Entity
 @Table(name = "stats")
 @NoArgsConstructor
+@AllArgsConstructor
 public class Stats {
     @Id
     private UUID statsId;
@@ -20,16 +21,6 @@ public class Stats {
     private Long userId;
     private String firstName;
     private Long score;
-    private LocalDateTime createdAt;
+    private Integer year;
     private Boolean isWinner;
-
-    public Stats(UUID uuid, Long chatId, Long id, String firstName, long l, LocalDateTime now, Boolean isWinner) {
-        this.statsId = uuid;
-        this.chatId = chatId;
-        this.userId = id;
-        this.firstName = firstName;
-        this.score = l;
-        this.createdAt = now;
-        this.isWinner = Boolean.FALSE;
-    }
 }

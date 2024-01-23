@@ -76,7 +76,7 @@ public class MessageBuilder {
             String header = dailyMessageService.getKeyNameSentence("registered_header") + firstName;
             return createMessage(header, chatId, firstName, messageIdToReply);
         }
-        statsService.addStat(new Stats(UUID.randomUUID(), chatId, user.getId(), user.getFirstName(), 0L, LocalDateTime.now(), Boolean.FALSE));
+        statsService.addStat(new Stats(UUID.randomUUID(), chatId, user.getId(), user.getFirstName(), 0L, LocalDateTime.now().getYear(), Boolean.FALSE));
         log.info("New user: " + user.getFirstName() + " (" + user.getId() + ")");
         String header = dailyMessageService.getKeyNameSentence("registered_now_header") + firstName;
         return createMessage(header, chatId, firstName, messageIdToReply);
@@ -88,14 +88,11 @@ public class MessageBuilder {
 
         List<Stats> modifiableList = new ArrayList<>(statsList);
         modifiableList.sort(Comparator.comparing(Stats::getScore).reversed());
-        int maxIndexLength = String.valueOf(Math.min(modifiableList.size(), 10)).length();
 
         String stringBuilder = IntStream
                 .iterate(0, i -> i < modifiableList.size() && i < 10, i -> i + 1)
-                .mapToObj(i -> dailyMessageService.getKeyNameSentence("stats_table").formatted(
-                        String.format("%" + maxIndexLength + "d", i + 1),
-                        modifiableList.get(i).getFirstName(),
-                        modifiableList.get(i).getScore()))
+                .mapToObj(i -> dailyMessageService.getKeyNameSentence("stats_table").
+                        formatted(i + 1, modifiableList.get(i).getFirstName(), modifiableList.get(i).getScore()))
                 .collect(Collectors.joining("", header, footer));
 
         return createMessage(stringBuilder, chatId, firstName, messageIdToReply);
