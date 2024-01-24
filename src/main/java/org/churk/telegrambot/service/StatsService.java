@@ -5,7 +5,9 @@ import org.churk.telegrambot.model.Stats;
 import org.churk.telegrambot.repository.StatsRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -13,15 +15,37 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StatsService {
     private final StatsRepository statsRepository;
-    /**
-     * Get all stats from all years and filter by chatId
-     *
-     * @param chatId
-     * @return List<Stats>
-     */
-    public List<Stats> getAggregatedStatsByChatId(Long chatId) {
-        return statsRepository.findAll().stream()
-                .filter(stats -> stats.getChatId().equals(chatId))
+
+
+    public Optional<Stats> getStatsByChatIdAndUserId(Long chatId, Long userId) {
+        return statsRepository.getStatsByChatIdAndUserId(chatId, userId);
+    }
+
+    public void registerByUserIdAndChatId(Long userId, Long chatId, String firstName) {
+        Stats stats = new Stats();
+        stats.setUserId(userId);
+        stats.setChatId(chatId);
+        stats.setFirstName(firstName);
+        stats.setYear(LocalDateTime.now().getYear());
+        statsRepository.save(stats);
+    }
+
+    public List<Stats> getStatsByChatIdAndYear(Long chatId, int year) {
+        return statsRepository.getStatsByChatIdAndYear(chatId, year);
+    }
+
+    public void updateStats(Stats randomWinner) {
+        randomWinner.setScore(randomWinner.getScore() + 1);
+        randomWinner.setIsWinner(Boolean.TRUE);
+        statsRepository.save(randomWinner);
+    }
+
+    public List<Stats> getAllStatsByChatIdAndYear(Long chatId, int year) {
+        return statsRepository.findAllByChatIdAndYear(chatId, year);
+    }
+
+    public List<Stats> getAllStatsByChatId(Long chatId) {
+        return statsRepository.findAllByChatId(chatId).stream()
                 .collect(Collectors.groupingBy(Stats::getUserId))
                 .entrySet().stream()
                 .map(entry -> {
@@ -36,35 +60,10 @@ public class StatsService {
                 .toList();
     }
 
-    public List<Stats> getStatsByChatIdAndYear(Long chatId, int year) {
-        return statsRepository.findStatsByChatIdAndYear(chatId, year);
-    }
-
-    public List<Stats> getStatsByChatIdAndUserId(Long chatId, Long userId) {
-        return statsRepository.findStatsByChatIdAndUserId(chatId, userId);
-    }
-
-    public boolean existsByUserId(Long userId) {
-        return statsRepository.existsByUserId(userId);
-    }
-
-    public boolean existsByWinnerToday() {
-        return statsRepository.existsIsWinner();
-    }
-
-    public List<Stats> getAllStats() {
-        return statsRepository.findAll();
-    }
-
-    public void addStat(Stats stats) {
-        statsRepository.save(stats);
-    }
-
-    public void updateStats(Stats stats) {
-        statsRepository.save(stats);
-    }
-
-    public void updateStats(List<Stats> stats) {
-        statsRepository.saveAll(stats);
+    public long getTotalScoreByChatIdAndUserId(Long chatId, Long userId) {
+        return statsRepository.findAllByChatId(chatId).stream()
+                .filter(stats -> stats.getUserId().equals(userId))
+                .mapToLong(Stats::getScore)
+                .sum();
     }
 }

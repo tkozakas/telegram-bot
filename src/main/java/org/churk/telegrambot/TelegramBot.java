@@ -4,9 +4,9 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.CommandProcessor;
+import org.churk.telegrambot.model.Command;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -30,22 +30,15 @@ import static java.lang.Thread.sleep;
 public class TelegramBot extends TelegramLongPollingBot {
     private static final boolean ENABLED = true;
     private final BotProperties botProperties;
-    private final CommandProcessor messageService;
+    private final CommandProcessor commandProcessor;
 
     @PostConstruct
     private void registerBotCommands() throws TelegramApiException {
-        List<Pair<String, String>> commands = List.of(
-                Pair.of("/%sreg".formatted(botProperties.getWinnerName()), "Register yourself as a " + botProperties.getWinnerName()),
-                Pair.of("/%s".formatted(botProperties.getWinnerName()), "Get today's " + botProperties.getWinnerName()),
-                Pair.of("/%sstats".formatted(botProperties.getWinnerName()), "Get stats (use %sstats [year] for specific year)".formatted(botProperties.getWinnerName())),
-                Pair.of("/%sall".formatted(botProperties.getWinnerName()), "Get all-time stats"),
-                Pair.of("/%sme".formatted(botProperties.getWinnerName()), "Get personal stats"),
-                Pair.of("/fact", "Random fact of the day"),
-                Pair.of("/sticker", "Random sticker from a " + botProperties.getWinnerName() + " sticker set"),
-                Pair.of("/reddit", "Random reddit picture (use /reddit [year] for specific subreddit)")
-        );
+        List<Command> commands = List.of(Command.values());
         List<BotCommand> botCommandList = commands.stream()
-                .map(command -> new BotCommand(command.getLeft(), command.getRight()))
+                .map(command -> new BotCommand(
+                        command.getTextCommand().formatted(botProperties.getWinnerName()),
+                        command.getDescription().formatted(botProperties.getWinnerName())))
                 .toList();
         this.execute(new SetMyCommands(botCommandList, new BotCommandScopeDefault(), null));
     }
@@ -71,7 +64,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             if (!ENABLED) {
                 return;
             }
-            executeMessages(messageService.handleCommand(update));
+            executeMessages(commandProcessor.handleCommand(update));
         }
     }
 

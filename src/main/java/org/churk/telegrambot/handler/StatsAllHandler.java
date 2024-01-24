@@ -1,6 +1,10 @@
 package org.churk.telegrambot.handler;
 
 import lombok.AllArgsConstructor;
+import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.decorator.StatsListDecorator;
+import org.churk.telegrambot.model.Stats;
+import org.churk.telegrambot.service.DailyMessageService;
 import org.churk.telegrambot.service.StatsService;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -9,10 +13,22 @@ import java.util.List;
 
 @AllArgsConstructor
 public class StatsAllHandler implements CommandHandler {
+    private final MessageBuilderFactory messageBuilderFactory;
+    private final DailyMessageService dailyMessageService;
     private final StatsService statsService;
-    private final List<String> arguments;
     @Override
     public List<Validable> handle(Update update) {
-        return null;
+        Long chatId = update.getMessage().getChatId();
+        List<Stats> stats = statsService.getAllStatsByChatId(chatId);
+
+        String statsTable = dailyMessageService.getKeyNameSentence("stats_table");
+        String header = dailyMessageService.getKeyNameSentence("stats_all_header");
+        String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
+        String text = new StatsListDecorator(stats).getFormattedStats(statsTable, header, footer);
+
+        return List.of(messageBuilderFactory
+                .createTextMessageBuilder(update.getMessage().getChatId())
+                .withText(text)
+                .build());
     }
 }

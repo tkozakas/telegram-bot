@@ -7,7 +7,6 @@ import org.churk.telegrambot.repository.StickerRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 
 @Slf4j
@@ -16,9 +15,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class StickerService {
     private final StickerRepository stickerRepository;
 
-    public String getRandomStickerId() {
-        List<Sticker> stickers = stickerRepository.findAll();
-        int randomIndex = ThreadLocalRandom.current().nextInt(stickers.size());
-        return stickers.get(randomIndex).getFileId();
+    public List<Sticker> getAllStickers() {
+        return stickerRepository.findAll();
     }
 }

@@ -25,15 +25,16 @@ public class HandlerFactory {
     private final BotProperties botProperties;
     public CommandHandler getHandler(Command command, List<String> arguments) {
         return switch (command) {
+            case FACT -> new FactHandler(messageBuilderFactory, factService);
+            case STICKER -> new StickerHandler(messageBuilderFactory, stickerService);
+            case MEME -> new RedditHandler(messageBuilderFactory, redditService, arguments);
+            case STATS -> new StatsHandler(messageBuilderFactory, dailyMessageService, statsService, arguments);
+            case STATS_ALL -> new StatsAllHandler(messageBuilderFactory, dailyMessageService, statsService);
+            case STATS_USER ->
+                    new StatsUserHandler(botProperties, messageBuilderFactory, dailyMessageService, statsService);
+            case REGISTER -> new RegisterHandler(messageBuilderFactory, dailyMessageService, statsService);
             case DAILY_MESSAGE ->
                     new DailyMessageHandler(botProperties, messageBuilderFactory, dailyMessageService, statsService);
-            case REGISTER -> new RegisterHandler(statsService, arguments);
-            case STATS -> new StatsHandler(statsService, arguments);
-            case STATS_ALL -> new StatsAllHandler(statsService, arguments);
-            case STATS_USER -> new StatsUserHandler(statsService, arguments);
-            case FACT -> new FactHandler(messageBuilderFactory, factService);
-            case STICKER -> new StickerHandler(stickerService, arguments);
-            case MEME -> new RedditHandler(redditService, arguments);
         };
     }
 }
