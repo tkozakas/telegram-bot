@@ -21,6 +21,7 @@ bot:
     - wunkus
     - clamworks
 
+  random-response-chance: 0.1
 reddit:
   api-url: https://meme-api.herokuapp.com/gimme
   download-path: /tmp/
@@ -30,3 +31,4 @@ schedule:
   daily-message: 0 0 12 * * *
   winner-reset: 0 0 0 * * *
   meme-post: 0 0 * * * *
+
