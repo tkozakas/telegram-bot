@@ -32,4 +32,9 @@ public class StatsUserHandler implements CommandHandler {
                 .withReplyToMessageId(messageId)
                 .build());
     }
+
+    @Override
+    public List<Validable> handleByChatId(Long chatId) {
+        return List.of();
+    }
 }

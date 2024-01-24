@@ -19,6 +19,15 @@ public class FactHandler implements CommandHandler {
     public List<Validable> handle(Update update) {
         Long chatId = update.getMessage().getChatId();
 
+        return getFact(chatId);
+    }
+
+    @Override
+    public List<Validable> handleByChatId(Long chatId) {
+        return getFact(chatId);
+    }
+
+    private List<Validable> getFact(Long chatId) {
         List<Fact> facts = factService.getAllFacts();
         Fact randomFact = facts.get(ThreadLocalRandom.current().nextInt(facts.size()));
         return List.of(messageBuilderFactory

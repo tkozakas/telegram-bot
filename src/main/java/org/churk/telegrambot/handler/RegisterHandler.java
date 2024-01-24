@@ -35,6 +35,11 @@ public class RegisterHandler implements CommandHandler {
         return getMessage(text, chatId, messageId);
     }
 
+    @Override
+    public List<Validable> handleByChatId(Long chatId) {
+        return List.of();
+    }
+
     private List<Validable> getMessage(String text, Long chatId, Integer messageId) {
         return List.of(messageBuilderFactory
                 .createTextMessageBuilder(chatId)

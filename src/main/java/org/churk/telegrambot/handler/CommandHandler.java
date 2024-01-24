@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface CommandHandler {
     List<Validable> handle(Update update);
+
+    List<Validable> handleByChatId(Long chatId);
 }

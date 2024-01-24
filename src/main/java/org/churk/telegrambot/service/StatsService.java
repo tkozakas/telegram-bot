@@ -66,4 +66,8 @@ public class StatsService {
                 .mapToLong(Stat::getScore)
                 .sum();
     }
+
+    public void reset() {
+        statsRepository.setAllIsWinnerToFalse();
+    }
 }

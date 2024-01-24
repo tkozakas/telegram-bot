@@ -20,6 +20,15 @@ public class RedditHandler implements CommandHandler {
     @Override
     public List<Validable> handle(Update update) {
         Long chatId = update.getMessage().getChatId();
+        return getRedditFile(chatId);
+    }
+
+    @Override
+    public List<Validable> handleByChatId(Long chatId) {
+        return getRedditFile(chatId);
+    }
+
+    private List<Validable> getRedditFile(Long chatId) {
         String subreddit = (arguments.size() == 2) ? arguments.get(1) : null;
         try {
             Optional<File> file = subreddit == null ?
@@ -37,6 +46,7 @@ public class RedditHandler implements CommandHandler {
         }
         return List.of();
     }
+
 
     private List<Validable> getPhotoMessage(Long chatId, File file) {
         log.info("Sending photo message to chatId: {}", chatId);

@@ -31,4 +31,9 @@ public class StatsAllHandler implements CommandHandler {
                 .withText(text)
                 .build());
     }
+
+    @Override
+    public List<Validable> handleByChatId(Long chatId) {
+        return List.of();
+    }
 }

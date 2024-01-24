@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.CommandProcessor;
 import org.churk.telegrambot.model.Command;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -87,18 +88,18 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
 
-//    @Scheduled(cron = "${schedule.daily-message}") // 12 am
-//    public void sendScheduledMessage() {
-//        executeMessages(messageService.processDailyWinnerMessage());
-//    }
-//
-//    @Scheduled(cron = "${schedule.meme-post}") // hourly reddit memes
-//    public void sendScheduledRedditMeme() {
-//        executeMessages(messageService.processScheduledRandomRedditMeme());
-//    }
-//
-//    @Scheduled(cron = "${schedule.winner-reset}")  // midnight
-//    public void resetWinner() {
-//        messageService.resetWinner();
-//    }
+    @Scheduled(cron = "${schedule.daily-message}") // 12 am
+    public void sendScheduledMessage() {
+        executeMessages(commandProcessor.handleScheduledCommand(Command.DAILY_MESSAGE));
+    }
+
+    @Scheduled(cron = "${schedule.meme-post}") // hourly reddit memes
+    public void sendScheduledRedditMeme() {
+        executeMessages(commandProcessor.handleScheduledCommand(Command.REDDIT));
+    }
+
+    @Scheduled(cron = "${schedule.winner-reset}")  // midnight
+    public void resetWinner() {
+        commandProcessor.handleReset();
+    }
 }

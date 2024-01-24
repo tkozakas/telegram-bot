@@ -50,6 +50,11 @@ public class DailyMessageHandler implements CommandHandler {
         return getNewWinnerMessage(randomWinner.getFirstName(), chatId);
     }
 
+    @Override
+    public List<Validable> handleByChatId(Long chatId) {
+        return List.of();
+    }
+
     private List<Validable> getNewWinnerMessage(String randomWinner, Long chatId) {
         List<Sentence> sentences = dailyMessageService.getRandomGroupSentences();
         sentences.getLast().setText(sentences.getLast().getText() + randomWinner);
