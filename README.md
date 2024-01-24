@@ -7,8 +7,7 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 - Create a group and add the bot to the group.
 
 ## Deployment
-
-### Development
+### Option 1
 #### Start Postgres
 ```bash
   cd docker && docker-compose -f dev-compose.example.yaml up -d && cd ..
@@ -18,6 +17,7 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
   mvn clean install
   mvn spring-boot:run
 ```
+### Option 2
 #### Start the application using IntelliJ
 - Create a new run configuration with the following environment variables:
   - Environment variables: `BOT_USERNAME=<your_bot_username>`
@@ -42,7 +42,6 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
   - `/reddit`: Get a random picture from subreddits.
   - `/fact`: Get a random fact.
 
-### Features
 - Sends scheduled message for daily updates of who is the winner of the day and memes.
 - Multiple Messages Typing Animation
   
