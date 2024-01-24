@@ -3,7 +3,7 @@ package org.churk.telegrambot.handler;
 import lombok.AllArgsConstructor;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.decorator.StatsListDecorator;
-import org.churk.telegrambot.model.Stats;
+import org.churk.telegrambot.model.Stat;
 import org.churk.telegrambot.service.DailyMessageService;
 import org.churk.telegrambot.service.StatsService;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -22,7 +22,7 @@ public class StatsHandler implements CommandHandler {
     public List<Validable> handle(Update update) {
         Long chatId = update.getMessage().getChatId();
         int year = arguments.size() > 1 ? Integer.parseInt(arguments.get(1)) : LocalDate.now().getYear();
-        List<Stats> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
+        List<Stat> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
 
         String statsTable = dailyMessageService.getKeyNameSentence("stats_table");
         String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);

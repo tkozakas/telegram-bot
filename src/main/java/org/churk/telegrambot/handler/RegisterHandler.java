@@ -3,7 +3,7 @@ package org.churk.telegrambot.handler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.model.Stats;
+import org.churk.telegrambot.model.Stat;
 import org.churk.telegrambot.service.DailyMessageService;
 import org.churk.telegrambot.service.StatsService;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -25,7 +25,7 @@ public class RegisterHandler implements CommandHandler {
         Integer messageId = update.getMessage().getMessageId();
         String firstName = update.getMessage().getFrom().getFirstName();
 
-        Optional<Stats> userStats = statsService.getStatsByChatIdAndUserId(chatId, userId);
+        Optional<Stat> userStats = statsService.getStatsByChatIdAndUserId(chatId, userId);
         if (userStats.isPresent()) {
             String text = dailyMessageService.getKeyNameSentence("registered_header").formatted(firstName);
             return getMessage(text, chatId, messageId);

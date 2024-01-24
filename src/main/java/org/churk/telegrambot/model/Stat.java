@@ -14,11 +14,11 @@ import java.util.UUID;
 @Table(name = "stats")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Stats {
+public class Stat {
     @Id
     private UUID statsId;
-    private Long chatId;
     private Long userId;
+    private Long chatId;
     private String firstName;
     private Long score;
     private Integer year;
