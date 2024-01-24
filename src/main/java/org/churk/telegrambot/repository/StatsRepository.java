@@ -22,7 +22,4 @@ public interface StatsRepository extends JpaRepository<Stat, UUID> {
 
     @Query("SELECT s FROM Stat s WHERE s.chatId = ?1 AND s.year = ?2")
     List<Stat> findAllByChatIdAndYear(Long chatId, int year);
-
-    @Query("UPDATE Stat s SET s.isWinner = false")
-    void setAllIsWinnerToFalse();
 }

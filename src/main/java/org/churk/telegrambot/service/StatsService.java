@@ -68,6 +68,8 @@ public class StatsService {
     }
 
     public void reset() {
-        statsRepository.setAllIsWinnerToFalse();
+        List<Stat> stats = statsRepository.findAll();
+        stats.forEach(stat -> stat.setIsWinner(Boolean.FALSE));
+        statsRepository.saveAll(stats);
     }
 }

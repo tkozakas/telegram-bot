@@ -12,12 +12,23 @@ bot:
   # token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
   # winner_name: <<PROVIDE USING ENVIRONMENT VARIABLES>>
 
+  sticker-set-names:
+    - primates_uffchat
+    - greatchurkobesfbi_by_fStikBot
+
+  subreddit-names:
+    - wordington
+    - wunkus
+    - clamworks
+
 reddit:
   api-url: https://meme-api.herokuapp.com/gimme
   download-path: /tmp/
   file-name: meme
 
 schedule:
-  daily-message: 0 0 12 * * *
-  winner-reset: 0 0 0 * * *
+  # daily-message: 0 0 12 * * *
+  # winner-reset: 0 0 0 * * *
+  daily-message:  "0 * * * * *"
+  winner-reset: "0 * * * * *"
   meme-post: 0 0 * * * *
