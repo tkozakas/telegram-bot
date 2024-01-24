@@ -1,8 +1,6 @@
 package org.churk.telegrambot.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,11 +14,12 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Stat {
     @Id
+    @GeneratedValue (strategy = GenerationType.UUID)
     private UUID statsId;
     private Long userId;
     private Long chatId;
     private String firstName;
-    private Long score;
     private Integer year;
+    private Long score;
     private Boolean isWinner;
 }

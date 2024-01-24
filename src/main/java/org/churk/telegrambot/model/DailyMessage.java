@@ -14,7 +14,7 @@ import java.util.UUID;
 @ToString(exclude = "sentences")
 public class DailyMessage {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue (strategy = GenerationType.UUID)
     private UUID dailyMessageId;
 
     private String keyName;

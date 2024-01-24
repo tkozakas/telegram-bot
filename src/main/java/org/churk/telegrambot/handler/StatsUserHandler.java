@@ -3,13 +3,15 @@ package org.churk.telegrambot.handler;
 import lombok.AllArgsConstructor;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
+import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.service.DailyMessageService;
 import org.churk.telegrambot.service.StatsService;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
 
+@Component
 @AllArgsConstructor
 public class StatsUserHandler implements CommandHandler {
     private final BotProperties botProperties;
@@ -18,13 +20,12 @@ public class StatsUserHandler implements CommandHandler {
     private final StatsService statsService;
 
     @Override
-    public List<Validable> handle(Update update) {
-        Long chatId = update.getMessage().getChatId();
-        Long userId = update.getMessage().getFrom().getId();
-        Integer messageId = update.getMessage().getMessageId();
+    public List<Validable> handle(HandlerContext context) {
+        Long chatId = context.getUpdate().getMessage().getChatId();
+        Long userId = context.getUpdate().getMessage().getFrom().getId();
+        Integer messageId = context.getUpdate().getMessage().getMessageId();
+        String firstName = context.getUpdate().getMessage().getFrom().getFirstName();
         long total = statsService.getTotalScoreByChatIdAndUserId(chatId, userId);
-        String firstName = update.getMessage().getFrom().getFirstName();
-
 
         String text = dailyMessageService.getKeyNameSentence("me_header")
                 .formatted(firstName, botProperties.getWinnerName(), total);
@@ -36,7 +37,7 @@ public class StatsUserHandler implements CommandHandler {
     }
 
     @Override
-    public List<Validable> handleByChatId(Long chatId) {
-        return List.of();
+    public Command getSupportedCommand() {
+        return Command.STATS_USER;
     }
 }

@@ -1,43 +1,24 @@
 package org.churk.telegrambot.factory;
 
-import lombok.AllArgsConstructor;
-import lombok.Setter;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.handler.*;
+import org.churk.telegrambot.handler.CommandHandler;
 import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.service.*;
 import org.springframework.stereotype.Service;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
-@AllArgsConstructor
-@Setter
 public class HandlerFactory {
-    private final StatsService statsService;
-    private final DailyMessageService dailyMessageService;
-    private final FactService factService;
-    private final RedditService redditService;
-    private final StickerService stickerService;
-    private final ChatService chatService;
+    private final Map<Command, CommandHandler> handlerMap = new EnumMap<>(Command.class);
 
-    private final MessageBuilderFactory messageBuilderFactory;
-    private final BotProperties botProperties;
-    public CommandHandler getHandler(Command command, List<String> arguments) {
-        return switch (command) {
-            case START -> new StartHandler(chatService);
-            case HELP -> new HelpHandler(botProperties, messageBuilderFactory);
-            case FACT -> new FactHandler(messageBuilderFactory, factService);
-            case STICKER -> new StickerHandler(messageBuilderFactory, stickerService);
-            case REDDIT -> new RedditHandler(botProperties, messageBuilderFactory, redditService, arguments);
-            case STATS -> new StatsHandler(messageBuilderFactory, dailyMessageService, statsService, arguments);
-            case STATS_ALL -> new StatsAllHandler(messageBuilderFactory, dailyMessageService, statsService);
-            case STATS_USER ->
-                    new StatsUserHandler(botProperties, messageBuilderFactory, dailyMessageService, statsService);
-            case REGISTER -> new RegisterHandler(messageBuilderFactory, dailyMessageService, statsService);
-            case DAILY_MESSAGE ->
-                    new DailyMessageHandler(botProperties, messageBuilderFactory, dailyMessageService, statsService);
-        };
+    public HandlerFactory(List<CommandHandler> handlers) {
+        handlers.stream()
+                .filter(handler -> handler.getSupportedCommand() != null)
+                .forEachOrdered(handler -> handlerMap.put(handler.getSupportedCommand(), handler));
+    }
+
+    public CommandHandler getHandler(Command command) {
+        return handlerMap.get(command);
     }
 }
