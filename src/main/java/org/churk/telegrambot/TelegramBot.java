@@ -87,7 +87,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-
     @Scheduled(cron = "${schedule.daily-message}") // 12 am
     public void sendScheduledMessage() {
         executeMessages(commandProcessor.handleScheduledCommand(Command.DAILY_MESSAGE));

@@ -20,7 +20,7 @@ public class StartHandler implements CommandHandler {
     @Override
     public List<Validable> handle(Update update) {
         Long chatId = update.getMessage().getChatId();
-        String chatName = update.getMessage().getChat().getUserName();
+        String chatName = update.getMessage().getChat().getTitle();
         chatService.saveChat(chatId, chatName);
 
         String welcomeMessage = dailyMessageService.getKeyNameSentence("welcome_message");
