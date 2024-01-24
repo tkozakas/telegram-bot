@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.churk.telegrambot.model.Chat;
 import org.churk.telegrambot.repository.ChatRepository;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
 
@@ -12,11 +13,15 @@ import java.util.List;
 public class ChatService {
     private final ChatRepository chatRepository;
 
-    public void saveChat(Long chatId, String chatName) {
-        chatRepository.save(new Chat(chatId, chatName));
+    public void saveChat(Update update) {
+        chatRepository.save(new Chat(update.getMessage().getChatId(), update));
     }
 
     public List<Chat> getAllChats() {
         return chatRepository.findAll();
+    }
+
+    public boolean isChatExists(Long chatId) {
+        return chatRepository.existsById(chatId);
     }
 }
