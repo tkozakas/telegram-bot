@@ -6,11 +6,6 @@ Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 - Create a bot using [BotFather](https://t.me/botfather) and get the token.
 - Create a group and add the bot to the group.
 
-### Optional
-- Add facts to the database using the .csv file in the resources folder.
-- Add daily scheduled messages to the database using the .csv file in the resources folder.
-- Change the winner message in the application.yaml in the resources folder (changes the commands).
-
 ## Deployment
 
 ### Development
