@@ -27,8 +27,6 @@ reddit:
   file-name: meme
 
 schedule:
-  # daily-message: 0 0 12 * * *
-  # winner-reset: 0 0 0 * * *
-  daily-message:  "0 * * * * *"
-  winner-reset: "0 * * * * *"
+  daily-message: 0 0 12 * * *
+  winner-reset: 0 0 0 * * *
   meme-post: 0 0 * * * *

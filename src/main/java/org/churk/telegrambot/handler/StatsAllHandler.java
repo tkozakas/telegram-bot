@@ -16,6 +16,7 @@ public class StatsAllHandler implements CommandHandler {
     private final MessageBuilderFactory messageBuilderFactory;
     private final DailyMessageService dailyMessageService;
     private final StatsService statsService;
+
     @Override
     public List<Validable> handle(Update update) {
         Long chatId = update.getMessage().getChatId();

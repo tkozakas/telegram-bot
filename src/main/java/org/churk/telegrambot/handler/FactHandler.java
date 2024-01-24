@@ -18,7 +18,6 @@ public class FactHandler implements CommandHandler {
     @Override
     public List<Validable> handle(Update update) {
         Long chatId = update.getMessage().getChatId();
-
         return getFact(chatId);
     }
 

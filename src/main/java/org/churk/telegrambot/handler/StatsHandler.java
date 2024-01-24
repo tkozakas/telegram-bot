@@ -18,6 +18,7 @@ public class StatsHandler implements CommandHandler {
     private final DailyMessageService dailyMessageService;
     private final StatsService statsService;
     private final List<String> arguments;
+
     @Override
     public List<Validable> handle(Update update) {
         Long chatId = update.getMessage().getChatId();
