@@ -4,9 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
+import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.service.RedditService;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.File;
 import java.util.List;
@@ -14,25 +15,26 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
+@Component
 @AllArgsConstructor
 public class RedditHandler implements CommandHandler {
     private final BotProperties botProperties;
     private final MessageBuilderFactory messageBuilderFactory;
     private final RedditService redditService;
-    private final List<String> arguments;
 
     @Override
-    public List<Validable> handle(Update update) {
-        Long chatId = update.getMessage().getChatId();
-        return getRedditFile(chatId);
+    public List<Validable> handle(HandlerContext context) {
+        Long chatId = context.getUpdate().getMessage().getChatId();
+        List<String> arguments = context.getArgs();
+        return getRedditFile(arguments, chatId);
     }
 
     @Override
-    public List<Validable> handleByChatId(Long chatId) {
-        return getRedditFile(chatId);
+    public Command getSupportedCommand() {
+        return Command.REDDIT;
     }
 
-    private List<Validable> getRedditFile(Long chatId) {
+    private List<Validable> getRedditFile(List<String> arguments, Long chatId) {
         String subreddit = (arguments.size() == 2) ?
                 arguments.get(1) :
                 botProperties.getSubredditNames()

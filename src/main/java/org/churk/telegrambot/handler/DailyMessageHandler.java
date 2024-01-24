@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
+import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Sentence;
 import org.churk.telegrambot.model.Stat;
 import org.churk.telegrambot.service.DailyMessageService;
 import org.churk.telegrambot.service.StatsService;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Component
 @AllArgsConstructor
 public class DailyMessageHandler implements CommandHandler {
     private final BotProperties botProperties;
@@ -26,8 +28,8 @@ public class DailyMessageHandler implements CommandHandler {
     private final StatsService statsService;
 
     @Override
-    public List<Validable> handle(Update update) {
-        Long chatId = update.getMessage().getChatId();
+    public List<Validable> handle(HandlerContext context) {
+        Long chatId = context.getUpdate().getMessage().getChatId();
         int year = LocalDateTime.now().getYear();
 
         List<Stat> statByChatIdAndYear = statsService.getStatsByChatIdAndYear(chatId, year);
@@ -48,11 +50,6 @@ public class DailyMessageHandler implements CommandHandler {
         statsService.updateStats(randomWinner);
 
         return getNewWinnerMessage(randomWinner.getFirstName(), chatId);
-    }
-
-    @Override
-    public List<Validable> handleByChatId(Long chatId) {
-        return List.of();
     }
 
     private List<Validable> getNewWinnerMessage(String randomWinner, Long chatId) {
@@ -82,5 +79,10 @@ public class DailyMessageHandler implements CommandHandler {
         log.info("Winner exists for chatId: {}", chatId);
         return getMessage(dailyMessageService.getKeyNameSentence("winner_message")
                 .formatted(botProperties.getWinnerName(), isWinnerStat.getFirstName()), chatId);
+    }
+
+    @Override
+    public Command getSupportedCommand() {
+        return Command.DAILY_MESSAGE;
     }
 }

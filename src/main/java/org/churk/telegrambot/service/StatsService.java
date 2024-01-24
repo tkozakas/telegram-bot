@@ -26,6 +26,8 @@ public class StatsService {
         stat.setUserId(userId);
         stat.setChatId(chatId);
         stat.setFirstName(firstName);
+        stat.setScore(0L);
+        stat.setIsWinner(Boolean.FALSE);
         stat.setYear(LocalDateTime.now().getYear());
         statsRepository.save(stat);
     }
@@ -54,8 +56,8 @@ public class StatsService {
                     String firstName = entry.getValue().getFirst().getFirstName();
                     Integer year = entry.getValue().getFirst().getYear();
                     Boolean isWinner = entry.getValue().getFirst().getIsWinner();
-                    long totalScore = entry.getValue().stream().mapToLong(Stat::getScore).sum();
-                    return new Stat(statsId, chatId, userId, firstName, totalScore, year, isWinner);
+                    Long totalScore = entry.getValue().stream().mapToLong(Stat::getScore).sum();
+                    return new Stat(statsId, userId, chatId, firstName, year, totalScore, isWinner);
                 })
                 .toList();
     }

@@ -1,27 +1,23 @@
 package org.churk.telegrambot.handler;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.config.BotProperties;
+import org.churk.telegrambot.model.Command;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
 
-@Slf4j
+@Component
 @AllArgsConstructor
 public class HelpHandler implements CommandHandler {
-    private BotProperties botProperties;
-    private MessageBuilderFactory messageBuilderFactory;
 
     @Override
-    public List<Validable> handle(Update update) {
+    public List<Validable> handle(HandlerContext context) {
         return List.of();
     }
 
     @Override
-    public List<Validable> handleByChatId(Long chatId) {
-        return List.of();
+    public Command getSupportedCommand() {
+        return Command.HELP;
     }
 }

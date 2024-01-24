@@ -12,7 +12,7 @@ import java.util.UUID;
 @ToString(exclude = "dailyMessage")
 public class Sentence {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue (strategy = GenerationType.UUID)
     private UUID sentenceId;
 
     private UUID groupId;
