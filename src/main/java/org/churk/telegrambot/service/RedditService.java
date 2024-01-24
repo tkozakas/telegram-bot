@@ -23,11 +23,6 @@ public class RedditService {
         return getFile(map);
     }
 
-    public Optional<File> getMeme() {
-        Map<String, Object> map = redditClient.getRedditMeme();
-        return getFile(map);
-    }
-
     private Optional<File> getFile(Map<String, Object> map) {
         String apiUrl = (String) map.get("url");
         String extension = apiUrl.substring(apiUrl.lastIndexOf("."));

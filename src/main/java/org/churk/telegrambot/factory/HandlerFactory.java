@@ -26,11 +26,11 @@ public class HandlerFactory {
     private final BotProperties botProperties;
     public CommandHandler getHandler(Command command, List<String> arguments) {
         return switch (command) {
-            case START -> new StartHandler(messageBuilderFactory, dailyMessageService, chatService);
+            case START -> new StartHandler(chatService);
             case HELP -> new HelpHandler(botProperties, messageBuilderFactory);
             case FACT -> new FactHandler(messageBuilderFactory, factService);
             case STICKER -> new StickerHandler(messageBuilderFactory, stickerService);
-            case REDDIT -> new RedditHandler(messageBuilderFactory, redditService, arguments);
+            case REDDIT -> new RedditHandler(botProperties, messageBuilderFactory, redditService, arguments);
             case STATS -> new StatsHandler(messageBuilderFactory, dailyMessageService, statsService, arguments);
             case STATS_ALL -> new StatsAllHandler(messageBuilderFactory, dailyMessageService, statsService);
             case STATS_USER ->
