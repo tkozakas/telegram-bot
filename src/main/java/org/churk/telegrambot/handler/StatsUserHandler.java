@@ -16,6 +16,7 @@ public class StatsUserHandler implements CommandHandler {
     private final MessageBuilderFactory messageBuilderFactory;
     private final DailyMessageService dailyMessageService;
     private final StatsService statsService;
+
     @Override
     public List<Validable> handle(Update update) {
         Long chatId = update.getMessage().getChatId();
@@ -25,7 +26,8 @@ public class StatsUserHandler implements CommandHandler {
         String firstName = update.getMessage().getFrom().getFirstName();
 
 
-        String text = dailyMessageService.getKeyNameSentence("me_header").formatted(firstName, botProperties.getWinnerName(), total);
+        String text = dailyMessageService.getKeyNameSentence("me_header")
+                .formatted(firstName, botProperties.getWinnerName(), total);
         return List.of(messageBuilderFactory
                 .createTextMessageBuilder(chatId)
                 .withText(text)

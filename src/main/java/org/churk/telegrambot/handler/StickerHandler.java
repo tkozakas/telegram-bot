@@ -14,6 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class StickerHandler implements CommandHandler {
     private final MessageBuilderFactory messageBuilderFactory;
     private final StickerService stickerService;
+
     @Override
     public List<Validable> handle(Update update) {
         Long chatId = update.getMessage().getChatId();

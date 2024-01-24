@@ -20,6 +20,7 @@ public class RedditHandler implements CommandHandler {
     private final MessageBuilderFactory messageBuilderFactory;
     private final RedditService redditService;
     private final List<String> arguments;
+
     @Override
     public List<Validable> handle(Update update) {
         Long chatId = update.getMessage().getChatId();
