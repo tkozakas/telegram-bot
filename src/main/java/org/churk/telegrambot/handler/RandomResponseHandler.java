@@ -18,7 +18,7 @@ public class RandomResponseHandler implements CommandHandler {
     private final Random random = new Random();
 
     private boolean shouldTriggerRandomResponse() {
-        return random.nextInt(100) < botProperties.getRandomResponseChance() * 100;
+        return random.nextInt(100) < botProperties.getRandomResponseChance() * 10;
     }
 
     private CommandHandler selectRandomHandler() {
