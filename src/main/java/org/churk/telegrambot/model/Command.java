@@ -8,18 +8,17 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor
 public enum Command {
-    START("/start", ".*/start\\b.*", "Start the bot"),
-    HELP("/help", ".*/help\\b.*", "Get help"),
-    REGISTER("/%sreg", ".*/%sreg\\b.*", "Register yourself as a %s"),
-    DAILY_MESSAGE("/%s", ".*/%s\\b.*", "Get today's %s"),
-    STATS("/%sstats", ".*/%sstats\\b.*", "Get stats (use %sstats [year] for specific year)"),
-    STATS_ALL("/%sall", ".*/%sall\\b.*", "Get all-time stats"),
-    STATS_USER("/%sme", ".*/%sme\\b.*", "Get personal stats"),
-    FACT("/fact", ".*/fact\\b.*", "Random fact of the day"),
-    STICKER("/sticker", ".*/sticker\\b.*", "Random sticker from a %s sticker set"),
-    REDDIT("/reddit", ".*/reddit\\b.*", "Random reddit picture (use /reddit [year] for specific subreddit)");
+    START(".*/start\\b.*", "Start the bot"),
+    HELP(".*/help\\b.*", "Get help"),
+    REGISTER(".*/%sreg\\b.*", "Register yourself as a %s"),
+    DAILY_MESSAGE(".*/%s\\b.*", "Get today's %s"),
+    STATS(".*/%sstats\\b.*", "Get stats (use %sstats [year] for specific year)"),
+    STATS_ALL(".*/%sall\\b.*", "Get all-time stats"),
+    STATS_USER(".*/%sme\\b.*", "Get personal stats"),
+    FACT(".*/fact\\b.*", "Random fact of the day"),
+    STICKER(".*/sticker\\b.*", "Random sticker from a %s sticker set"),
+    REDDIT(".*/reddit\\b.*", "Random reddit picture (use /reddit [year] for specific subreddit)");
 
-    private final String textCommand;
     private final String pattern;
     private final String description;
 
