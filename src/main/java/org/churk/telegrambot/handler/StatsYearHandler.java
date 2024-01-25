@@ -15,15 +15,15 @@ import java.util.List;
 
 @Component
 @AllArgsConstructor
-public class StatsHandler implements CommandHandler {
+public class StatsYearHandler implements CommandHandler {
     private final MessageBuilderFactory messageBuilderFactory;
     private final DailyMessageService dailyMessageService;
     private final StatsService statsService;
-    private final List<String> arguments;
 
     @Override
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
+        List<String> arguments = context.getArgs();
         int year = arguments.size() > 1 ? Integer.parseInt(arguments.get(1)) : LocalDate.now().getYear();
         List<Stat> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
 
