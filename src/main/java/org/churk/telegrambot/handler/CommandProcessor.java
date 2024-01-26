@@ -35,8 +35,8 @@ public class CommandProcessor {
         String firstName = update.getMessage().getFrom().getFirstName();
         log.info("{}: {}", firstName, messageText);
 
-        List<String> arguments = List.of(update.getMessage().getText().split(" "));
-        Command command = Command.getTextCommand(arguments.getFirst(), botProperties.getWinnerName());
+        List<String> arguments = List.of(messageText.split(" "));
+        Command command = Command.getTextCommand(messageText, botProperties.getWinnerName());
         if (command == null) {
             return randomResponseHandler.handle(HandlerContext.builder()
                     .update(update)

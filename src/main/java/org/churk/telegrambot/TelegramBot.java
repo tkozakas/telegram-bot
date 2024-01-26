@@ -12,15 +12,13 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
-import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Thread.sleep;
@@ -36,12 +34,19 @@ public class TelegramBot extends TelegramLongPollingBot {
     @PostConstruct
     private void registerBotCommands() throws TelegramApiException {
         List<Command> commands = List.of(Command.values());
-        List<BotCommand> botCommandList = commands.stream()
-                .map(command -> {
-                    String com = command.getPattern().formatted(botProperties.getWinnerName())
-                            .replace(".*/", "/").replace("\\b.*", "");;
-                    return new BotCommand(com, command.getDescription().formatted(botProperties.getWinnerName()));
-                }).toList();
+        List<BotCommand> botCommandList = new ArrayList<>();
+
+        commands.forEach(command -> {
+            String primaryPattern = command.getPatterns().stream()
+                    .findFirst()
+                    .orElse("")
+                    .formatted(botProperties.getWinnerName())
+                    .replace(".*/", "/")
+                    .replace("\\b.*", "");
+            BotCommand botCommand = new BotCommand(primaryPattern, command.getDescription().formatted(botProperties.getWinnerName()));
+            botCommandList.add(botCommand);
+        });
+
         this.execute(new SetMyCommands(botCommandList, new BotCommandScopeDefault(), null));
     }
 
@@ -74,6 +79,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     case SendSticker sendsticker -> execute(sendsticker);
                     case SendPhoto sendphoto -> execute(sendphoto);
                     case SendAnimation sendanimation -> execute(sendanimation);
+                    case SendVideo sendvideo -> execute(sendvideo);
                     default -> {
                     }
                 }
