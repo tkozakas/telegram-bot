@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.factory.HandlerFactory;
 import org.churk.telegrambot.model.bot.Chat;
 import org.churk.telegrambot.model.bot.Command;
 import org.churk.telegrambot.service.ChatService;

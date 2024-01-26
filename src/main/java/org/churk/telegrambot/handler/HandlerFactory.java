@@ -1,6 +1,5 @@
-package org.churk.telegrambot.factory;
+package org.churk.telegrambot.handler;
 
-import org.churk.telegrambot.handler.CommandHandler;
 import org.churk.telegrambot.model.bot.Command;
 import org.springframework.stereotype.Service;
 
