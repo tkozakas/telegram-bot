@@ -1,7 +1,7 @@
 package org.churk.telegrambot.service;
 
 import lombok.AllArgsConstructor;
-import org.churk.telegrambot.model.Chat;
+import org.churk.telegrambot.model.bot.Chat;
 import org.churk.telegrambot.repository.ChatRepository;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;

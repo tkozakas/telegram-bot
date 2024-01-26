@@ -1,6 +1,6 @@
 package org.churk.telegrambot.decorator;
 
-import org.churk.telegrambot.model.Stat;
+import org.churk.telegrambot.model.bot.Stat;
 
 import java.util.Comparator;
 import java.util.List;

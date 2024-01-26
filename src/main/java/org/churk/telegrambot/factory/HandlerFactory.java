@@ -1,7 +1,7 @@
 package org.churk.telegrambot.factory;
 
 import org.churk.telegrambot.handler.CommandHandler;
-import org.churk.telegrambot.model.Command;
+import org.churk.telegrambot.model.bot.Command;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;
