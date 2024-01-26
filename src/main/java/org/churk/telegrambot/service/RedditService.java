@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
@@ -25,16 +27,19 @@ public class RedditService {
             String jsonResponse = redditClient.getRedditMemeFromSubreddit(subreddit);
             ObjectMapper mapper = new ObjectMapper();
             RedditPost redditMeme = mapper.readValue(jsonResponse, RedditPost.class);
-            return getFile(redditMeme);
+            return getFile(redditMeme).get();
         } catch (JsonProcessingException e) {
             log.error("Error while parsing reddit response", e);
+            return Optional.empty();
+        } catch (ExecutionException | InterruptedException e) {
+            log.error("Error while getting reddit file", e);
             return Optional.empty();
         }
     }
 
-    private Optional<File> getFile(RedditPost reddit) {
-        String apiUrl = reddit.getUrl();
+    private CompletableFuture<Optional<File>> getFile(RedditPost redditPost) {
+        String apiUrl = redditPost.getUrl();
         String extension = apiUrl.substring(apiUrl.lastIndexOf("."));
-        return FileDownloader.downloadAndCompressMedia(apiUrl, redditProperties, extension);
+        return FileDownloader.downloadAndCompressMediaAsync(apiUrl, redditProperties, extension);
     }
 }

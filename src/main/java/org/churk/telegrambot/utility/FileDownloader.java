@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
@@ -18,16 +19,24 @@ public class FileDownloader {
     private static final int TIME_OUT_SECONDS = 30;
     private static final String COMPRESSION_QUALITY = "10";
 
-    public static Optional<File> downloadAndCompressMedia(String apiUrl, DownloadMediaProperties properties, String extension) {
-        downloadFileFromUrl(apiUrl, properties.getPath(), properties.getFileName(), extension);
-        String downloadedFilePath = waitForDownload(properties.getPath(), properties.getFileName(), extension);
+    public static CompletableFuture<Optional<File>> downloadAndCompressMediaAsync(String apiUrl, DownloadMediaProperties properties, String extension) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                downloadFileFromUrl(apiUrl, properties.getPath(), properties.getFileName(), extension);
+                String downloadedFilePath = waitForDownload(properties.getPath(), properties.getFileName(), extension);
 
-        if (downloadedFilePath == null) {
-            return Optional.empty();
-        }
+                if (downloadedFilePath == null) {
+                    return Optional.empty();
+                }
 
-        return Optional.of(new File(downloadedFilePath));
+                return Optional.of(new File(downloadedFilePath));
+            } catch (Exception e) {
+                log.error("Error in async download/compression", e);
+                return Optional.empty();
+            }
+        });
     }
+
 
     public static String waitForDownload(String downloadDirectory, String fileName, String extension) {
         String filePath = downloadDirectory + fileName + "_compressed" + extension;

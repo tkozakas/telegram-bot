@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
@@ -27,20 +29,23 @@ public class InstagramService {
             ObjectMapper mapper = new ObjectMapper();
             InstagramPost instagramPost = mapper.readValue(jsonResponse, InstagramPost.class);
 
-            return getFile(instagramPost);
+            return getFile(instagramPost).get();
         } catch (JsonProcessingException e) {
             log.error("Error while parsing instagram response", e);
+            return Optional.empty();
+        } catch (ExecutionException | InterruptedException e) {
+            log.error("Error while getting instagram file", e);
             return Optional.empty();
         }
     }
 
-    private Optional<File> getFile(InstagramPost instagramPost) {
+    private CompletableFuture<Optional<File>> getFile(InstagramPost instagramPost) {
         Shortcode shortcodeMedia = instagramPost.getGraphql().getShortcodeMedia();
         if (shortcodeMedia.isVideo() && shortcodeMedia.getVideoUrl() != null) {
             String apiUrl = shortcodeMedia.getVideoUrl();
             String extension = ".mp4";
-            return FileDownloader.downloadAndCompressMedia(apiUrl, instagramProperties, extension);
+            return FileDownloader.downloadAndCompressMediaAsync(apiUrl, instagramProperties, extension);
         }
-        return Optional.empty();
+        return CompletableFuture.completedFuture(Optional.empty());
     }
 }

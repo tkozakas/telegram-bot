@@ -2,7 +2,6 @@ package org.churk.telegrambot;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.CommandProcessor;
@@ -60,7 +59,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         return botProperties.getToken();
     }
 
-    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
