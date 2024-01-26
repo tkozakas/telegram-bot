@@ -26,11 +26,11 @@ bot:
     - holup
     - blursedimages
 
-  random-response-chance: 0.1
+  random-response-chance: 0.2
 
 download-media:
   path: /tmp/
-  file-name: meme
+  file-name: file
 
 schedule:
   daily-message: 0 0 12 * * *
