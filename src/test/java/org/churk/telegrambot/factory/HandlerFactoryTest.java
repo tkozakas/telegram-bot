@@ -1,6 +1,7 @@
 package org.churk.telegrambot.factory;
 
 import org.churk.telegrambot.handler.CommandHandler;
+import org.churk.telegrambot.handler.HandlerFactory;
 import org.churk.telegrambot.handler.StartHandler;
 import org.churk.telegrambot.model.bot.Command;
 import org.junit.jupiter.api.BeforeEach;
