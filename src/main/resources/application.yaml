@@ -27,9 +27,9 @@ bot:
     - blursedimages
 
   random-response-chance: 0.1
-reddit:
-  api-url: https://meme-api.herokuapp.com/gimme
-  download-path: /tmp/
+
+download-media:
+  path: /tmp/
   file-name: meme
 
 schedule:

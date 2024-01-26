@@ -19,4 +19,8 @@ public class MessageBuilderFactory {
     public StickerMessageBuilder createStickerMessageBuilder(Long chatId) {
         return new StickerMessageBuilder(chatId);
     }
+
+    public VideoMessageBuilder createVideoMessage(Long chatId) {
+        return new VideoMessageBuilder(chatId);
+    }
 }

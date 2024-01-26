@@ -2,6 +2,7 @@ package org.churk.telegrambot.utility;
 
 import com.github.kokorin.jaffree.ffmpeg.*;
 import lombok.extern.slf4j.Slf4j;
+import org.churk.telegrambot.config.DownloadMediaProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -9,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -16,6 +18,16 @@ public class FileDownloader {
     private static final int TIME_OUT_SECONDS = 30;
     private static final String COMPRESSION_QUALITY = "10";
 
+    public static Optional<File> downloadAndCompressMedia(String apiUrl, DownloadMediaProperties properties, String extension) {
+        downloadFileFromUrl(apiUrl, properties.getPath(), properties.getFileName(), extension);
+        String downloadedFilePath = waitForDownload(properties.getPath(), properties.getFileName(), extension);
+
+        if (downloadedFilePath == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new File(downloadedFilePath));
+    }
 
     public static String waitForDownload(String downloadDirectory, String fileName, String extension) {
         String filePath = downloadDirectory + fileName + "_compressed" + extension;
@@ -45,7 +57,7 @@ public class FileDownloader {
         String compressedFilePath = downloadDirectory + fileName + "_compressed" + extension;
         log.info("Downloading file from {}", apiUrl);
 
-        int bufferSize = 1024 * 1024;
+        int bufferSize = 2048 * 1024;
 
         try (InputStream in = new BufferedInputStream(new URL(apiUrl).openStream());
              FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
@@ -65,44 +77,33 @@ public class FileDownloader {
     }
 
     private static void compressFile(String extension, String filePath, String compressedFilePath) {
-        if (extension.equals(".gif")) {
-            compressGif(filePath, compressedFilePath);
-        } else {
-            compressImage(filePath, compressedFilePath);
-        }
-    }
-
-    private static void compressImage(String filePath, String compressedFilePath) {
         try {
             deleteIfExists(compressedFilePath);
-            FFmpeg.atPath()
+            FFmpeg builder = FFmpeg.atPath()
                     .addInput(UrlInput.fromPath(Paths.get(filePath)))
-                    .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath))
-                            .addArguments("-c:v", "mjpeg")
-                            .addArguments("-q:v", COMPRESSION_QUALITY))
-                    .execute();
-            log.info("File compressed and saved as: {}", compressedFilePath);
-        } catch (IOException e) {
-            log.error("Error compressing the image: {}", e.getMessage());
-        }
-    }
+                    .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)));
 
-    private static void compressGif(String filePath, String compressedFilePath) {
-        try {
-            deleteIfExists(compressedFilePath);
-            FFmpeg.atPath()
-                    .addInput(UrlInput.fromPath(Paths.get(filePath)))
-                    .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
-                    .setComplexFilter(FilterGraph.of(
-                            FilterChain.of(
-                                    Filter.withName("fps").addArgument("fps=8"),
-                                    Filter.withName("setpts").addArgument("4/10*PTS")
-                            )
-                    ))
-                    .execute();
+            switch (extension) {
+                case ".gif" -> builder.setComplexFilter(FilterGraph.of(
+                        FilterChain.of(
+                                Filter.withName("fps").addArgument("fps=8"),
+                                Filter.withName("setpts").addArgument("4/10*PTS")
+                        )
+                ));
+                case ".mp4" -> builder.addArguments("-q:v", COMPRESSION_QUALITY)
+                        .setComplexFilter(FilterGraph.of(
+                                FilterChain.of(
+                                        Filter.withName("fps").addArgument("fps=16")
+                                )
+                        ));
+                default -> builder.addArguments("-c:v", "mjpeg")
+                        .addArguments("-q:v", COMPRESSION_QUALITY);
+            }
+
+            builder.execute();
             log.info("File compressed and saved as: {}", compressedFilePath);
         } catch (IOException e) {
-            log.error("Error compressing the gif: {}", e.getMessage());
+            log.error("Error compressing file: {}", e.getMessage());
         }
     }
 

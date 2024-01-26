@@ -4,10 +4,9 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-@ConfigurationProperties("reddit")
-public class RedditProperties {
-    private String apiUrl;
-    private String downloadPath;
+@ConfigurationProperties("download-media")
+public class DownloadMediaProperties {
+    private String path;
     private String fileName;
     private String schedule;
 }

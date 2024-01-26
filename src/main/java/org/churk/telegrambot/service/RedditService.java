@@ -3,7 +3,7 @@ package org.churk.telegrambot.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.client.RedditClient;
-import org.churk.telegrambot.config.RedditProperties;
+import org.churk.telegrambot.config.DownloadMediaProperties;
 import org.churk.telegrambot.utility.FileDownloader;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class RedditService {
-    private final RedditProperties redditProperties;
+    private final DownloadMediaProperties redditProperties;
     private final RedditClient redditClient;
 
     public Optional<File> getMemeFromSubreddit(String subreddit) throws feign.FeignException.NotFound {
@@ -26,14 +26,6 @@ public class RedditService {
     private Optional<File> getFile(Map<String, Object> map) {
         String apiUrl = (String) map.get("url");
         String extension = apiUrl.substring(apiUrl.lastIndexOf("."));
-
-        FileDownloader.downloadFileFromUrl(apiUrl, redditProperties.getDownloadPath(), redditProperties.getFileName(), extension);
-        String downloadedFilePath = FileDownloader.waitForDownload(redditProperties.getDownloadPath(), redditProperties.getFileName(), extension);
-
-        if (downloadedFilePath == null) {
-            return Optional.empty();
-        }
-        return Optional.of(new File(downloadedFilePath));
+        return FileDownloader.downloadAndCompressMedia(apiUrl, redditProperties, extension);
     }
-
 }
