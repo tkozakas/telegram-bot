@@ -81,10 +81,11 @@ public class FileDownloader {
             deleteIfExists(compressedFilePath);
             FFmpeg builder = FFmpeg.atPath()
                     .addInput(UrlInput.fromPath(Paths.get(filePath)))
-                    .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)));
-
+                    .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
+                    .addArguments("-loglevel", "panic");
             switch (extension) {
-                case ".gif" -> builder.setComplexFilter(FilterGraph.of(
+                case ".gif" -> builder
+                        .setComplexFilter(FilterGraph.of(
                         FilterChain.of(
                                 Filter.withName("fps").addArgument("fps=8"),
                                 Filter.withName("setpts").addArgument("4/10*PTS")
@@ -93,10 +94,11 @@ public class FileDownloader {
                 case ".mp4" -> builder.addArguments("-q:v", COMPRESSION_QUALITY)
                         .addArgument("-vcodec")
                         .addArgument("libx265")
-                        .addArguments("-crf", "28")
+                        .addArguments("-crf", "30")
+                        .addArguments("-preset", "fast")
                         .setComplexFilter(FilterGraph.of(
                                 FilterChain.of(
-                                        Filter.withName("fps").addArgument("fps=16")
+                                        Filter.withName("fps").addArgument("fps=12")
                                 )
                         ));
                 default -> builder.addArguments("-c:v", "mjpeg")
