@@ -10,10 +10,13 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 @AllArgsConstructor
 public class InstagramHandler implements CommandHandler {
+    private final Pattern pattern = Pattern.compile("https://www.instagram.com/reel/([^/?]+)");
     private final MessageBuilderFactory messageBuilderFactory;
     private final InstagramService instagramService;
 
@@ -22,18 +25,16 @@ public class InstagramHandler implements CommandHandler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
-        String postCode = context.getArgs().size() == 2 ? context.getArgs().get(1) : null;
-        if (postCode == null) {
+        String postCode = context.getArgs().size() == 2 ? context.getArgs().get(1) : "";
+        Matcher matcher = pattern.matcher(postCode);
+        if (!matcher.find() || postCode.isBlank()) {
             return List.of(messageBuilderFactory
                     .createTextMessageBuilder(chatId)
-                    .withText("Please provide a url using /reels <url>")
+                    .withText("Please provide a valid url using /reels <url>")
                     .withReplyToMessageId(messageId)
                     .build());
         }
-
-        String[] parts = postCode.split("/");
-        String identifier = parts[parts.length - 1];
-
+        String identifier = matcher.group(1);
         Optional<File> file = instagramService.getInstagramMedia(identifier);
         if (file.isPresent()) {
             File existingFile = file.get();
