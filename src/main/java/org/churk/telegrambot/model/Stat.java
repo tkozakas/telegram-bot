@@ -22,4 +22,9 @@ public class Stat {
     private Integer year;
     private Long score;
     private Boolean isWinner;
+
+    public Stat(String firstName, Long score) {
+        this.firstName = firstName;
+        this.score = score;
+    }
 }

@@ -1,0 +1,38 @@
+package org.churk.telegrambot.factory;
+
+import org.churk.telegrambot.handler.CommandHandler;
+import org.churk.telegrambot.handler.StartHandler;
+import org.churk.telegrambot.model.Command;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class HandlerFactoryTest {
+    @InjectMocks
+    private StartHandler startHandler;
+    private HandlerFactory handlerFactory;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        handlerFactory = new HandlerFactory(List.of(startHandler));
+    }
+
+    @Test
+    void getStartHandlerTest() {
+        CommandHandler handler = handlerFactory.getHandler(Command.START);
+        assertNotNull(handler, "Handler should not be null");
+        assertEquals(StartHandler.class, handler.getClass(), "Handler should be of type StartHandler");
+    }
+
+    @Test
+    void getUnsupportedCommandHandlerTest() {
+        CommandHandler handler = handlerFactory.getHandler(null);
+        assertNull(handler, "Handler for unsupported command should be null");
+    }
+}

@@ -86,6 +86,25 @@
             <artifactId>jaffree</artifactId>
             <version>2023.09.10</version>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.7.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.instancio</groupId>
+            <artifactId>instancio-junit</artifactId>
+            <version>4.0.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 
