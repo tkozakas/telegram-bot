@@ -6,7 +6,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.CommandProcessor;
-import org.churk.telegrambot.model.Command;
+import org.churk.telegrambot.model.bot.Command;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;

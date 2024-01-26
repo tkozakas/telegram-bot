@@ -1,7 +1,7 @@
 package org.churk.telegrambot.service;
 
 import lombok.RequiredArgsConstructor;
-import org.churk.telegrambot.model.Stat;
+import org.churk.telegrambot.model.bot.Stat;
 import org.churk.telegrambot.repository.StatsRepository;
 import org.springframework.stereotype.Service;
 

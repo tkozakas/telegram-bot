@@ -3,7 +3,7 @@ package org.churk.telegrambot.handler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.model.Command;
+import org.churk.telegrambot.model.bot.Command;
 import org.churk.telegrambot.service.ChatService;
 import org.churk.telegrambot.service.DailyMessageService;
 import org.springframework.stereotype.Component;

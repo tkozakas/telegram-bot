@@ -1,6 +1,6 @@
 package org.churk.telegrambot.repository;
 
-import org.churk.telegrambot.model.DailyMessage;
+import org.churk.telegrambot.model.bot.DailyMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

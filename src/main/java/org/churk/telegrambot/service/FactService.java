@@ -2,7 +2,7 @@ package org.churk.telegrambot.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.churk.telegrambot.model.Fact;
+import org.churk.telegrambot.model.bot.Fact;
 import org.churk.telegrambot.repository.FactRepository;
 import org.springframework.stereotype.Service;
 
