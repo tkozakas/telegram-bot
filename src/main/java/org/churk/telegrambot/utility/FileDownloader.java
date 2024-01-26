@@ -91,6 +91,9 @@ public class FileDownloader {
                         )
                 ));
                 case ".mp4" -> builder.addArguments("-q:v", COMPRESSION_QUALITY)
+                        .addArgument("-vcodec")
+                        .addArgument("libx265")
+                        .addArguments("-crf", "28")
                         .setComplexFilter(FilterGraph.of(
                                 FilterChain.of(
                                         Filter.withName("fps").addArgument("fps=16")
