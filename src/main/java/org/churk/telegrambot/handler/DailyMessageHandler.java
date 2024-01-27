@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Component
 @AllArgsConstructor
 public class DailyMessageHandler implements CommandHandler {
-    private final boolean ENABLED = true;
+    private final boolean ENABLED = false;
     private final BotProperties botProperties;
     private final MessageBuilderFactory messageBuilderFactory;
     private final DailyMessageService dailyMessageService;
