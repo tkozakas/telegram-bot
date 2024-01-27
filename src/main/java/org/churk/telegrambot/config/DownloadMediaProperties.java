@@ -9,4 +9,5 @@ public class DownloadMediaProperties {
     private String path;
     private String fileName;
     private String schedule;
+    private String accessToken;
 }

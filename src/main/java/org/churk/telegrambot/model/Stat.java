@@ -1,4 +1,4 @@
-package org.churk.telegrambot.model.bot;
+package org.churk.telegrambot.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
