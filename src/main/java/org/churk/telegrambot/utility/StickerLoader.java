@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.client.TelegramClient;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.model.stickerset.StickerResponse;
+import org.churk.telegrambot.model.StickerResponse;
 import org.churk.telegrambot.repository.StickerRepository;
 import org.springframework.stereotype.Service;
 

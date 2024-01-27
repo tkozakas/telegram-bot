@@ -2,8 +2,8 @@ package org.churk.telegrambot.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.churk.telegrambot.model.bot.DailyMessage;
-import org.churk.telegrambot.model.bot.Sentence;
+import org.churk.telegrambot.model.DailyMessage;
+import org.churk.telegrambot.model.Sentence;
 import org.churk.telegrambot.repository.DailyMessageRepository;
 import org.churk.telegrambot.repository.SentenceRepository;
 import org.springframework.stereotype.Service;
