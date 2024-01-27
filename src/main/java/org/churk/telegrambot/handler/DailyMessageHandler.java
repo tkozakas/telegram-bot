@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @Component
 @AllArgsConstructor
 public class DailyMessageHandler implements CommandHandler {
+    private final boolean ENABLED = true;
     private final BotProperties botProperties;
     private final MessageBuilderFactory messageBuilderFactory;
     private final DailyMessageService dailyMessageService;
@@ -47,7 +48,9 @@ public class DailyMessageHandler implements CommandHandler {
         }
 
         Stat randomWinner = statByChatIdAndYear.get(ThreadLocalRandom.current().nextInt(statByChatIdAndYear.size()));
-        statsService.updateStats(randomWinner);
+        if (ENABLED) {
+            statsService.updateStats(randomWinner);
+        }
 
         return getNewWinnerMessage(randomWinner.getFirstName(), chatId);
     }
@@ -77,8 +80,10 @@ public class DailyMessageHandler implements CommandHandler {
 
     private List<Validable> getMessage(Stat isWinnerStat, Long chatId) {
         log.info("Winner exists for chatId: {}", chatId);
-        return getMessage(dailyMessageService.getKeyNameSentence("winner_message")
-                .formatted(botProperties.getWinnerName(), isWinnerStat.getFirstName()), chatId);
+        String mentionedUser = "[" + isWinnerStat.getFirstName() + "](tg://user?id=" + isWinnerStat.getUserId() + ")";
+        String messageText = dailyMessageService.getKeyNameSentence("winner_message")
+                .formatted(botProperties.getWinnerName(), mentionedUser);
+        return getMessage(messageText, chatId);
     }
 
     @Override
