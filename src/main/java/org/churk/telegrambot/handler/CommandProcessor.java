@@ -11,6 +11,7 @@ import org.churk.telegrambot.service.DailyMessageService;
 import org.churk.telegrambot.service.StatsService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
@@ -28,10 +29,12 @@ public class CommandProcessor {
     private final RandomResponseHandler randomResponseHandler;
 
     public List<Validable> handleCommand(Update update) {
-        Long chatId = update.getMessage().getChatId();
-        Integer messageId = update.getMessage().getMessageId();
-        String messageText = update.getMessage().getText();
-        String firstName = update.getMessage().getFrom().getFirstName();
+        if (update != null && !chatService.isChatExists(update.getMessage().getChatId())) {
+            return handleBotAddedToGroup(update);
+        }
+        Message message = update.getMessage();
+        String messageText = message.getText();
+        String firstName = message.getFrom().getFirstName();
         log.info("{}: {}", firstName, messageText);
 
         List<String> arguments = List.of(messageText.split(" "));
@@ -42,16 +45,24 @@ public class CommandProcessor {
                     .args(arguments)
                     .build());
         }
-        if (command != Command.START && !chatService.isChatExists(update.getMessage().getChatId())) {
-            return List.of(messageBuilderFactory.createTextMessageBuilder(chatId)
-                    .withReplyToMessageId(messageId)
-                    .withText(dailyMessageService.getKeyNameSentence("not_started"))
-                    .build());
-        }
         CommandHandler handler = handlerFactory.getHandler(command);
         return handler.handle(HandlerContext.builder()
                 .update(update)
                 .args(arguments)
+                .build());
+    }
+
+    private List<Validable> handleBotAddedToGroup(Update update) {
+        String groupName = update.getMessage().getChat().getTitle();
+        String firstName = update.getMessage().getFrom().getFirstName();
+        Long chatId = update.getMessage().getChatId();
+        Integer messageId = update.getMessage().getMessageId();
+
+        log.info("Bot added to group: {} (ID: {})", groupName, chatId);
+        chatService.saveChat(update);
+        return List.of(messageBuilderFactory.createTextMessageBuilder(chatId)
+                .withReplyToMessageId(messageId)
+                .withText(dailyMessageService.getKeyNameSentence("welcome_message").formatted(firstName))
                 .build());
     }
 
