@@ -20,6 +20,11 @@ public class TextMessageBuilder {
         return this;
     }
 
+    public TextMessageBuilder enableMarkdown(boolean enableMarkdown) {
+        message.enableMarkdown(enableMarkdown);
+        return this;
+    }
+
     public SendMessage build() {
         return message;
     }

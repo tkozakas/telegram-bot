@@ -19,7 +19,8 @@ public enum Command {
     FACT(List.of(".*/fact\\b.*"), "Random fact of the day"),
     STICKER(List.of(".*/sticker\\b.*"), "Random sticker from a %s sticker set"),
     REDDIT(List.of(".*/reddit\\b.*", ".*/meme\\b.*"), "Random reddit picture (use /reddit [year] for specific subreddit)"),
-    REELS(List.of(".*/reels\\b.*", ".*/reel\\b.*"), "Random reels video (use /reels [link] for specific reels video)");
+    REELS(List.of(".*/reels\\b.*", ".*/reel\\b.*"), "Random reels video (use /reels [link] for specific reels video)"),
+    NEWS(List.of(".*/news\\b.*"), "Get news (use /news [query] for specific news by query)");
 
     private final List<String> patterns;
     private final String description;
