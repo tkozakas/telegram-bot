@@ -6,6 +6,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.xml
+
+news:
+  language: en
+  # api-key: <<PROVIDE USING ENVIRONMENT VARIABLES>>
 
 bot:
   # username: <<PROVIDE USING ENVIRONMENT VARIABLES>>
@@ -29,6 +35,8 @@ bot:
   random-response-chance: 0.2
 
 download-media:
+  # instagram-access-token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
+
   path: /tmp/
   file-name: file
 
