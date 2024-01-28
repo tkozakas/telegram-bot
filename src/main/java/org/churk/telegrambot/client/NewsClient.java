@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
-@FeignClient(name = "news", url = "https://newsapi.org/v2")
+@FeignClient(name = "newsClient", url = "https://newsapi.org/v2")
 public interface NewsClient {
     @GetMapping("/everything?sortBy=popularity")
     Map<String, Object> getNewsByCategory(@RequestParam("q") String category,
