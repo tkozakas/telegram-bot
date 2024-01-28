@@ -21,15 +21,16 @@ public class NewsService {
     private final NewsClient newsClient;
 
     public List<Article> getNewsByCategory(String country) {
-        return getArticles(country, 7);
+        return getArticles(country);
     }
 
-    private List<Article> getArticles(String category, int daysAgo) {
+    private List<Article> getArticles(String category) {
+        String categoryQuery = "q=+" + category;
         String apiKey = newsProperties.getApiKey();
         String language = newsProperties.getLanguage();
-        LocalDateTime from = LocalDateTime.now().minusDays(daysAgo);
+        LocalDateTime from = LocalDateTime.now().minusDays(3);
         String formattedDate = from.format(DateTimeFormatter.ISO_LOCAL_DATE);
-        Map<String, Object> jsonObject = newsClient.getNewsByCategory(category, apiKey, formattedDate, language);
+        Map<String, Object> jsonObject = newsClient.getNewsByCategory(categoryQuery, apiKey, formattedDate, language);
         NewsResponse newsResponse = new ObjectMapper().convertValue(jsonObject, new TypeReference<>() {
         });
         return newsResponse.getArticles();
