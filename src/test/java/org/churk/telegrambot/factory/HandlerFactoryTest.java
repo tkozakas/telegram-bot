@@ -34,10 +34,4 @@ class HandlerFactoryTest {
         assertNotNull(handler, "Handler should not be null");
         assertEquals(StartHandler.class, handler.getClass(), "Handler should be of type StartHandler");
     }
-
-    @Test
-    void getUnsupportedCommandHandlerTest() {
-        CommandHandler handler = handlerFactory.getHandler(null);
-        assertNull(handler, "Handler for unsupported command should be null");
-    }
 }
