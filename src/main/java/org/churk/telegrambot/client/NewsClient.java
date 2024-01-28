@@ -8,7 +8,7 @@ import java.util.Map;
 
 @FeignClient(name = "news", url = "https://newsapi.org/v2")
 public interface NewsClient {
-    @GetMapping("/everything?sortBy=popularity&pageSize=10")
+    @GetMapping("/everything?sortBy=popularity")
     Map<String, Object> getNewsByCategory(@RequestParam("q") String category,
                                           @RequestParam("apiKey") String apiKey,
                                           @RequestParam("from") String from,

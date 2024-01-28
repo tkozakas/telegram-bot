@@ -26,7 +26,7 @@ public class NewsHandler implements CommandHandler {
             return getErrorMessage(chatId, messageId, "Please provide a query (use /news [query]");
         }
 
-        String query = args.getFirst();
+        String query = args.stream().reduce("", (a, b) -> a + " " + b);
         List<Article> articles = newsService.getNewsByCategory(query);
 
         if (articles.isEmpty()) {
