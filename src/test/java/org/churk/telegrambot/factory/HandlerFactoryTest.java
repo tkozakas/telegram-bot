@@ -38,6 +38,6 @@ class HandlerFactoryTest {
     @Test
     void getUnsupportedCommandHandlerTest() {
         CommandHandler handler = handlerFactory.getHandler(null);
-        assertNull(handler, "Handler for unsupported command should be null");
+        assertEquals(randomResponseHandler, handler, "Handler should be of type RandomResponseHandler");
     }
 }
