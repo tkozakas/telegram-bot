@@ -24,12 +24,12 @@ public class StatsYearHandler implements CommandHandler {
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-        List<String> arguments = context.getArgs();
+        List<String> args = context.getArgs();
 
         int year;
-        if (arguments.size() > 1) {
+        if (!args.isEmpty()) {
             try {
-                year = Integer.parseInt(arguments.get(1));
+                year = Integer.parseInt(args.getFirst());
             } catch (NumberFormatException e) {
                 return getErrorMessage(chatId, messageId,
                         "Please provide a valid year (/stats <year>)");
