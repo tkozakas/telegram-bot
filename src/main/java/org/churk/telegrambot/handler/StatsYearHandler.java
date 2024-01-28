@@ -10,7 +10,7 @@ import org.churk.telegrambot.service.StatsService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -23,10 +23,22 @@ public class StatsYearHandler implements CommandHandler {
     @Override
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
+        Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<String> arguments = context.getArgs();
-        int year = arguments.size() > 1 ? Integer.parseInt(arguments.get(1)) : LocalDate.now().getYear();
-        List<Stat> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
 
+        int year;
+        if (arguments.size() > 1) {
+            try {
+                year = Integer.parseInt(arguments.get(1));
+            } catch (NumberFormatException e) {
+                return getErrorMessage(chatId, messageId,
+                        "Please provide a valid year (/stats <year>)");
+            }
+        } else {
+            year = LocalDateTime.now().getYear();
+        }
+
+        List<Stat> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
         String statsTable = dailyMessageService.getKeyNameSentence("stats_table");
         String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
         String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
@@ -34,6 +46,14 @@ public class StatsYearHandler implements CommandHandler {
 
         return List.of(messageBuilderFactory
                 .createTextMessageBuilder(chatId)
+                .withText(text)
+                .build());
+    }
+
+    private List<Validable> getErrorMessage(Long chatId, Integer messageId, String text) {
+        return List.of(messageBuilderFactory
+                .createTextMessageBuilder(chatId)
+                .withReplyToMessageId(messageId)
                 .withText(text)
                 .build());
     }

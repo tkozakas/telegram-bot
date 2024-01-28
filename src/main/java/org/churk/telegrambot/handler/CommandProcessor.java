@@ -26,7 +26,6 @@ public class CommandProcessor {
     private final BotProperties botProperties;
     private final MessageBuilderFactory messageBuilderFactory;
     private final DailyMessageService dailyMessageService;
-    private final RandomResponseHandler randomResponseHandler;
 
     public List<Validable> handleCommand(Update update) {
         if (update != null && !chatService.isChatExists(update.getMessage().getChatId())) {
@@ -39,12 +38,6 @@ public class CommandProcessor {
 
         List<String> arguments = List.of(messageText.split(" "));
         Command command = Command.getTextCommand(messageText, botProperties.getWinnerName());
-        if (command == null) {
-            return randomResponseHandler.handle(HandlerContext.builder()
-                    .update(update)
-                    .args(arguments)
-                    .build());
-        }
         CommandHandler handler = handlerFactory.getHandler(command);
         return handler.handle(HandlerContext.builder()
                 .update(update)

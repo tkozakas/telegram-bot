@@ -30,13 +30,14 @@ public class DailyMessageHandler implements CommandHandler {
 
     @Override
     public List<Validable> handle(HandlerContext context) {
+        Integer messageId = context.getUpdate().getMessage().getMessageId();
         Long chatId = context.getUpdate().getMessage().getChatId();
         int year = LocalDateTime.now().getYear();
 
         List<Stat> statByChatIdAndYear = statsService.getStatsByChatIdAndYear(chatId, year);
 
         if (statByChatIdAndYear.isEmpty()) {
-            return getNoStatsAvailableMessage(chatId);
+            return getErrorMessage(chatId, messageId, dailyMessageService.getKeyNameSentence("no_stats_available"));
         }
 
         Optional<Stat> isWinnerStats = statByChatIdAndYear.stream()
@@ -66,16 +67,12 @@ public class DailyMessageHandler implements CommandHandler {
                 .collect(Collectors.toList());
     }
 
-    private List<Validable> getMessage(String text, Long chatId) {
+    private List<Validable> getErrorMessage(Long chatId, Integer messageId, String text) {
         return List.of(messageBuilderFactory
                 .createTextMessageBuilder(chatId)
+                .withReplyToMessageId(messageId)
                 .withText(text)
                 .build());
-    }
-
-    private List<Validable> getNoStatsAvailableMessage(Long chatId) {
-        log.info("No stats available for chatId: {}", chatId);
-        return getMessage(dailyMessageService.getKeyNameSentence("no_stats_available"), chatId);
     }
 
     private List<Validable> getMessage(Stat isWinnerStat, Long chatId) {
@@ -83,7 +80,10 @@ public class DailyMessageHandler implements CommandHandler {
         String mentionedUser = "[" + isWinnerStat.getFirstName() + "](tg://user?id=" + isWinnerStat.getUserId() + ")";
         String messageText = dailyMessageService.getKeyNameSentence("winner_message")
                 .formatted(botProperties.getWinnerName(), mentionedUser);
-        return getMessage(messageText, chatId);
+        return List.of(messageBuilderFactory
+                .createTextMessageBuilder(chatId)
+                .withText(messageText)
+                .build());
     }
 
     @Override
