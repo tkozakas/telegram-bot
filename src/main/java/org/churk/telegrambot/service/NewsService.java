@@ -28,11 +28,17 @@ public class NewsService {
         String categoryQuery = "q=+" + category;
         String apiKey = newsProperties.getApiKey();
         String language = newsProperties.getLanguage();
-        LocalDateTime from = LocalDateTime.now().minusDays(3);
-        String formattedDate = from.format(DateTimeFormatter.ISO_LOCAL_DATE);
-        Map<String, Object> jsonObject = newsClient.getNewsByCategory(categoryQuery, apiKey, formattedDate, language);
-        NewsResponse newsResponse = new ObjectMapper().convertValue(jsonObject, new TypeReference<>() {
-        });
+        NewsResponse newsResponse;
+        int days = 31;
+        do {
+            LocalDateTime from = LocalDateTime.now().minusDays(days);
+            String formattedDate = from.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            Map<String, Object> jsonObject = newsClient.getNewsByCategory(categoryQuery, apiKey, formattedDate, language);
+            newsResponse = new ObjectMapper().convertValue(jsonObject, new TypeReference<>() {
+            });
+            days--;
+        } while (!(newsResponse.getTotalResults() > 0) && days >= 0);
+
         return newsResponse.getArticles();
     }
 }

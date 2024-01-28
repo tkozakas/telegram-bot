@@ -46,7 +46,7 @@ public class NewsHandler implements CommandHandler {
 
     private static String getNews(List<Article> articles) {
         return articles.stream()
-                .limit(5)
+                .limit(3)
                 .map(article -> article.getTitle() + "\n" + article.getUrl())
                 .reduce("", (a, b) -> a + "\n\n" + b);
     }
