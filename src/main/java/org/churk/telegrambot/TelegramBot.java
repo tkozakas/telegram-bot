@@ -33,7 +33,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     @PostConstruct
     private void registerBotCommands() throws TelegramApiException {
         List<BotCommand> botCommandList = Stream.of(Command.values())
-                .map(command -> new BotCommand("/" + command.name().toLowerCase(), command.getDescription().formatted(botProperties.getWinnerName())))
+                .map(command -> new BotCommand(command.getPatterns().stream()
+                        .findFirst()
+                        .orElse("")
+                        .formatted(botProperties.getWinnerName())
+                        .replace(".*/", "/")
+                        .replace("\\b.*", ""),
+                        command.getDescription().formatted(botProperties.getWinnerName())))
                 .toList();
         this.execute(new SetMyCommands(botCommandList, new BotCommandScopeDefault(), null));
     }
