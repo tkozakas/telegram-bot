@@ -2,6 +2,7 @@ package org.churk.telegrambot.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.client.RedditClient;
@@ -28,9 +29,11 @@ public class RedditService {
             RedditPost redditMeme = mapper.readValue(jsonResponse, RedditPost.class);
             return getFile(redditMeme).join();
         } catch (JsonProcessingException e) {
-            log.error("Error while parsing reddit response", e);
-            return Optional.empty();
+            log.error("Error while parsing Instagram response", e);
+        } catch (FeignException e) {
+            log.error("Error with Feign client", e);
         }
+        return Optional.empty();
     }
 
     private CompletableFuture<Optional<File>> getFile(RedditPost redditPost) {

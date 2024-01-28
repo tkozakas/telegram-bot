@@ -25,20 +25,15 @@ public class RedditHandler implements CommandHandler {
     @Override
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
+        Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<String> arguments = context.getArgs();
-        return getRedditFile(arguments, chatId);
+        return getRedditFile(arguments, chatId, messageId);
     }
 
-    @Override
-    public Command getSupportedCommand() {
-        return Command.REDDIT;
-    }
-
-    private List<Validable> getRedditFile(List<String> arguments, Long chatId) {
+    private List<Validable> getRedditFile(List<String> arguments, Long chatId, Integer messageId) {
         String subreddit = (arguments.size() == 2) ?
                 arguments.get(1) :
-                botProperties.getSubredditNames()
-                        .get(ThreadLocalRandom.current().nextInt(botProperties.getSubredditNames().size()));
+                botProperties.getSubredditNames().get(ThreadLocalRandom.current().nextInt(botProperties.getSubredditNames().size()));
         try {
             Optional<File> file = redditService.getMemeFromSubreddit(subreddit);
             if (file.isPresent()) {
@@ -50,11 +45,10 @@ public class RedditHandler implements CommandHandler {
                         getPhotoMessage(chatId, existingFile, subreddit);
             }
         } catch (Exception e) {
-            return getErrorMessage(e, chatId);
+            return getErrorMessage(chatId, messageId, "Something went wrong, please try again later");
         }
         return List.of();
     }
-
 
     private List<Validable> getPhotoMessage(Long chatId, File file, String subreddit) {
         log.info("Sending photo message to chatId: {}", chatId);
@@ -74,11 +68,16 @@ public class RedditHandler implements CommandHandler {
                 .build());
     }
 
-    private List<Validable> getErrorMessage(Exception e, Long chatId) {
-        log.error("Error occurred while fetching meme: {}", e.getMessage());
+    private List<Validable> getErrorMessage(Long chatId, Integer messageId, String text) {
         return List.of(messageBuilderFactory
                 .createTextMessageBuilder(chatId)
-                .withText("An error occurred while fetching the meme.")
+                .withReplyToMessageId(messageId)
+                .withText(text)
                 .build());
+    }
+
+    @Override
+    public Command getSupportedCommand() {
+        return Command.REDDIT;
     }
 }

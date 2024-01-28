@@ -2,11 +2,13 @@ package org.churk.telegrambot.factory;
 
 import org.churk.telegrambot.handler.CommandHandler;
 import org.churk.telegrambot.handler.HandlerFactory;
+import org.churk.telegrambot.handler.RandomResponseHandler;
 import org.churk.telegrambot.handler.StartHandler;
 import org.churk.telegrambot.model.Command;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HandlerFactoryTest {
+    @Mock
+    private RandomResponseHandler randomResponseHandler;
     @InjectMocks
     private StartHandler startHandler;
     private HandlerFactory handlerFactory;
@@ -21,7 +25,7 @@ class HandlerFactoryTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        handlerFactory = new HandlerFactory(List.of(startHandler));
+        handlerFactory = new HandlerFactory(List.of(startHandler), randomResponseHandler);
     }
 
     @Test

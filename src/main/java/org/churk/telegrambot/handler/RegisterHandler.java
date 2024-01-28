@@ -31,11 +31,6 @@ public class RegisterHandler implements CommandHandler {
         return getRegister(chatId, userId, firstName, messageId);
     }
 
-    @Override
-    public Command getSupportedCommand() {
-        return Command.REGISTER;
-    }
-
     private List<Validable> getRegister(Long chatId, Long userId, String firstName, Integer messageId) {
         Optional<Stat> userStats = statsService.getStatsByChatIdAndUserId(chatId, userId);
         if (userStats.isPresent()) {
@@ -53,5 +48,10 @@ public class RegisterHandler implements CommandHandler {
                 .withText(text)
                 .withReplyToMessageId(messageId)
                 .build());
+    }
+
+    @Override
+    public Command getSupportedCommand() {
+        return Command.REGISTER;
     }
 }

@@ -9,15 +9,20 @@ import java.util.Map;
 
 @Service
 public class HandlerFactory {
+    private final RandomResponseHandler randomResponseHandler;
     private final Map<Command, CommandHandler> handlerMap = new EnumMap<>(Command.class);
 
-    public HandlerFactory(List<CommandHandler> handlers) {
+    public HandlerFactory(List<CommandHandler> handlers, RandomResponseHandler randomResponseHandler) {
+        this.randomResponseHandler = randomResponseHandler;
         handlers.stream()
                 .filter(handler -> handler.getSupportedCommand() != null)
                 .forEachOrdered(handler -> handlerMap.put(handler.getSupportedCommand(), handler));
     }
 
     public CommandHandler getHandler(Command command) {
+        if (command == null) {
+            return randomResponseHandler;
+        }
         return handlerMap.get(command);
     }
 }
