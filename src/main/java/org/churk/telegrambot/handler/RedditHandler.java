@@ -43,6 +43,7 @@ public class RedditHandler implements CommandHandler {
             Optional<File> file = redditService.getMemeFromSubreddit(subreddit);
             if (file.isPresent()) {
                 File existingFile = file.get();
+                existingFile.deleteOnExit();
                 String fileName = file.get().getName().toLowerCase();
                 return fileName.endsWith(".gif") ?
                         getAnimationMessage(chatId, existingFile, subreddit) :
