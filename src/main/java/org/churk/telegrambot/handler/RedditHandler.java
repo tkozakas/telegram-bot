@@ -31,8 +31,8 @@ public class RedditHandler implements CommandHandler {
     }
 
     private List<Validable> getRedditFile(List<String> arguments, Long chatId, Integer messageId) {
-        String subreddit = (arguments.size() == 2) ?
-                arguments.get(1) :
+        String subreddit = (!arguments.isEmpty()) ?
+                arguments.getFirst() :
                 botProperties.getSubredditNames().get(ThreadLocalRandom.current().nextInt(botProperties.getSubredditNames().size()));
         try {
             Optional<File> file = redditService.getMemeFromSubreddit(subreddit);

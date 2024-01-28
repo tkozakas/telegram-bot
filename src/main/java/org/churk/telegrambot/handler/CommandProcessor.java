@@ -36,7 +36,7 @@ public class CommandProcessor {
         String firstName = message.getFrom().getFirstName();
         log.info("{}: {}", firstName, messageText);
 
-        List<String> arguments = List.of(messageText.split(" "));
+        List<String> arguments = List.of(messageText.split(" ")).subList(1, messageText.split(" ").length);
         Command command = Command.getTextCommand(messageText, botProperties.getWinnerName());
         CommandHandler handler = handlerFactory.getHandler(command);
         return handler.handle(HandlerContext.builder()
