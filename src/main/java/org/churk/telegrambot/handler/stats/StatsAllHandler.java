@@ -1,6 +1,7 @@
 package org.churk.telegrambot.handler.stats;
 
-import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.decorator.StatsListDecorator;
 import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.handler.HandlerContext;
@@ -14,10 +15,13 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class StatsAllHandler extends Handler {
-    private final DailyMessageService dailyMessageService;
     private final StatsService statsService;
+
+    public StatsAllHandler(BotProperties botProperties, DailyMessageService dailyMessageService, MessageBuilderFactory messageBuilderFactory, StatsService statsService) {
+        super(botProperties, dailyMessageService, messageBuilderFactory);
+        this.statsService = statsService;
+    }
 
     @Override
     public List<Validable> handle(HandlerContext context) {

@@ -1,8 +1,10 @@
 package org.churk.telegrambot.handler;
 
-import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.news.Article;
+import org.churk.telegrambot.service.DailyMessageService;
 import org.churk.telegrambot.service.NewsService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -10,9 +12,13 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class NewsHandler extends Handler {
     private final NewsService newsService;
+
+    public NewsHandler(BotProperties botProperties, DailyMessageService dailyMessageService, MessageBuilderFactory messageBuilderFactory, NewsService newsService) {
+        super(botProperties, dailyMessageService, messageBuilderFactory);
+        this.newsService = newsService;
+    }
 
     @Override
     public List<Validable> handle(HandlerContext context) {

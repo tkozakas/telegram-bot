@@ -12,9 +12,15 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public abstract class Handler implements CommandHandler {
-    protected BotProperties botProperties;
-    protected DailyMessageService dailyMessageService;
-    protected MessageBuilderFactory messageBuilderFactory;
+    protected final BotProperties botProperties;
+    protected final DailyMessageService dailyMessageService;
+    protected final MessageBuilderFactory messageBuilderFactory;
+
+    protected Handler(DailyMessageService dailyMessageService, BotProperties botProperties, MessageBuilderFactory messageBuilderFactory) {
+        this.dailyMessageService = dailyMessageService;
+        this.botProperties = botProperties;
+        this.messageBuilderFactory = messageBuilderFactory;
+    }
 
     protected List<Validable> getReplyMessage(Long chatId, Integer messageId, String s) {
         return List.of(messageBuilderFactory
