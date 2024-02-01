@@ -1,8 +1,10 @@
-package org.churk.telegrambot.handler;
+package org.churk.telegrambot.handler.stats;
 
 import lombok.AllArgsConstructor;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
+import org.churk.telegrambot.handler.CommandHandler;
+import org.churk.telegrambot.handler.HandlerContext;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.service.DailyMessageService;
 import org.churk.telegrambot.service.StatsService;

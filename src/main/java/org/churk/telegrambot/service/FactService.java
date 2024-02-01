@@ -16,4 +16,8 @@ public class FactService {
     public List<Fact> getAllFacts() {
         return factRepository.findAll();
     }
+
+    public void addFact(Long chatId, String join) {
+        factRepository.save(new Fact(chatId, join));
+    }
 }

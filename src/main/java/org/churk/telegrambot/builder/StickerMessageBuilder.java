@@ -16,6 +16,11 @@ public class StickerMessageBuilder {
         return this;
     }
 
+    public StickerMessageBuilder withReplyToMessageId(Integer messageId) {
+        message.setReplyToMessageId(messageId);
+        return this;
+    }
+
     public SendSticker build() {
         return message;
     }

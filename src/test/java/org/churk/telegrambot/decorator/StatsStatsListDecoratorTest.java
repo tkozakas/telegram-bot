@@ -10,15 +10,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-class StatsListDecoratorTest {
+class StatsStatsListDecoratorTest {
     @Test
     void getFormattedStatsTest() {
         List<Stat> statList = List.of(new Stat("Alice", 9L),
                 new Stat("Bob", 7L),
                 new Stat("Charlie", 8L));
 
-        StatsListDecorator statsListDecorator = new StatsListDecorator(statList);
-        String result = statsListDecorator.getFormattedStats("%d %s %d", "header", "footer");
+        StatsListDecorator listDecorator = new StatsListDecorator(statList);
+        String result = listDecorator.getFormattedStats("%d %s %d", "header", "footer", 10);
 
         String expected = "header" +
                 "1 Alice 9" +

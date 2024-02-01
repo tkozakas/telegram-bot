@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @Data
 @Entity(name = "stickers")
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Sticker {
     @Id
@@ -20,12 +19,6 @@ public class Sticker {
     private UUID stickerId;
     @JsonProperty("file_id")
     private String fileId;
-    @JsonProperty("is_animated")
-    private Boolean isAnimated;
-    @JsonProperty("is_video")
-    private Boolean isVideo;
-    @JsonProperty("emoji")
-    private String emoji;
-    @JsonProperty("file_size")
-    private Integer fileSize;
+    private Long chatId;
+    private String stickerSetName;
 }
