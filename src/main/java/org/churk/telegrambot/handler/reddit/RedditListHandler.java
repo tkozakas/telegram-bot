@@ -1,8 +1,7 @@
 package org.churk.telegrambot.handler.reddit;
 
-import lombok.AllArgsConstructor;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.handler.CommandHandler;
+import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.handler.HandlerContext;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Subreddit;
@@ -13,9 +12,8 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import java.util.List;
 
 @Component
-@AllArgsConstructor
-public class RedditListHandler implements CommandHandler {
-    private final MessageBuilderFactory messageBuilderFactory;
+@RequiredArgsConstructor
+public class RedditListHandler extends Handler {
     private final SubredditService subredditService;
 
     @Override
@@ -24,30 +22,15 @@ public class RedditListHandler implements CommandHandler {
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
 
-        return subreddits.isEmpty() ?
-                getTextMessageWithReply(chatId, messageId, "No subreddits available") :
-                getTextMessage(chatId, subreddits);
-    }
-
-    private List<Validable> getTextMessage(Long chatId, List<Subreddit> subreddits) {
         String message = "*Subreddits:*\n" +
                 subreddits.stream()
                         .limit(20)
                         .map(Subreddit::getSubredditName)
                         .reduce("", (a, b) -> a + "- /r" + b + "\n");
 
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
-                .withText(message)
-                .build());
-    }
-
-    private List<Validable> getTextMessageWithReply(Long chatId, Integer messageId, String text) {
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
-                .withReplyToMessageId(messageId)
-                .withText(text)
-                .build());
+        return subreddits.isEmpty() ?
+                getReplyMessage(chatId, messageId, "No subreddits available") :
+                getMessage(chatId, message);
     }
 
     @Override

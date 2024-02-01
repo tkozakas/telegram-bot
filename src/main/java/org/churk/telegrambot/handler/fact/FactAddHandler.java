@@ -1,8 +1,7 @@
 package org.churk.telegrambot.handler.fact;
 
-import lombok.AllArgsConstructor;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.handler.CommandHandler;
+import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.handler.HandlerContext;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.service.FactService;
@@ -12,10 +11,9 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import java.util.List;
 
 @Component
-@AllArgsConstructor
-public class FactAddHandler implements CommandHandler {
+@RequiredArgsConstructor
+public class FactAddHandler extends Handler {
     private final FactService factService;
-    private final MessageBuilderFactory messageBuilderFactory;
 
     @Override
     public List<Validable> handle(HandlerContext context) {
@@ -24,21 +22,12 @@ public class FactAddHandler implements CommandHandler {
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
         if (args.isEmpty()) {
-            return getTextMessageWithReply(chatId, messageId,
+            return getReplyMessage(chatId, messageId,
                     "Please provide a valid name /factadd <fact>");
         }
         factService.addFact(chatId, args.stream().reduce((a, b) -> a + " " + b).get());
-        return getTextMessageWithReply(chatId, messageId,
+        return getReplyMessage(chatId, messageId,
                 "Fact: " + args.getFirst() + " added");
-    }
-
-    private List<Validable> getTextMessageWithReply(Long chatId, Integer messageId, String s) {
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
-                .withReplyToMessageId(messageId)
-                .withText(s)
-                .enableMarkdown(false)
-                .build());
     }
 
     @Override

@@ -1,7 +1,6 @@
 package org.churk.telegrambot.handler;
 
-import lombok.AllArgsConstructor;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
+import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.news.Article;
 import org.churk.telegrambot.service.NewsService;
@@ -11,9 +10,8 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import java.util.List;
 
 @Component
-@AllArgsConstructor
-public class NewsHandler implements CommandHandler {
-    private final MessageBuilderFactory messageBuilderFactory;
+@RequiredArgsConstructor
+public class NewsHandler extends Handler {
     private final NewsService newsService;
 
     @Override
@@ -23,40 +21,23 @@ public class NewsHandler implements CommandHandler {
         List<String> args = context.getArgs();
 
         if (args.isEmpty()) {
-            return getErrorMessage(chatId, messageId, "Please provide a query (use /news <query>");
+            return getReplyMessage(chatId, messageId, "Please provide a query (use /news <query>");
         }
 
         String query = args.stream().reduce("", (a, b) -> a + " " + b);
         List<Article> articles = newsService.getNewsByCategory(query);
 
         if (articles.isEmpty()) {
-            return getErrorMessage(chatId, messageId, "No news available");
+            return getReplyMessage(chatId, messageId, "No news available");
         }
         String text = getNews(articles);
         return getMessage(chatId, text);
     }
-
-    private List<Validable> getMessage(Long chatId, String text) {
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
-                .withText(text)
-                .enableMarkdown(false)
-                .build());
-    }
-
     private static String getNews(List<Article> articles) {
         return articles.stream()
                 .limit(3)
                 .map(article -> article.getTitle() + "\n" + article.getUrl())
                 .reduce("", (a, b) -> a + "\n\n" + b);
-    }
-
-    private List<Validable> getErrorMessage(Long chatId, Integer messageId, String text) {
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
-                .withReplyToMessageId(messageId)
-                .withText(text)
-                .build());
     }
 
     @Override

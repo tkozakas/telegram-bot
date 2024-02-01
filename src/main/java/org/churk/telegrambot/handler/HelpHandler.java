@@ -1,8 +1,6 @@
 package org.churk.telegrambot.handler;
 
-import lombok.AllArgsConstructor;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.config.BotProperties;
+import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -11,10 +9,8 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
-@AllArgsConstructor
-public class HelpHandler implements CommandHandler {
-    private final MessageBuilderFactory messageBuilderFactory;
-    private final BotProperties botProperties;
+@RequiredArgsConstructor
+public class HelpHandler extends Handler {
 
     @Override
     public List<Validable> handle(HandlerContext context) {
@@ -32,11 +28,7 @@ public class HelpHandler implements CommandHandler {
                 .reduce((s1, s2) -> s1 + "\n" + s2)
                 .orElse("No commands available");
 
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
-                .withText(message)
-                .withReplyToMessageId(messageId)
-                .build());
+        return getReplyMessage(chatId, messageId, message);
     }
 
     @Override
