@@ -27,7 +27,6 @@ public abstract class Handler implements CommandHandler {
                 .createTextMessageBuilder(chatId)
                 .withReplyToMessageId(messageId)
                 .withText(s)
-                .enableMarkdown(false)
                 .build());
     }
 

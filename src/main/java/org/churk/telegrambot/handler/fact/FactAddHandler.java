@@ -29,7 +29,7 @@ public class FactAddHandler extends Handler {
 
         if (args.isEmpty()) {
             return getReplyMessage(chatId, messageId,
-                    "Please provide a valid name /factadd <fact>");
+                    "Save a fact using /factadd <fact>");
         }
         factService.addFact(chatId, args.stream().reduce((a, b) -> a + " " + b).get());
         return getReplyMessage(chatId, messageId,
