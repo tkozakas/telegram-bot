@@ -1,7 +1,6 @@
 package org.churk.telegrambot.handler;
 
-import lombok.AllArgsConstructor;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
+import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.service.InstagramService;
 import org.springframework.stereotype.Component;
@@ -14,10 +13,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-@AllArgsConstructor
-public class InstagramHandler implements CommandHandler {
+@RequiredArgsConstructor
+public class InstagramHandler extends Handler {
     private final Pattern pattern = Pattern.compile("https://www\\.instagram\\.com/(?:p|reel|tv)/([^/?]+)/");
-    private final MessageBuilderFactory messageBuilderFactory;
     private final InstagramService instagramService;
 
     @Override
@@ -28,20 +26,14 @@ public class InstagramHandler implements CommandHandler {
         String postCode = context.getArgs().size() == 2 ? context.getArgs().get(1) : "";
         Matcher matcher = pattern.matcher(postCode);
         if (!matcher.find() || postCode.isBlank()) {
-            return List.of(messageBuilderFactory
-                    .createTextMessageBuilder(chatId)
-                    .withText("Please provide a valid url using /reels <url>")
-                    .withReplyToMessageId(messageId)
-                    .build());
+            return getReplyMessage(chatId, messageId,
+                    "Please provide a valid link /reels <link>");
         }
         String identifier = matcher.group(1);
         Optional<File> file = instagramService.getInstagramMedia(identifier);
         if (file.isPresent()) {
             File existingFile = file.get();
-            return List.of(messageBuilderFactory
-                    .createVideoMessage(chatId)
-                    .withVideo(existingFile)
-                    .build());
+            return getVideoMessage(chatId, existingFile);
         }
         return List.of();
     }

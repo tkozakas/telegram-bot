@@ -1,8 +1,7 @@
 package org.churk.telegrambot.handler.fact;
 
-import lombok.AllArgsConstructor;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.handler.CommandHandler;
+import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.handler.HandlerContext;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Fact;
@@ -14,9 +13,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
-@AllArgsConstructor
-public class FactHandler implements CommandHandler {
-    private final MessageBuilderFactory messageBuilderFactory;
+@RequiredArgsConstructor
+public class FactHandler extends Handler {
     private final FactService factService;
 
     @Override
@@ -24,26 +22,11 @@ public class FactHandler implements CommandHandler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<Fact> facts = factService.getAllFacts();
-        Fact randomFact = facts.get(ThreadLocalRandom.current().nextInt(facts.size()));
+        String randomFact = facts.get(ThreadLocalRandom.current().nextInt(facts.size())).getComment();
 
         return context.isReply() ?
                 getReplyMessage(chatId, messageId, randomFact) :
                 getMessage(chatId, randomFact);
-    }
-
-    private List<Validable> getMessage(Long chatId, Fact randomFact) {
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
-                .withText(randomFact.getComment())
-                .build());
-    }
-
-    private List<Validable> getReplyMessage(Long chatId, Integer messageId, Fact randomFact) {
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
-                .withText(randomFact.getComment())
-                .withReplyToMessageId(messageId)
-                .build());
     }
 
     @Override

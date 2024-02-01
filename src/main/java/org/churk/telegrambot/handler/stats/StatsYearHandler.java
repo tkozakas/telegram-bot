@@ -1,9 +1,8 @@
 package org.churk.telegrambot.handler.stats;
 
-import lombok.AllArgsConstructor;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
+import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.decorator.StatsListDecorator;
-import org.churk.telegrambot.handler.CommandHandler;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.handler.HandlerContext;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Stat;
@@ -16,9 +15,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
-@AllArgsConstructor
-public class StatsYearHandler implements CommandHandler {
-    private final MessageBuilderFactory messageBuilderFactory;
+@RequiredArgsConstructor
+public class StatsYearHandler extends Handler {
     private final DailyMessageService dailyMessageService;
     private final StatsService statsService;
 
@@ -33,7 +31,7 @@ public class StatsYearHandler implements CommandHandler {
             try {
                 year = Integer.parseInt(args.getFirst());
             } catch (NumberFormatException e) {
-                return getErrorMessage(chatId, messageId,
+                return getReplyMessage(chatId, messageId,
                         "Please provide a valid year (/stats <year>)");
             }
         } else {
@@ -46,18 +44,7 @@ public class StatsYearHandler implements CommandHandler {
         String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
         String text = new StatsListDecorator(stats).getFormattedStats(statsTable, header, footer, 10);
 
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
-                .withText(text)
-                .build());
-    }
-
-    private List<Validable> getErrorMessage(Long chatId, Integer messageId, String text) {
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
-                .withReplyToMessageId(messageId)
-                .withText(text)
-                .build());
+        return getMessage(chatId, text);
     }
 
     @Override

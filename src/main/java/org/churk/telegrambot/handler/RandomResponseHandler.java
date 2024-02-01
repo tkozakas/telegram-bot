@@ -1,7 +1,6 @@
 package org.churk.telegrambot.handler;
 
-import lombok.AllArgsConstructor;
-import org.churk.telegrambot.config.BotProperties;
+import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.handler.fact.FactHandler;
 import org.churk.telegrambot.handler.sticker.StickerHandler;
 import org.churk.telegrambot.model.Command;
@@ -13,9 +12,8 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
-@AllArgsConstructor
-public class RandomResponseHandler implements CommandHandler {
-    private final BotProperties botProperties;
+@RequiredArgsConstructor
+public class RandomResponseHandler extends Handler {
     private final FactHandler factHandler;
     private final StickerHandler stickerHandler;
     private final Random random = new Random();

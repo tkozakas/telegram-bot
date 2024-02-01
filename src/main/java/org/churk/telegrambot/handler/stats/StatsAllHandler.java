@@ -1,9 +1,8 @@
 package org.churk.telegrambot.handler.stats;
 
-import lombok.AllArgsConstructor;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
+import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.decorator.StatsListDecorator;
-import org.churk.telegrambot.handler.CommandHandler;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.handler.HandlerContext;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Stat;
@@ -15,9 +14,8 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import java.util.List;
 
 @Component
-@AllArgsConstructor
-public class StatsAllHandler implements CommandHandler {
-    private final MessageBuilderFactory messageBuilderFactory;
+@RequiredArgsConstructor
+public class StatsAllHandler extends Handler {
     private final DailyMessageService dailyMessageService;
     private final StatsService statsService;
 
@@ -31,10 +29,7 @@ public class StatsAllHandler implements CommandHandler {
         String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
         String text = new StatsListDecorator(stats).getFormattedStats(statsTable, header, footer, 10);
 
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
-                .withText(text)
-                .build());
+        return getMessage(chatId, text);
     }
 
     @Override
