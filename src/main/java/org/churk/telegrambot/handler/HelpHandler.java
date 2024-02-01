@@ -20,8 +20,6 @@ public class HelpHandler extends Handler {
     @Override
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
-
         String message = Arrays.stream(Command.values())
                 .map(command ->
                         "*" + command.getPatterns().toString().formatted(botProperties.getWinnerName())
@@ -33,7 +31,7 @@ public class HelpHandler extends Handler {
                 .reduce((s1, s2) -> s1 + "\n" + s2)
                 .orElse("No commands available");
 
-        return getReplyMessage(chatId, messageId, message);
+        return getMessage(chatId, message);
     }
 
     @Override
