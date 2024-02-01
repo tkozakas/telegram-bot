@@ -13,7 +13,7 @@ import java.util.List;
 public class ChatService {
     private final ChatRepository chatRepository;
 
-    public void saveChat(Update update) {
+    public void addChat(Update update) {
         chatRepository.save(new Chat(update.getMessage().getChatId(), update));
     }
 

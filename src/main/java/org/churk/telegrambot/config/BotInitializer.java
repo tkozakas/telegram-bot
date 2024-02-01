@@ -3,7 +3,6 @@ package org.churk.telegrambot.config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.TelegramBot;
-import org.churk.telegrambot.utility.StickerLoader;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -16,11 +15,9 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @RequiredArgsConstructor
 public class BotInitializer {
     private final TelegramBot telegramBot;
-    private final StickerLoader stickerLoader;
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() {
-        stickerLoader.loadStickers();
         try {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             telegramBotsApi.registerBot(telegramBot);

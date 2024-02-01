@@ -52,7 +52,7 @@ public class CommandProcessor {
         Integer messageId = update.getMessage().getMessageId();
 
         log.info("Bot added to group: {} (ID: {})", groupName, chatId);
-        chatService.saveChat(update);
+        chatService.addChat(update);
         return List.of(messageBuilderFactory.createTextMessageBuilder(chatId)
                 .withReplyToMessageId(messageId)
                 .withText(dailyMessageService.getKeyNameSentence("welcome_message").formatted(firstName))

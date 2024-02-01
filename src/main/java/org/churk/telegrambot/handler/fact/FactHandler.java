@@ -1,7 +1,9 @@
-package org.churk.telegrambot.handler;
+package org.churk.telegrambot.handler.fact;
 
 import lombok.AllArgsConstructor;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.handler.CommandHandler;
+import org.churk.telegrambot.handler.HandlerContext;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Fact;
 import org.churk.telegrambot.service.FactService;

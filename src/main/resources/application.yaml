@@ -18,20 +18,6 @@ bot:
   # token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
   # winner_name: <<PROVIDE USING ENVIRONMENT VARIABLES>>
 
-  sticker-set-names:
-    - primates_uffchat
-    - greatchurkobesfbi_by_fStikBot
-
-  subreddit-names:
-    - wordington
-    - wunkus
-    - clamworks
-    - AROOOOOOO
-    - THE_PACK
-    - cursedcomments
-    - holup
-    - blursedimages
-
   random-response-chance: 0.2
 
 download-media:

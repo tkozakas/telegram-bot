@@ -1,7 +1,9 @@
-package org.churk.telegrambot.handler;
+package org.churk.telegrambot.handler.sticker;
 
 import lombok.AllArgsConstructor;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.handler.CommandHandler;
+import org.churk.telegrambot.handler.HandlerContext;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Sticker;
 import org.churk.telegrambot.service.StickerService;
@@ -20,10 +22,18 @@ public class StickerHandler implements CommandHandler {
     @Override
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
-        List<Sticker> stickers = stickerService.getAllStickers();
+        List<Sticker> stickers = stickerService.getStickerSets(chatId);
+        Integer messageId = context.getUpdate().getMessage().getMessageId();
+        if (stickers.isEmpty()) {
+            return List.of(messageBuilderFactory
+                    .createTextMessageBuilder(chatId)
+                    .withReplyToMessageId(messageId)
+                    .withText("No sticker sets available")
+                    .build());
+        }
         Sticker randomSticker = stickers.get(ThreadLocalRandom.current().nextInt(stickers.size()));
         return context.isReply() ?
-                getStickerReply(chatId, randomSticker) :
+                getStickerReply(chatId, randomSticker, messageId) :
                 getStickerMessage(chatId, randomSticker);
     }
 
@@ -34,10 +44,11 @@ public class StickerHandler implements CommandHandler {
                 .build());
     }
 
-    private List<Validable> getStickerReply(Long chatId, Sticker randomSticker) {
+    private List<Validable> getStickerReply(Long chatId, Sticker randomSticker, Integer messageId) {
         return List.of(messageBuilderFactory
                 .createStickerMessageBuilder(chatId)
                 .withSticker(randomSticker.getFileId())
+                .withReplyToMessageId(messageId)
                 .build());
     }
 

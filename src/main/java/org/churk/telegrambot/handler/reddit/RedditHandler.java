@@ -1,11 +1,13 @@
-package org.churk.telegrambot.handler;
+package org.churk.telegrambot.handler.reddit;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.config.BotProperties;
+import org.churk.telegrambot.handler.CommandHandler;
+import org.churk.telegrambot.handler.HandlerContext;
 import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.service.RedditService;
+import org.churk.telegrambot.model.Subreddit;
+import org.churk.telegrambot.service.SubredditService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -18,24 +20,19 @@ import java.util.concurrent.ThreadLocalRandom;
 @Component
 @AllArgsConstructor
 public class RedditHandler implements CommandHandler {
-    private final BotProperties botProperties;
     private final MessageBuilderFactory messageBuilderFactory;
-    private final RedditService redditService;
+    private final SubredditService subredditService;
 
     @Override
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
+        List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-        List<String> arguments = context.getArgs();
-        return getRedditFile(arguments, chatId, messageId);
-    }
+        Subreddit randomSubreddit = subreddits.get(ThreadLocalRandom.current().nextInt(subreddits.size()));
+        String subreddit = context.getArgs().isEmpty() ? randomSubreddit.getSubredditName() : context.getArgs().getFirst();
 
-    private List<Validable> getRedditFile(List<String> arguments, Long chatId, Integer messageId) {
-        String subreddit = (!arguments.isEmpty()) ?
-                arguments.getFirst() :
-                botProperties.getSubredditNames().get(ThreadLocalRandom.current().nextInt(botProperties.getSubredditNames().size()));
         try {
-            Optional<File> file = redditService.getMemeFromSubreddit(subreddit);
+            Optional<File> file = subredditService.getMemeFromSubreddit(subreddit);
             if (file.isPresent()) {
                 File existingFile = file.get();
                 existingFile.deleteOnExit();

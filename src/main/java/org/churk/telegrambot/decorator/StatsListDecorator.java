@@ -14,10 +14,10 @@ public class StatsListDecorator {
         this.statList = statList;
     }
 
-    public String getFormattedStats(String statsTable, String header, String footer) {
+    public String getFormattedStats(String statsTable, String header, String footer, int limit) {
         List<Stat> sortedStats = statList.stream()
                 .sorted(Comparator.comparing(Stat::getScore).reversed())
-                .limit(10)
+                .limit(limit)
                 .toList();
 
         return IntStream.range(0, sortedStats.size())
