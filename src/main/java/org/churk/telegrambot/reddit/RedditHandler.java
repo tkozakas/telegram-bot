@@ -2,10 +2,10 @@ package org.churk.telegrambot.reddit;
 
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.handler.Handler;
-import org.churk.telegrambot.utility.HandlerContext;
 import org.churk.telegrambot.handler.Command;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.message.DailyMessageService;
+import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -26,12 +26,24 @@ public class RedditHandler extends Handler {
     @Override
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
-        List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-        Subreddit randomSubreddit = subreddits.get(ThreadLocalRandom.current().nextInt(subreddits.size()));
-        String subreddit = context.getArgs().isEmpty() ?
-                randomSubreddit.getSubredditName() :
-                context.getArgs().getFirst();
+        List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
+
+        String subreddit;
+        if (context.getArgs().isEmpty()) {
+            if (subreddits.isEmpty()) {
+                return getReplyMessage(chatId, messageId,
+                        "No subreddits available (use /redditadd <subreddit>)");
+            }
+            subreddit = subreddits.get(ThreadLocalRandom.current().nextInt(subreddits.size())).getSubredditName();
+        } else {
+            subreddit = context.getArgs().getFirst();
+        }
+
+        if (!subredditService.isValidSubreddit(subreddit)) {
+            return getReplyMessage(chatId, messageId,
+                    "This subreddit does not exist.");
+        }
 
         try {
             Optional<File> file = subredditService.getMemeFromSubreddit(subreddit);

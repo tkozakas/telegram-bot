@@ -1,11 +1,12 @@
 package org.churk.telegrambot.message;
 
 import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.builder.TextMessageBuilder;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.Command;
 import org.churk.telegrambot.handler.Handler;
-import org.churk.telegrambot.stats.StatsService;
 import org.churk.telegrambot.stats.Stat;
+import org.churk.telegrambot.stats.StatsService;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -58,8 +59,7 @@ public class DailyMessageHandler extends Handler {
         List<Sentence> sentences = dailyMessageService.getRandomGroupSentences();
         sentences.getLast().setText(sentences.getLast().getText() + randomWinner);
         return sentences.stream()
-                .map(sentence -> messageBuilderFactory
-                        .createTextMessageBuilder(chatId)
+                .map(sentence -> messageBuilderFactory.createBuilder(chatId, TextMessageBuilder.class)
                         .withText(sentence.getText().formatted(botProperties.getWinnerName()))
                         .build())
                 .collect(Collectors.toList());

@@ -4,23 +4,18 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MessageBuilderFactory {
-    public TextMessageBuilder createTextMessageBuilder(Long chatId) {
-        return new TextMessageBuilder(chatId);
-    }
-
-    public PhotoMessageBuilder createPhotoMessageBuilder(Long chatId) {
-        return new PhotoMessageBuilder(chatId);
-    }
-
-    public AnimationMessageBuilder createAnimationMessageBuilder(Long chatId) {
-        return new AnimationMessageBuilder(chatId);
-    }
-
-    public StickerMessageBuilder createStickerMessageBuilder(Long chatId) {
-        return new StickerMessageBuilder(chatId);
-    }
-
-    public VideoMessageBuilder createVideoMessage(Long chatId) {
-        return new VideoMessageBuilder(chatId);
+    public <T> T createBuilder(Long chatId, Class<T> builderClass) {
+        if (builderClass == TextMessageBuilder.class) {
+            return (T) new TextMessageBuilder(chatId);
+        } else if (builderClass == PhotoMessageBuilder.class) {
+            return (T) new PhotoMessageBuilder(chatId);
+        } else if (builderClass == AnimationMessageBuilder.class) {
+            return (T) new AnimationMessageBuilder(chatId);
+        } else if (builderClass == StickerMessageBuilder.class) {
+            return (T) new StickerMessageBuilder(chatId);
+        } else if (builderClass == VideoMessageBuilder.class) {
+            return (T) new VideoMessageBuilder(chatId);
+        }
+        throw new IllegalArgumentException("Unsupported builder class: " + builderClass.getName());
     }
 }

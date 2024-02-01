@@ -3,6 +3,7 @@ package org.churk.telegrambot.utility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.builder.TextMessageBuilder;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.CommandHandler;
 import org.churk.telegrambot.handler.HandlerFactory;
@@ -55,7 +56,7 @@ public class CommandProcessor {
 
         log.info("Bot added to group: {} (ID: {})", groupName, chatId);
         chatService.addChat(update);
-        return List.of(messageBuilderFactory.createTextMessageBuilder(chatId)
+        return List.of(messageBuilderFactory.createBuilder(chatId, TextMessageBuilder.class)
                 .withReplyToMessageId(messageId)
                 .withText(dailyMessageService.getKeyNameSentence("welcome_message").formatted(firstName))
                 .build());

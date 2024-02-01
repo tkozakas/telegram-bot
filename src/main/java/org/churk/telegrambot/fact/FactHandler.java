@@ -2,10 +2,10 @@ package org.churk.telegrambot.fact;
 
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.handler.Handler;
-import org.churk.telegrambot.utility.HandlerContext;
 import org.churk.telegrambot.handler.Command;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.message.DailyMessageService;
+import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -26,6 +26,10 @@ public class FactHandler extends Handler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<Fact> facts = factService.getAllFacts();
+        if (facts.isEmpty()) {
+            return getReplyMessage(chatId, messageId,
+                    "No facts available (use /factadd <fact> to add some)");
+        }
         String randomFact = facts.get(ThreadLocalRandom.current().nextInt(facts.size())).getComment();
 
         return context.isReply() ?

@@ -1,10 +1,10 @@
 package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.builder.*;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.sticker.Sticker;
 import org.churk.telegrambot.message.DailyMessageService;
+import org.churk.telegrambot.sticker.Sticker;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
 import java.io.File;
@@ -22,56 +22,55 @@ public abstract class Handler implements CommandHandler {
         this.messageBuilderFactory = messageBuilderFactory;
     }
 
+    protected <T> List<Validable> createMessage(Long chatId, MessageBuilderFunction<T> builderFunction, Class<T> builderClass) {
+        T builder = messageBuilderFactory.createBuilder(chatId, builderClass);
+        return List.of(builderFunction.build(builder));
+    }
+
+
     protected List<Validable> getReplyMessage(Long chatId, Integer messageId, String s) {
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
+        return createMessage(chatId, builder -> builder
                 .withReplyToMessageId(messageId)
                 .withText(s)
-                .build());
+                .build(), TextMessageBuilder.class);
     }
 
     protected List<Validable> getMessage(Long chatId, String s) {
-        return List.of(messageBuilderFactory
-                .createTextMessageBuilder(chatId)
+        return createMessage(chatId, builder -> builder
                 .withText(s)
-                .build());
+                .build(), TextMessageBuilder.class);
     }
 
     protected List<Validable> getAnimationMessage(Long chatId, File file, String caption) {
-        return List.of(messageBuilderFactory
-                .createAnimationMessageBuilder(chatId)
+        return createMessage(chatId, builder -> builder
                 .withAnimation(file)
                 .withCaption(caption)
-                .build());
+                .build(), AnimationMessageBuilder.class);
     }
 
-    protected List<Validable> getPhotoMessage(Long chatId, File file,  String caption) {
-        return List.of(messageBuilderFactory
-                .createPhotoMessageBuilder(chatId)
+    protected List<Validable> getPhotoMessage(Long chatId, File file, String caption) {
+        return createMessage(chatId, builder -> builder
                 .withPhoto(file)
                 .withCaption(caption)
-                .build());
+                .build(), PhotoMessageBuilder.class);
     }
 
     protected List<Validable> getStickerMessage(Long chatId, Sticker randomSticker) {
-        return List.of(messageBuilderFactory
-                .createStickerMessageBuilder(chatId)
+        return createMessage(chatId, builder -> builder
                 .withSticker(randomSticker.getFileId())
-                .build());
+                .build(), StickerMessageBuilder.class);
     }
 
     protected List<Validable> getReplySticker(Long chatId, Sticker randomSticker, Integer messageId) {
-        return List.of(messageBuilderFactory
-                .createStickerMessageBuilder(chatId)
+        return createMessage(chatId, builder -> builder
                 .withSticker(randomSticker.getFileId())
                 .withReplyToMessageId(messageId)
-                .build());
+                .build(), StickerMessageBuilder.class);
     }
 
     protected List<Validable> getVideoMessage(Long chatId, File existingFile) {
-        return List.of(messageBuilderFactory
-                .createVideoMessage(chatId)
+        return createMessage(chatId, builder -> builder
                 .withVideo(existingFile)
-                .build());
+                .build(), VideoMessageBuilder.class);
     }
 }

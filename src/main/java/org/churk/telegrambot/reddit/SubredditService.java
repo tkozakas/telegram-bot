@@ -55,6 +55,8 @@ public class SubredditService {
             String jsonResponse = redditClient.getRedditMemeFromSubreddit(subreddit);
             ObjectMapper mapper = new ObjectMapper();
             return Optional.ofNullable(mapper.readValue(jsonResponse, RedditPost.class));
+        } catch (FeignException.NotFound e) {
+            log.error("Subreddit not found", e);
         } catch (FeignException e) {
             log.error("Error with Feign client", e);
         } catch (JsonProcessingException e) {
