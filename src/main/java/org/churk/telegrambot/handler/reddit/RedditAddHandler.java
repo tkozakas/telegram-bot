@@ -24,16 +24,15 @@ public class RedditAddHandler extends Handler {
 
     @Override
     public List<Validable> handle(HandlerContext context) {
-        String subreddit = context.getArgs().getFirst();
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-
-        if (subreddit.startsWith(REDDIT_URL)) {
-            subreddit = subreddit.replace(REDDIT_URL, "");
-        }
-        if (subreddit.isEmpty() || !subredditService.isValidSubreddit(subreddit)) {
+        if (context.getArgs().isEmpty() || !subredditService.isValidSubreddit(context.getArgs().getFirst())) {
             return getReplyMessage(chatId, messageId,
                     "Please provide a valid name /redditadd <subreddit>");
+        }
+        String subreddit = context.getArgs().getFirst();
+        if (subreddit.startsWith(REDDIT_URL)) {
+            subreddit = subreddit.replace(REDDIT_URL, "");
         }
         if (subredditService.existsByChatIdAndSubredditName(chatId, subreddit)) {
             return getReplyMessage(chatId, messageId,

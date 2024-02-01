@@ -24,16 +24,15 @@ public class StickerAddHandler extends Handler {
 
     @Override
     public List<Validable> handle(HandlerContext context) {
-        String stickerSetName = context.getArgs().getFirst();
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-
+        if (context.getArgs().isEmpty() || !stickerService.isValidSticker(context.getArgs().getFirst())) {
+            return getReplyMessage(chatId, messageId,
+                    "Please provide a valid name /stickeradd <name>");
+        }
+        String stickerSetName = context.getArgs().getFirst();
         if (stickerSetName.startsWith(STICKER_SET_URL)) {
             stickerSetName = stickerSetName.replace(STICKER_SET_URL, "");
-        }
-        if (stickerSetName.isEmpty() || !stickerService.isValidSticker(stickerSetName)) {
-            return getReplyMessage(chatId, messageId,
-                    "Please provide a valid name /stickeradd <sticker_name>");
         }
         if (stickerService.existsByChatIdAndStickerName(chatId, stickerSetName)) {
             return getReplyMessage(chatId, messageId,
