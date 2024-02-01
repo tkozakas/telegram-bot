@@ -1,4 +1,4 @@
-FROM maven:3-eclipse-temurin-21 AS builder
+FROM docker.io/maven:3-eclipse-temurin-21 AS builder
 WORKDIR /app
 
 COPY pom.xml .
@@ -9,7 +9,7 @@ RUN mvn package -DskipTests
 
 RUN java -Djarmode=layertools -jar target/telegram-bot*.jar extract
 
-FROM eclipse-temurin:21-jre
+FROM docker.io/eclipse-temurin:21-jre
 WORKDIR /app
 
 RUN apt-get -y update && apt-get -y upgrade \
