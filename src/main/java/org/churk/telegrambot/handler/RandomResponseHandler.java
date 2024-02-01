@@ -1,9 +1,11 @@
 package org.churk.telegrambot.handler;
 
-import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.fact.FactHandler;
 import org.churk.telegrambot.handler.sticker.StickerHandler;
 import org.churk.telegrambot.model.Command;
+import org.churk.telegrambot.service.DailyMessageService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -12,11 +14,16 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
-@RequiredArgsConstructor
 public class RandomResponseHandler extends Handler {
     private final FactHandler factHandler;
     private final StickerHandler stickerHandler;
     private final Random random = new Random();
+
+    public RandomResponseHandler(BotProperties botProperties, DailyMessageService dailyMessageService, MessageBuilderFactory messageBuilderFactory, FactHandler factHandler, StickerHandler stickerHandler) {
+        super(botProperties, dailyMessageService, messageBuilderFactory);
+        this.factHandler = factHandler;
+        this.stickerHandler = stickerHandler;
+    }
 
     private boolean shouldTriggerRandomResponse() {
         return random.nextInt(100) < botProperties.getRandomResponseChance() * 10;

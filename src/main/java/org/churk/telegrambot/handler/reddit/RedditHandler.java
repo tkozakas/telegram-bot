@@ -1,10 +1,12 @@
 package org.churk.telegrambot.handler.reddit;
 
-import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.handler.HandlerContext;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Subreddit;
+import org.churk.telegrambot.service.DailyMessageService;
 import org.churk.telegrambot.service.SubredditService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -15,9 +17,13 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
-@RequiredArgsConstructor
 public class RedditHandler extends Handler {
     private final SubredditService subredditService;
+
+    public RedditHandler(BotProperties botProperties, DailyMessageService dailyMessageService, MessageBuilderFactory messageBuilderFactory, SubredditService subredditService) {
+        super(botProperties, dailyMessageService, messageBuilderFactory);
+        this.subredditService = subredditService;
+    }
 
     @Override
     public List<Validable> handle(HandlerContext context) {
