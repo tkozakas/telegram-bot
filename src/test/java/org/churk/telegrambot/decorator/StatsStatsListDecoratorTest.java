@@ -1,6 +1,7 @@
 package org.churk.telegrambot.decorator;
 
-import org.churk.telegrambot.model.Stat;
+import org.churk.telegrambot.builder.StatsListDecorator;
+import org.churk.telegrambot.stats.Stat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

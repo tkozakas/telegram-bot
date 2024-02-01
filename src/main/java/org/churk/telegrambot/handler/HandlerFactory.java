@@ -1,6 +1,5 @@
 package org.churk.telegrambot.handler;
 
-import org.churk.telegrambot.model.Command;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;

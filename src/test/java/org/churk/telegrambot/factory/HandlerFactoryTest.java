@@ -4,7 +4,7 @@ import org.churk.telegrambot.handler.CommandHandler;
 import org.churk.telegrambot.handler.HandlerFactory;
 import org.churk.telegrambot.handler.RandomResponseHandler;
 import org.churk.telegrambot.handler.StartHandler;
-import org.churk.telegrambot.model.Command;
+import org.churk.telegrambot.handler.Command;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

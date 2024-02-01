@@ -2,8 +2,8 @@ package org.churk.telegrambot.handler;
 
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.service.DailyMessageService;
+import org.churk.telegrambot.message.DailyMessageService;
+import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 

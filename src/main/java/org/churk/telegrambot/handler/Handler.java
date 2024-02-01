@@ -3,8 +3,8 @@ package org.churk.telegrambot.handler;
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.model.Sticker;
-import org.churk.telegrambot.service.DailyMessageService;
+import org.churk.telegrambot.sticker.Sticker;
+import org.churk.telegrambot.message.DailyMessageService;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
 import java.io.File;
