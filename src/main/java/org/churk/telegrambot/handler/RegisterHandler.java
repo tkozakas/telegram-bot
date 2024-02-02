@@ -28,12 +28,12 @@ public class RegisterHandler extends Handler {
     private List<Validable> getRegister(Long chatId, Long userId, String firstName, Integer messageId) {
         Optional<Stat> userStats = statsService.getStatsByChatIdAndUserId(chatId, userId);
         if (userStats.isPresent()) {
-            String text = dailyMessageService.getKeyNameSentence("registered_header").formatted(firstName);
-            return getReplyMessage(chatId, messageId, text);
+            return getReplyMessage(chatId, messageId,
+                    dailyMessageService.getKeyNameSentence("registered_header").formatted(firstName));
         }
         statsService.registerByUserIdAndChatId(userId, chatId, firstName);
-        String text = dailyMessageService.getKeyNameSentence("registered_now_header").formatted(firstName);
-        return getReplyMessage(chatId, messageId, text);
+        return getReplyMessage(chatId, messageId,
+                dailyMessageService.getKeyNameSentence("registered_now_header").formatted(firstName));
     }
 
     @Override
