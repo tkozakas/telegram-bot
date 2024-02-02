@@ -2,7 +2,7 @@ package org.churk.telegrambot.reddit;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.handler.Command;
-import org.churk.telegrambot.handler.Handler;
+import org.churk.telegrambot.handler.MessageCreationService;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 @RequiredArgsConstructor
-public class RedditHandler extends Handler {
+public class RedditMessageCreationService extends MessageCreationService {
     private final SubredditService subredditService;
 
     @Override

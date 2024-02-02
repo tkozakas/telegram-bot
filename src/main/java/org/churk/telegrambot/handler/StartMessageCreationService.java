@@ -9,7 +9,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class StartHandler extends Handler {
+public class StartMessageCreationService extends MessageCreationService {
     @Override
     public List<Validable> handle(HandlerContext context) {
         return List.of();

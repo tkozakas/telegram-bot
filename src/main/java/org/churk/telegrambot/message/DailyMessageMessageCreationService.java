@@ -2,7 +2,7 @@ package org.churk.telegrambot.message;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.handler.Command;
-import org.churk.telegrambot.handler.Handler;
+import org.churk.telegrambot.handler.MessageCreationService;
 import org.churk.telegrambot.stats.Stat;
 import org.churk.telegrambot.stats.StatsService;
 import org.churk.telegrambot.utility.HandlerContext;
@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 @RequiredArgsConstructor
-public class DailyMessageHandler extends Handler {
+public class DailyMessageMessageCreationService extends MessageCreationService {
     private static final boolean ENABLED = true;
     private final StatsService statsService;
 

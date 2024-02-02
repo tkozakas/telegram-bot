@@ -16,7 +16,7 @@ import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class Handler implements CommandHandler {
+public abstract class MessageCreationService implements CommandHandler {
     @Autowired
     protected BotProperties botProperties;
     @Autowired

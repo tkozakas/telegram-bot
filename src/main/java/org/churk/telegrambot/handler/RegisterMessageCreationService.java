@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class RegisterHandler extends Handler {
+public class RegisterMessageCreationService extends MessageCreationService {
     private final StatsService statsService;
 
     @Override
