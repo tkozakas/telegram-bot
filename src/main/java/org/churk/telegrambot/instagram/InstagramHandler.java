@@ -1,10 +1,8 @@
 package org.churk.telegrambot.instagram;
 
-import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.handler.Handler;
+import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.handler.Command;
-import org.churk.telegrambot.message.DailyMessageService;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -16,14 +14,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
+@RequiredArgsConstructor
 public class InstagramHandler extends Handler {
     private final Pattern pattern = Pattern.compile("https://www\\.instagram\\.com/(?:p|reel|tv)/([^/?]+)/");
     private final InstagramService instagramService;
-
-    public InstagramHandler(BotProperties botProperties, DailyMessageService dailyMessageService, MessageBuilderFactory messageBuilderFactory, InstagramService instagramService) {
-        super(botProperties, dailyMessageService, messageBuilderFactory);
-        this.instagramService = instagramService;
-    }
 
     @Override
     public List<Validable> handle(HandlerContext context) {

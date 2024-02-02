@@ -1,26 +1,26 @@
 package org.churk.telegrambot.handler;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.churk.telegrambot.builder.*;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.message.DailyMessageService;
 import org.churk.telegrambot.sticker.Sticker;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
 import java.io.File;
 import java.util.List;
 
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public abstract class Handler implements CommandHandler {
-    protected final BotProperties botProperties;
-    protected final DailyMessageService dailyMessageService;
-    protected final MessageBuilderFactory messageBuilderFactory;
-
-    protected Handler(DailyMessageService dailyMessageService, BotProperties botProperties, MessageBuilderFactory messageBuilderFactory) {
-        this.dailyMessageService = dailyMessageService;
-        this.botProperties = botProperties;
-        this.messageBuilderFactory = messageBuilderFactory;
-    }
+    @Autowired
+    protected BotProperties botProperties;
+    @Autowired
+    protected DailyMessageService dailyMessageService;
+    @Autowired
+    protected MessageBuilderFactory messageBuilderFactory;
 
     protected <T> List<Validable> createMessage(Long chatId, MessageBuilderFunction<T> builderFunction, Class<T> builderClass) {
         T builder = messageBuilderFactory.createBuilder(chatId, builderClass);

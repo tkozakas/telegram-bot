@@ -1,8 +1,7 @@
 package org.churk.telegrambot.message;
 
-import org.churk.telegrambot.builder.MessageBuilderFactory;
+import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.builder.TextMessageBuilder;
-import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.Command;
 import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.stats.Stat;
@@ -18,14 +17,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class DailyMessageHandler extends Handler {
     private static final boolean ENABLED = false;
     private final StatsService statsService;
-
-    public DailyMessageHandler(BotProperties botProperties, DailyMessageService dailyMessageService, MessageBuilderFactory messageBuilderFactory, StatsService statsService) {
-        super(botProperties, dailyMessageService, messageBuilderFactory);
-        this.statsService = statsService;
-    }
 
     @Override
     public List<Validable> handle(HandlerContext context) {

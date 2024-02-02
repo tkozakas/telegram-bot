@@ -1,10 +1,8 @@
 package org.churk.telegrambot.fact;
 
-import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.config.BotProperties;
+import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.handler.Command;
 import org.churk.telegrambot.handler.Handler;
-import org.churk.telegrambot.message.DailyMessageService;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -13,13 +11,9 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
+@RequiredArgsConstructor
 public class FactHandler extends Handler {
     private final FactService factService;
-
-    public FactHandler(BotProperties botProperties, DailyMessageService dailyMessageService, MessageBuilderFactory messageBuilderFactory, FactService factService) {
-        super(botProperties, dailyMessageService, messageBuilderFactory);
-        this.factService = factService;
-    }
 
     @Override
     public List<Validable> handle(HandlerContext context) {

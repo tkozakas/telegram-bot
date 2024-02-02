@@ -1,24 +1,18 @@
 package org.churk.telegrambot.sticker;
 
-import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.config.BotProperties;
+import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.handler.Command;
 import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.utility.HandlerContext;
-import org.churk.telegrambot.handler.Command;
-import org.churk.telegrambot.message.DailyMessageService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class StickerListHandler extends Handler {
     private final StickerService stickerService;
-
-    public StickerListHandler(DailyMessageService dailyMessageService, BotProperties botProperties, MessageBuilderFactory messageBuilderFactory, StickerService stickerService) {
-        super(dailyMessageService, botProperties, messageBuilderFactory);
-        this.stickerService = stickerService;
-    }
 
     @Override
     public List<Validable> handle(HandlerContext context) {

@@ -1,9 +1,7 @@
 package org.churk.telegrambot.handler;
 
-import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.config.BotProperties;
+import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.stats.Stat;
-import org.churk.telegrambot.message.DailyMessageService;
 import org.churk.telegrambot.stats.StatsService;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
@@ -13,13 +11,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class RegisterHandler extends Handler {
     private final StatsService statsService;
-
-    public RegisterHandler(BotProperties botProperties, DailyMessageService dailyMessageService, MessageBuilderFactory messageBuilderFactory, StatsService statsService) {
-        super(botProperties, dailyMessageService, messageBuilderFactory);
-        this.statsService = statsService;
-    }
 
     @Override
     public List<Validable> handle(HandlerContext context) {
