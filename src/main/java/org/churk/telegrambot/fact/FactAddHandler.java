@@ -2,10 +2,10 @@ package org.churk.telegrambot.fact;
 
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.handler.Handler;
-import org.churk.telegrambot.utility.HandlerContext;
 import org.churk.telegrambot.handler.Command;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.message.DailyMessageService;
+import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -30,9 +30,12 @@ public class FactAddHandler extends Handler {
             return getReplyMessage(chatId, messageId,
                     "Save a fact using /factadd <fact>");
         }
-        factService.addFact(chatId, args.stream().reduce((a, b) -> a + " " + b).get());
+        String fact = args.stream()
+                .reduce((a, b) -> a + " " + b)
+                .orElseGet(String::new);
+        factService.addFact(chatId, fact);
         return getReplyMessage(chatId, messageId,
-                "Fact: " + args.getFirst() + " added");
+                "Fact: " + fact + " added");
     }
 
     @Override
