@@ -14,11 +14,9 @@ public class ChatService {
     public void addChat(Update update) {
         chatRepository.save(new Chat(update.getMessage().getChatId(), update));
     }
-
     public List<Chat> getAllChats() {
         return chatRepository.findAll();
     }
-
     public boolean isChatExists(Long chatId) {
         return chatRepository.existsById(chatId);
     }

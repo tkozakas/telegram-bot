@@ -23,24 +23,32 @@ public class StatsYearHandler extends Handler {
         List<String> args = context.getArgs();
 
         int year;
-        if (!args.isEmpty()) {
-            try {
-                year = Integer.parseInt(args.getFirst());
-            } catch (NumberFormatException e) {
-                return getReplyMessage(chatId, messageId,
-                        "Please provide a valid year (/stats <year>)");
-            }
-        } else {
-            year = LocalDateTime.now().getYear();
+        try {
+            year = determineYear(args);
+        } catch (NumberFormatException e) {
+            return getReplyMessage(chatId, messageId,
+                    "Please provide a valid year (/stats <year>)");
         }
 
         List<Stat> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
+
+        if (stats.isEmpty()) {
+            return getReplyMessage(chatId, messageId,
+                    "No stats found for " + year);
+        }
+
         String statsTable = dailyMessageService.getKeyNameSentence("stats_table");
         String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
         String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
         String text = new StatsListDecorator(stats).getFormattedStats(statsTable, header, footer, 10);
 
         return getMessage(chatId, text);
+    }
+
+    private int determineYear(List<String> args) throws NumberFormatException {
+        return args.isEmpty() ?
+                LocalDateTime.now().getYear() :
+                Integer.parseInt(args.getFirst());
     }
 
     @Override

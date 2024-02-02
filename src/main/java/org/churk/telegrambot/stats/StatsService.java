@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 public class StatsService {
     private final StatsRepository statsRepository;
 
-
     public Optional<Stat> getStatsByChatIdAndUserId(Long chatId, Long userId) {
         return statsRepository.getStatsByChatIdAndUserId(chatId, userId);
     }
