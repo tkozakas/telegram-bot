@@ -10,7 +10,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class HelpMessageCreationService extends MessageCreationService {
+public class HelpHandler extends Handler {
     @Override
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();

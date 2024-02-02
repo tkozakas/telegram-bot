@@ -2,7 +2,7 @@ package org.churk.telegrambot.fact;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.handler.Command;
-import org.churk.telegrambot.handler.MessageCreationService;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class FactAddMessageCreationService extends MessageCreationService {
+public class FactAddHandler extends Handler {
     private final FactService factService;
 
     @Override

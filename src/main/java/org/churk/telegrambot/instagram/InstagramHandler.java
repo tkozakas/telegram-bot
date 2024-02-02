@@ -2,7 +2,7 @@ package org.churk.telegrambot.instagram;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.handler.Command;
-import org.churk.telegrambot.handler.MessageCreationService;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
-public class InstagramMessageCreationService extends MessageCreationService {
+public class InstagramHandler extends Handler {
     private final Pattern pattern = Pattern.compile("https://www\\.instagram\\.com/(?:p|reel|tv)/([^/?]+)/");
     private final InstagramService instagramService;
 

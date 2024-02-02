@@ -1,8 +1,8 @@
 package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
-import org.churk.telegrambot.fact.FactMessageCreationService;
-import org.churk.telegrambot.sticker.StickerMessageCreationService;
+import org.churk.telegrambot.fact.FactHandler;
+import org.churk.telegrambot.sticker.StickerHandler;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -13,9 +13,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
-public class RandomResponseMessageCreationService extends MessageCreationService {
-    private final FactMessageCreationService factHandler;
-    private final StickerMessageCreationService stickerHandler;
+public class RandomResponseHandler extends Handler {
+    private final FactHandler factHandler;
+    private final StickerHandler stickerHandler;
     private final Random random = new Random();
 
     private boolean shouldTriggerRandomResponse() {

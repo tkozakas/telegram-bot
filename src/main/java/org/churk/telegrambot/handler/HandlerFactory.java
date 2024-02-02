@@ -8,10 +8,10 @@ import java.util.Map;
 
 @Service
 public class HandlerFactory {
-    private final RandomResponseMessageCreationService randomResponseHandler;
+    private final RandomResponseHandler randomResponseHandler;
     private final Map<Command, CommandHandler> handlerMap = new EnumMap<>(Command.class);
 
-    public HandlerFactory(List<CommandHandler> handlers, RandomResponseMessageCreationService randomResponseHandler) {
+    public HandlerFactory(List<CommandHandler> handlers, RandomResponseHandler randomResponseHandler) {
         this.randomResponseHandler = randomResponseHandler;
         handlers.stream()
                 .filter(handler -> handler.getSupportedCommand() != null)

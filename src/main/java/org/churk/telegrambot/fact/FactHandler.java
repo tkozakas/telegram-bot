@@ -1,8 +1,8 @@
-package org.churk.telegrambot.sticker;
+package org.churk.telegrambot.fact;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.handler.Command;
-import org.churk.telegrambot.handler.MessageCreationService;
+import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -12,26 +12,27 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 @RequiredArgsConstructor
-public class StickerMessageCreationService extends MessageCreationService {
-    private final StickerService stickerService;
+public class FactHandler extends Handler {
+    private final FactService factService;
 
     @Override
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
-        List<Sticker> stickers = stickerService.getStickerSets(chatId);
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-        if (stickers.isEmpty()) {
+        List<Fact> facts = factService.getAllFacts();
+        if (facts.isEmpty()) {
             return getReplyMessage(chatId, messageId,
-                    "No sticker sets available");
+                    "No facts available (use /factadd <fact> to add some)");
         }
-        Sticker randomSticker = stickers.get(ThreadLocalRandom.current().nextInt(stickers.size()));
+        String randomFact = facts.get(ThreadLocalRandom.current().nextInt(facts.size())).getComment();
+
         return context.isReply() ?
-                getReplySticker(chatId, messageId, randomSticker) :
-                getSticker(chatId, randomSticker);
+                getReplyMessage(chatId, messageId, randomFact) :
+                getMessage(chatId, randomFact);
     }
 
     @Override
     public Command getSupportedCommand() {
-        return Command.STICKER;
+        return Command.FACT;
     }
 }
