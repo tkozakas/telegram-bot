@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class DailyMessageHandler extends Handler {
-    private static final boolean ENABLED = true;
+    private static final boolean ENABLED = false;
     private final StatsService statsService;
 
     public DailyMessageHandler(BotProperties botProperties, DailyMessageService dailyMessageService, MessageBuilderFactory messageBuilderFactory, StatsService statsService) {
@@ -57,7 +57,8 @@ public class DailyMessageHandler extends Handler {
         }
 
         List<Sentence> sentences = dailyMessageService.getRandomGroupSentences();
-        sentences.getLast().setText(sentences.getLast().getText() + randomWinner);
+        String mentionedUser = "[" + randomWinner.getFirstName() + "](tg://user?id=" + randomWinner.getUserId() + ")";
+        sentences.getLast().setText(sentences.getLast().getText() + mentionedUser);
         return sentences.stream()
                 .map(sentence -> messageBuilderFactory.createBuilder(chatId, TextMessageBuilder.class)
                         .withText(sentence.getText().formatted(botProperties.getWinnerName()))
