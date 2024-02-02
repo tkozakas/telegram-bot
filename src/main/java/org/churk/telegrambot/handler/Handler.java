@@ -33,7 +33,8 @@ public abstract class Handler implements CommandHandler {
         return createMessage(MessageType.TEXT, Map.of(
                 MessageParams.CHAT_ID, chatId,
                 MessageParams.TEXT, message,
-                MessageParams.REPLY_TO_MESSAGE_ID, messageId
+                MessageParams.REPLY_TO_MESSAGE_ID, messageId,
+                MessageParams.MARKDOWN, true
         ));
     }
 
