@@ -24,7 +24,7 @@ public class RedditListHandler extends Handler {
                 subreddits.stream()
                         .limit(20)
                         .map(Subreddit::getSubredditName)
-                        .reduce("", (a, b) -> a + "- /r" + b + "\n");
+                        .reduce("", (a, b) -> a + "- r/" + b + "\n");
 
         return subreddits.isEmpty() ?
                 getReplyMessage(chatId, messageId, "No subreddits available") :

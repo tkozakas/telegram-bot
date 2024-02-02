@@ -41,7 +41,7 @@ public abstract class Handler implements CommandHandler {
     protected List<Validable> getReplySticker(Long chatId, Integer messageId, Sticker sticker) {
         return createMessage(MessageType.STICKER, Map.of(
                 MessageParams.CHAT_ID, chatId,
-                MessageParams.STICKER, sticker,
+                MessageParams.STICKER, sticker.getFileId(),
                 MessageParams.REPLY_TO_MESSAGE_ID, messageId
         ));
     }
@@ -57,7 +57,7 @@ public abstract class Handler implements CommandHandler {
     protected List<Validable> getSticker(Long chatId, Sticker sticker) {
         return createMessage(MessageType.STICKER, Map.of(
                 MessageParams.CHAT_ID, chatId,
-                MessageParams.STICKER, sticker
+                MessageParams.STICKER, sticker.getFileId()
         ));
     }
 
