@@ -1,7 +1,6 @@
 package org.churk.telegrambot.message;
 
 import lombok.RequiredArgsConstructor;
-import org.churk.telegrambot.builder.TextMessageBuilder;
 import org.churk.telegrambot.handler.Command;
 import org.churk.telegrambot.handler.Handler;
 import org.churk.telegrambot.stats.Stat;
@@ -14,12 +13,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class DailyMessageHandler extends Handler {
-    private static final boolean ENABLED = false;
+    private static final boolean ENABLED = true;
     private final StatsService statsService;
 
     @Override
@@ -54,11 +52,11 @@ public class DailyMessageHandler extends Handler {
         List<Sentence> sentences = dailyMessageService.getRandomGroupSentences();
         String mentionedUser = "[" + randomWinner.getFirstName() + "](tg://user?id=" + randomWinner.getUserId() + ")";
         sentences.getLast().setText(sentences.getLast().getText() + mentionedUser);
-        return sentences.stream()
-                .map(sentence -> messageBuilderFactory.createBuilder(chatId, TextMessageBuilder.class)
-                        .withText(sentence.getText().formatted(botProperties.getWinnerName()))
-                        .build())
-                .collect(Collectors.toList());
+        return sentences
+                .stream()
+                .map(sent -> sent.getText().formatted(botProperties.getWinnerName()))
+                .map(text -> getMessage(chatId, text).getFirst())
+                .toList();
     }
 
     @Override

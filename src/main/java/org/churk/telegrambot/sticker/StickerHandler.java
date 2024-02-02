@@ -26,8 +26,8 @@ public class StickerHandler extends Handler {
         }
         Sticker randomSticker = stickers.get(ThreadLocalRandom.current().nextInt(stickers.size()));
         return context.isReply() ?
-                getReplySticker(chatId, randomSticker, messageId) :
-                getStickerMessage(chatId, randomSticker);
+                getReplySticker(chatId, messageId, randomSticker) :
+                getSticker(chatId, randomSticker);
     }
 
     @Override

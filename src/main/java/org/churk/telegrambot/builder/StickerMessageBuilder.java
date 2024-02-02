@@ -1,27 +1,28 @@
 package org.churk.telegrambot.builder;
 
+import lombok.NoArgsConstructor;
+import org.churk.telegrambot.handler.MessageParams;
+import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 
-public class StickerMessageBuilder {
-    private final SendSticker message;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 
-    public StickerMessageBuilder(Long chatId) {
-        this.message = new SendSticker();
-        this.message.setChatId(String.valueOf(chatId));
-    }
+@NoArgsConstructor
+public class StickerMessageBuilder implements MessageBuilder {
+    private final SendSticker message = new SendSticker();
 
-    public StickerMessageBuilder withSticker(String sticker) {
-        message.setSticker(new InputFile(sticker));
-        return this;
-    }
-
-    public StickerMessageBuilder withReplyToMessageId(Integer messageId) {
-        message.setReplyToMessageId(messageId);
-        return this;
-    }
-
-    public SendSticker build() {
-        return message;
+    public List<Validable> build(Map<MessageParams, Object> params) {
+        params.forEach((key, value) -> {
+            switch (key) {
+                case MessageParams.CHAT_ID -> message.setChatId(String.valueOf(value));
+                case MessageParams.STICKER -> message.setSticker(new InputFile((File) value));
+                case MessageParams.REPLY_TO_MESSAGE_ID -> message.setReplyToMessageId((Integer) value);
+                default -> throw new IllegalStateException("Unexpected value: " + key);
+            }
+        });
+        return List.of(message);
     }
 }

@@ -46,8 +46,8 @@ public class RedditHandler extends Handler {
                 existingFile.deleteOnExit();
                 String fileName = file.get().getName().toLowerCase();
                 return fileName.endsWith(".gif") ?
-                        getAnimationMessage(chatId, existingFile, "From r/%s".formatted(subreddit)) :
-                        getPhotoMessage(chatId, existingFile, "From r/%s".formatted(subreddit));
+                        getAnimation(chatId, existingFile, "From r/%s".formatted(subreddit)) :
+                        getPhoto(chatId, existingFile, "From r/%s".formatted(subreddit));
             }
         } catch (Exception e) {
             return getReplyMessage(chatId, messageId, "Something went wrong, please try again later");

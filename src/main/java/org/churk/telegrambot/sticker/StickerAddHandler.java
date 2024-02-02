@@ -19,6 +19,7 @@ public class StickerAddHandler extends Handler {
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
+
         if (context.getArgs().isEmpty() || !stickerService.isValidSticker(context.getArgs().getFirst())) {
             return getReplyMessage(chatId, messageId,
                     "Please provide a valid name /stickeradd <name>");

@@ -3,13 +3,10 @@ package org.churk.telegrambot.utility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
-import org.churk.telegrambot.builder.TextMessageBuilder;
-import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.handler.CommandHandler;
-import org.churk.telegrambot.handler.HandlerFactory;
 import org.churk.telegrambot.chat.Chat;
-import org.churk.telegrambot.handler.Command;
 import org.churk.telegrambot.chat.ChatService;
+import org.churk.telegrambot.config.BotProperties;
+import org.churk.telegrambot.handler.*;
 import org.churk.telegrambot.message.DailyMessageService;
 import org.churk.telegrambot.stats.StatsService;
 import org.springframework.stereotype.Service;
@@ -18,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -56,10 +54,11 @@ public class CommandProcessor {
 
         log.info("Bot added to group: {} (ID: {})", groupName, chatId);
         chatService.addChat(update);
-        return List.of(messageBuilderFactory.createBuilder(chatId, TextMessageBuilder.class)
-                .withReplyToMessageId(messageId)
-                .withText(dailyMessageService.getKeyNameSentence("welcome_message").formatted(firstName))
-                .build());
+        return messageBuilderFactory.getBuilder(MessageType.TEXT).build(Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.REPLY_TO_MESSAGE_ID, messageId,
+                MessageParams.TEXT, dailyMessageService.getKeyNameSentence("welcome_message").formatted(firstName)
+        ));
     }
 
     public List<Validable> handleScheduledCommand(Command command) {

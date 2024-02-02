@@ -2,7 +2,8 @@ package org.churk.telegrambot.handler;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.churk.telegrambot.builder.*;
+import org.churk.telegrambot.builder.MessageBuilder;
+import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.message.DailyMessageService;
 import org.churk.telegrambot.sticker.Sticker;
@@ -11,6 +12,7 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,55 +24,62 @@ public abstract class Handler implements CommandHandler {
     @Autowired
     protected MessageBuilderFactory messageBuilderFactory;
 
-    protected <T> List<Validable> createMessage(Long chatId, MessageBuilderFunction<T> builderFunction, Class<T> builderClass) {
-        T builder = messageBuilderFactory.createBuilder(chatId, builderClass);
-        return List.of(builderFunction.build(builder));
+    protected List<Validable> createMessage(MessageType messageType, Map<MessageParams, Object> params) {
+        MessageBuilder builder = messageBuilderFactory.getBuilder(messageType);
+        return builder.build(params);
     }
 
-
-    protected List<Validable> getReplyMessage(Long chatId, Integer messageId, String s) {
-        return createMessage(chatId, builder -> builder
-                .withReplyToMessageId(messageId)
-                .withText(s)
-                .build(), TextMessageBuilder.class);
+    protected List<Validable> getReplyMessage(Long chatId, Integer messageId, String message) {
+        return createMessage(MessageType.TEXT, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.TEXT, message,
+                MessageParams.REPLY_TO_MESSAGE_ID, messageId
+        ));
     }
 
-    protected List<Validable> getMessage(Long chatId, String s) {
-        return createMessage(chatId, builder -> builder
-                .withText(s)
-                .build(), TextMessageBuilder.class);
+    protected List<Validable> getReplySticker(Long chatId, Integer messageId, Sticker sticker) {
+        return createMessage(MessageType.STICKER, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.STICKER, sticker,
+                MessageParams.REPLY_TO_MESSAGE_ID, messageId
+        ));
     }
 
-    protected List<Validable> getAnimationMessage(Long chatId, File file, String caption) {
-        return createMessage(chatId, builder -> builder
-                .withAnimation(file)
-                .withCaption(caption)
-                .build(), AnimationMessageBuilder.class);
+    protected List<Validable> getMessage(Long chatId, String message) {
+        return createMessage(MessageType.TEXT, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.TEXT, message,
+                MessageParams.MARKDOWN, true
+        ));
     }
 
-    protected List<Validable> getPhotoMessage(Long chatId, File file, String caption) {
-        return createMessage(chatId, builder -> builder
-                .withPhoto(file)
-                .withCaption(caption)
-                .build(), PhotoMessageBuilder.class);
+    protected List<Validable> getSticker(Long chatId, Sticker sticker) {
+        return createMessage(MessageType.STICKER, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.STICKER, sticker
+        ));
     }
 
-    protected List<Validable> getStickerMessage(Long chatId, Sticker randomSticker) {
-        return createMessage(chatId, builder -> builder
-                .withSticker(randomSticker.getFileId())
-                .build(), StickerMessageBuilder.class);
+    protected List<Validable> getAnimation(Long chatId, File file, String caption) {
+        return createMessage(MessageType.ANIMATION, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.ANIMATION, file,
+                MessageParams.CAPTION, caption
+        ));
     }
 
-    protected List<Validable> getReplySticker(Long chatId, Sticker randomSticker, Integer messageId) {
-        return createMessage(chatId, builder -> builder
-                .withSticker(randomSticker.getFileId())
-                .withReplyToMessageId(messageId)
-                .build(), StickerMessageBuilder.class);
+    protected List<Validable> getPhoto(Long chatId, File file, String caption) {
+        return createMessage(MessageType.PHOTO, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.PHOTO, file,
+                MessageParams.CAPTION, caption
+        ));
     }
 
-    protected List<Validable> getVideoMessage(Long chatId, File existingFile) {
-        return createMessage(chatId, builder -> builder
-                .withVideo(existingFile)
-                .build(), VideoMessageBuilder.class);
+    protected List<Validable> getVideo(Long chatId, File file) {
+        return createMessage(MessageType.VIDEO, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.VIDEO, file
+        ));
     }
 }

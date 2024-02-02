@@ -1,21 +1,22 @@
 package org.churk.telegrambot.builder;
 
+import org.churk.telegrambot.handler.MessageType;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MessageBuilderFactory {
-    public <T> T createBuilder(Long chatId, Class<T> builderClass) {
-        if (builderClass == TextMessageBuilder.class) {
-            return (T) new TextMessageBuilder(chatId);
-        } else if (builderClass == PhotoMessageBuilder.class) {
-            return (T) new PhotoMessageBuilder(chatId);
-        } else if (builderClass == AnimationMessageBuilder.class) {
-            return (T) new AnimationMessageBuilder(chatId);
-        } else if (builderClass == StickerMessageBuilder.class) {
-            return (T) new StickerMessageBuilder(chatId);
-        } else if (builderClass == VideoMessageBuilder.class) {
-            return (T) new VideoMessageBuilder(chatId);
+    public MessageBuilder getBuilder(MessageType messageType) {
+        if (messageType == MessageType.TEXT) {
+            return new TextMessageBuilder();
+        } else if (messageType == MessageType.PHOTO) {
+            return new PhotoMessageBuilder();
+        } else if (messageType == MessageType.ANIMATION) {
+            return new AnimationMessageBuilder();
+        } else if (messageType == MessageType.STICKER) {
+            return new StickerMessageBuilder();
+        } else if (messageType == MessageType.VIDEO) {
+            return new VideoMessageBuilder();
         }
-        throw new IllegalArgumentException("Unsupported builder class: " + builderClass.getName());
+        throw new IllegalArgumentException("Unsupported message type: " + messageType);
     }
 }

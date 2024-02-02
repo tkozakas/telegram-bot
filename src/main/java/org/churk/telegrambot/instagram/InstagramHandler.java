@@ -34,7 +34,7 @@ public class InstagramHandler extends Handler {
         Optional<File> file = instagramService.getInstagramMedia(identifier);
         if (file.isPresent()) {
             File existingFile = file.get();
-            return getVideoMessage(chatId, existingFile);
+            return getVideo(chatId, existingFile);
         }
         return List.of();
     }

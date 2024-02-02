@@ -1,31 +1,28 @@
 package org.churk.telegrambot.builder;
 
+import lombok.NoArgsConstructor;
+import org.churk.telegrambot.handler.MessageParams;
+import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-public class TextMessageBuilder {
-    private final SendMessage message;
-    public TextMessageBuilder(Long chatId) {
-        this.message = new SendMessage();
-        this.message.setChatId(String.valueOf(chatId));
-        this.message.enableMarkdown(true);
-    }
+import java.util.List;
+import java.util.Map;
 
-    public TextMessageBuilder withText(String text) {
-        message.setText(text);
-        return this;
-    }
 
-    public TextMessageBuilder withReplyToMessageId(Integer messageId) {
-        message.setReplyToMessageId(messageId);
-        return this;
-    }
+@NoArgsConstructor
+public class TextMessageBuilder implements MessageBuilder {
+    private final SendMessage message = new SendMessage();
 
-    public TextMessageBuilder enableMarkdown(boolean enableMarkdown) {
-        message.enableMarkdown(enableMarkdown);
-        return this;
-    }
-
-    public SendMessage build() {
-        return message;
+    public List<Validable> build(Map<MessageParams, Object> params) {
+        params.forEach((key, value) -> {
+            switch (key) {
+                case MessageParams.CHAT_ID -> message.setChatId(String.valueOf(value));
+                case MessageParams.TEXT -> message.setText((String) value);
+                case MessageParams.REPLY_TO_MESSAGE_ID -> message.setReplyToMessageId((Integer) value);
+                case MessageParams.MARKDOWN -> message.setParseMode("Markdown");
+                default -> throw new IllegalStateException("Unexpected value: " + key);
+            }
+        });
+        return List.of(message);
     }
 }
