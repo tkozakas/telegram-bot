@@ -20,13 +20,13 @@ public class StickerAddHandler extends Handler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
-        if (context.getArgs().isEmpty() || !stickerService.isValidSticker(context.getArgs().getFirst())) {
-            return getReplyMessage(chatId, messageId,
-                    "Please provide a valid name /stickeradd <name>");
-        }
         String stickerSetName = context.getArgs().getFirst();
         if (stickerSetName.startsWith(STICKER_SET_URL)) {
             stickerSetName = stickerSetName.replace(STICKER_SET_URL, "");
+        }
+        if (context.getArgs().isEmpty() || !stickerService.isValidSticker(stickerSetName)) {
+            return getReplyMessage(chatId, messageId,
+                    "Please provide a valid name /stickeradd <name>");
         }
         if (stickerService.existsByChatIdAndStickerName(chatId, stickerSetName)) {
             return getReplyMessage(chatId, messageId,
