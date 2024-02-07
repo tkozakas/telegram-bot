@@ -13,7 +13,6 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.function.UnaryOperator;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,9 +30,14 @@ public abstract class Handler implements CommandHandler {
     }
 
     protected List<Validable> getReplyMessage(Long chatId, Integer messageId, String message) {
-        UnaryOperator<String> escapeMarkdown = name -> name
-                .replaceAll("([_\\\\*\\[\\]()~`#+\\-=|{}.!])", "\\\\$1");
-        message = escapeMarkdown.apply(message);
+        return createMessage(MessageType.TEXT, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.TEXT, message,
+                MessageParams.REPLY_TO_MESSAGE_ID, messageId
+        ));
+    }
+
+    protected List<Validable> getReplyMessageWithMarkdown(Long chatId, Integer messageId, String message) {
         return createMessage(MessageType.TEXT, Map.of(
                 MessageParams.CHAT_ID, chatId,
                 MessageParams.TEXT, message,
@@ -50,11 +54,18 @@ public abstract class Handler implements CommandHandler {
         ));
     }
 
-    protected List<Validable> getMessage(Long chatId, String message) {
+    protected List<Validable> getMessageWithMarkdown(Long chatId, String message) {
         return createMessage(MessageType.TEXT, Map.of(
                 MessageParams.CHAT_ID, chatId,
                 MessageParams.TEXT, message,
                 MessageParams.MARKDOWN, true
+        ));
+    }
+
+    protected List<Validable> getMessage(Long chatId, String message) {
+        return createMessage(MessageType.TEXT, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.TEXT, message
         ));
     }
 

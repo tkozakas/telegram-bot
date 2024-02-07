@@ -27,7 +27,7 @@ public class StatsUserHandler extends Handler {
         String text = dailyMessageService.getKeyNameSentence("me_header")
                 .formatted(firstName, botProperties.getWinnerName(), total);
 
-        return getReplyMessage(chatId, messageId, text);
+        return getReplyMessageWithMarkdown(chatId, messageId, text);
     }
 
     @Override

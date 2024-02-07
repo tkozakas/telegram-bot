@@ -30,7 +30,7 @@ public class StickerListHandler extends Handler {
                 .reduce("", (a, b) -> a + "- " + b + "\n");
         return stickerSets.isEmpty() ?
                 getReplyMessage(chatId, messageId, "No sticker sets available") :
-                getMessage(chatId, message);
+                getMessageWithMarkdown(chatId, message);
     }
 
     @Override

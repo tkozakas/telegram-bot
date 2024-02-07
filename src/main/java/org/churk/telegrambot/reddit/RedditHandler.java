@@ -17,45 +17,61 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RedditHandler extends Handler {
     private final SubredditService subredditService;
 
-    @Override
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-        List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
+        String subreddit = chooseSubreddit(context, chatId);
 
-        String subreddit;
-        if (context.getArgs().isEmpty()) {
-            if (subreddits.isEmpty()) {
-                return getReplyMessage(chatId, messageId,
-                        "No subreddits available (use /redditadd <subreddit>)");
-            }
-            subreddit = subreddits.get(ThreadLocalRandom.current().nextInt(subreddits.size())).getSubredditName();
-        } else {
-            subreddit = context.getArgs().getFirst();
+        if (subreddit == null) {
+            return getReplyMessage(chatId, messageId,
+                    "No subreddits available use /redditadd <subreddit>");
         }
-
         if (!subredditService.isValidSubreddit(subreddit)) {
             return getReplyMessage(chatId, messageId,
-                    "This subreddit does not exist.");
+                    "This subreddit does not exist");
         }
+        return fetchAndProcessMeme(chatId, messageId, subreddit);
+    }
 
+    private String chooseSubreddit(HandlerContext context, Long chatId) {
+        List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
+        if (context.getArgs().isEmpty()) {
+            return subreddits.isEmpty() ? null :
+                    subreddits.get(ThreadLocalRandom.current().nextInt(subreddits.size())).getSubredditName();
+        } else {
+            return context.getArgs().getFirst();
+        }
+    }
+
+    private List<Validable> fetchAndProcessMeme(Long chatId, Integer messageId, String subreddit) {
         try {
             Optional<RedditPost> redditPost = subredditService.getMemeFromSubreddit(subreddit);
             if (redditPost.isPresent()) {
                 RedditPost post = redditPost.get();
-                File existingFile = subredditService.getFile(post).join().get();
-                existingFile.deleteOnExit();
-                String fileName = existingFile.getName().toLowerCase();
-                String caption = (post.getTitle() != null ? post.getTitle() + "\n" : "") +
-                        " From r/%s".formatted(subreddit);
-                return fileName.endsWith(".gif") ?
-                        getAnimation(chatId, existingFile, caption) :
-                        getPhoto(chatId, existingFile, caption);
+                Optional<File> file = subredditService.getFile(post).join();
+                if (file.isEmpty()) {
+                    return postWithoutFileResponse(chatId, post, subreddit);
+                }
+                return postWithFileResponse(chatId, post, file.get(), subreddit);
             }
         } catch (Exception e) {
-            return getReplyMessage(chatId, messageId, "Something went wrong, please try again later");
+            getReplyMessage(chatId, messageId, "Something went wrong, please try again later");
         }
-        return List.of();
+        return getReplyMessage(chatId, messageId, "Something went wrong, please try again later");
+    }
+
+    private List<Validable> postWithoutFileResponse(Long chatId, RedditPost post, String subreddit) {
+        String caption = (post.getTitle() != null ? post.getTitle() + "\n" : "") + "<Image unavailable>\n" + "From r/" + subreddit;
+        return getMessage(chatId, caption);
+    }
+
+    private List<Validable> postWithFileResponse(Long chatId, RedditPost post, File file, String subreddit) {
+        file.deleteOnExit();
+        String caption = (post.getTitle() != null ? post.getTitle() + "\n" : "") + "From r/" + subreddit;
+        String fileName = file.getName().toLowerCase();
+        return fileName.endsWith(".gif") ?
+                getAnimation(chatId, file, caption) :
+                getPhoto(chatId, file, caption);
     }
 
     @Override

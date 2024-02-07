@@ -28,7 +28,6 @@ public class FileDownloader {
                 if (downloadedFilePath == null) {
                     return Optional.empty();
                 }
-
                 return Optional.of(new File(downloadedFilePath));
             } catch (Exception e) {
                 log.error("Error in async download/compression", e);
@@ -76,7 +75,6 @@ public class FileDownloader {
             while ((bytesRead = in.read(dataBuffer, 0, bufferSize)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
-
             compressFile(extension, filePath, compressedFilePath);
             File file = new File(filePath);
             file.deleteOnExit();
@@ -113,7 +111,6 @@ public class FileDownloader {
                 default -> builder.addArguments("-c:v", "mjpeg")
                         .addArguments("-q:v", COMPRESSION_QUALITY);
             }
-
             builder.execute();
             log.info("File compressed and saved as: {}", compressedFilePath);
         } catch (IOException e) {

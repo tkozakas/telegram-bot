@@ -25,7 +25,7 @@ public class HelpHandler extends Handler {
                 .reduce((s1, s2) -> s1 + "\n" + s2)
                 .orElse("No commands available");
 
-        return getMessage(chatId, message);
+        return getMessageWithMarkdown(chatId, message);
     }
 
     @Override

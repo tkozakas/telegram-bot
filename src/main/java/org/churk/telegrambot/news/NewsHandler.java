@@ -31,7 +31,7 @@ public class NewsHandler extends Handler {
             return getReplyMessage(chatId, messageId, "No news available");
         }
         String text = getNews(articles);
-        return getMessage(chatId, text);
+        return getMessageWithMarkdown(chatId, text);
     }
     private static String getNews(List<Article> articles) {
         return articles.stream()

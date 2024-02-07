@@ -41,7 +41,7 @@ public class DailyMessageHandler extends Handler {
             String mentionedUser = "[" + isWinnerStat.getFirstName() + "](tg://user?id=" + isWinnerStat.getUserId() + ")";
             String messageText = dailyMessageService.getKeyNameSentence("winner_message")
                     .formatted(botProperties.getWinnerName(), mentionedUser);
-            return getMessage(chatId, messageText);
+            return getMessageWithMarkdown(chatId, messageText);
         }
 
         Stat randomWinner = statByChatIdAndYear.get(ThreadLocalRandom.current().nextInt(statByChatIdAndYear.size()));
@@ -55,7 +55,7 @@ public class DailyMessageHandler extends Handler {
         return sentences
                 .stream()
                 .map(sent -> sent.getText().formatted(botProperties.getWinnerName()))
-                .map(text -> getMessage(chatId, text).getFirst())
+                .map(text -> getMessageWithMarkdown(chatId, text).getFirst())
                 .toList();
     }
 

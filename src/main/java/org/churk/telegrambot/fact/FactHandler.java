@@ -28,7 +28,7 @@ public class FactHandler extends Handler {
 
         return context.isReply() ?
                 getReplyMessage(chatId, messageId, randomFact) :
-                getMessage(chatId, randomFact);
+                getMessageWithMarkdown(chatId, randomFact);
     }
 
     @Override

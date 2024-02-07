@@ -27,7 +27,7 @@ public class StatsYearHandler extends Handler {
             year = determineYear(args);
         } catch (NumberFormatException e) {
             return getReplyMessage(chatId, messageId,
-                    "Please provide a valid year (/stats <year>)");
+                    "Please provide a valid year /stats <year>");
         }
 
         List<Stat> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
@@ -42,7 +42,7 @@ public class StatsYearHandler extends Handler {
         String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
         String text = new StatsListDecorator(stats).getFormattedStats(statsTable, header, footer, 10);
 
-        return getMessage(chatId, text);
+        return getMessageWithMarkdown(chatId, text);
     }
 
     private int determineYear(List<String> args) throws NumberFormatException {

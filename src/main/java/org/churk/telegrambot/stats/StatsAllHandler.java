@@ -25,7 +25,7 @@ public class StatsAllHandler extends Handler {
         String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
         String text = new StatsListDecorator(stats).getFormattedStats(statsTable, header, footer, 10);
 
-        return getMessage(chatId, text);
+        return getMessageWithMarkdown(chatId, text);
     }
 
     @Override

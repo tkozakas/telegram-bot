@@ -32,7 +32,7 @@ public class RedditListHandler extends Handler {
                         .reduce("", (a, b) -> a + "- r/" + b + "\n");
         return subreddits.isEmpty() ?
                 getReplyMessage(chatId, messageId, "No subreddits available") :
-                getMessage(chatId, message);
+                getMessageWithMarkdown(chatId, message);
     }
 
     @Override
