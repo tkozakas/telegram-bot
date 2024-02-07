@@ -22,7 +22,7 @@ public class StickerRemoveHandler extends Handler {
 
         if (args.isEmpty() || !stickerService.isValidSticker(args.getFirst())) {
             return getReplyMessage(chatId, messageId,
-                    "Please provide a valid name /stickerremove <sticker_name>");
+                    "Please provide a valid name /stickerremove <name>");
         }
         if (!stickerService.existsByChatIdAndStickerName(chatId, args.getFirst())) {
             return getReplyMessage(chatId, messageId,
@@ -30,7 +30,7 @@ public class StickerRemoveHandler extends Handler {
         }
         stickerService.deleteSticker(chatId, args.getFirst());
         return getReplyMessage(chatId, messageId,
-                "Sticker set " + args.getFirst() + " removed");
+                "Sticker set " + args.getFirst()+ " removed");
     }
     @Override
     public Command getSupportedCommand() {

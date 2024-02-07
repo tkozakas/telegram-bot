@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,6 +31,9 @@ public abstract class Handler implements CommandHandler {
     }
 
     protected List<Validable> getReplyMessage(Long chatId, Integer messageId, String message) {
+        UnaryOperator<String> escapeMarkdown = name -> name
+                .replaceAll("([_\\\\*\\[\\]()~`#+\\-=|{}.!])", "\\\\$1");
+        message = escapeMarkdown.apply(message);
         return createMessage(MessageType.TEXT, Map.of(
                 MessageParams.CHAT_ID, chatId,
                 MessageParams.TEXT, message,

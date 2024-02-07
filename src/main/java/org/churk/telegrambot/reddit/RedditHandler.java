@@ -40,12 +40,14 @@ public class RedditHandler extends Handler {
         }
 
         try {
-            Optional<File> file = subredditService.getMemeFromSubreddit(subreddit);
-            if (file.isPresent()) {
-                File existingFile = file.get();
+            Optional<RedditPost> redditPost = subredditService.getMemeFromSubreddit(subreddit);
+            if (redditPost.isPresent()) {
+                RedditPost post = redditPost.get();
+                File existingFile = subredditService.getFile(post).join().get();
                 existingFile.deleteOnExit();
-                String fileName = file.get().getName().toLowerCase();
-                String caption = "From r/%s".formatted(subreddit);
+                String fileName = existingFile.getName().toLowerCase();
+                String caption = (post.getTitle() != null ? post.getTitle() + "\n" : "") +
+                        " From r/%s".formatted(subreddit);
                 return fileName.endsWith(".gif") ?
                         getAnimation(chatId, existingFile, caption) :
                         getPhoto(chatId, existingFile, caption);

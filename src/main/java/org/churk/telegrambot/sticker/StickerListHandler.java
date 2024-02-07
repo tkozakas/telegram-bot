@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 @Component
 @RequiredArgsConstructor
@@ -20,8 +21,12 @@ public class StickerListHandler extends Handler {
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<String> stickerSets = stickerService.getStickerSetNames(chatId);
 
+        UnaryOperator<String> escapeMarkdown = name -> name
+                .replaceAll("([_\\\\*\\[\\]()~`>#+\\-=|{}.!])", "\\\\$1");
+
         String message = "*Sticker sets:*\n" + stickerSets.stream()
                 .limit(20)
+                .map(escapeMarkdown)
                 .reduce("", (a, b) -> a + "- " + b + "\n");
         return stickerSets.isEmpty() ?
                 getReplyMessage(chatId, messageId, "No sticker sets available") :

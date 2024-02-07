@@ -46,13 +46,12 @@ public class SubredditService {
         return subredditRepository.findAllByChatId(chatId);
     }
 
-    public Optional<File> getMemeFromSubreddit(String subreddit) throws feign.FeignException.NotFound {
+    public Optional<RedditPost> getMemeFromSubreddit(String subreddit) throws feign.FeignException.NotFound {
         List<RedditPost> redditMeme = getRedditPosts(subreddit);
         if (redditMeme.isEmpty()) {
             return Optional.empty();
         }
-        int randomIndex = ThreadLocalRandom.current().nextInt(redditMeme.size());
-        return getFile(redditMeme.get(randomIndex)).join();
+        return Optional.of(redditMeme.get(ThreadLocalRandom.current().nextInt(redditMeme.size())));
     }
 
     private List<RedditPost> getRedditPosts(String subreddit) {
@@ -79,7 +78,7 @@ public class SubredditService {
         return List.of();
     }
 
-    private CompletableFuture<Optional<File>> getFile(RedditPost redditPost) {
+    public CompletableFuture<Optional<File>> getFile(RedditPost redditPost) {
         String mediaUrl = redditPost.getUrl();
         String extension = mediaUrl.substring(mediaUrl.lastIndexOf("."));
         return FileDownloader.downloadAndCompressMediaAsync(mediaUrl, redditProperties, extension);

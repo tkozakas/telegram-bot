@@ -12,29 +12,25 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class StickerAddHandler extends Handler {
-    private static final String STICKER_SET_URL = "https://t.me/addstickers/";
     private final StickerService stickerService;
 
     @Override
     public List<Validable> handle(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
+        List<String> args = context.getArgs();
 
-        String stickerSetName = context.getArgs().getFirst();
-        if (stickerSetName.startsWith(STICKER_SET_URL)) {
-            stickerSetName = stickerSetName.replace(STICKER_SET_URL, "");
-        }
-        if (context.getArgs().isEmpty() || !stickerService.isValidSticker(stickerSetName)) {
+        if (args.isEmpty() || !stickerService.isValidSticker(args.getFirst())) {
             return getReplyMessage(chatId, messageId,
                     "Please provide a valid name /stickeradd <name>");
         }
-        if (stickerService.existsByChatIdAndStickerName(chatId, stickerSetName)) {
+        if (stickerService.existsByChatIdAndStickerName(chatId, args.getFirst())) {
             return getReplyMessage(chatId, messageId,
-                    "Sticker set " + stickerSetName + " already exists in the list");
+                    "Sticker set " + args.getFirst() + " already exists in the list");
         }
-        stickerService.addSticker(chatId, stickerSetName);
+        stickerService.addSticker(chatId, args.getFirst());
         return getReplyMessage(chatId, messageId,
-                "Sticker set " + stickerSetName + " added");
+                "Sticker set " + args.getFirst() + " added");
     }
 
     @Override

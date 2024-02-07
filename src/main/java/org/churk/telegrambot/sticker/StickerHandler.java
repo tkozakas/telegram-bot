@@ -20,6 +20,7 @@ public class StickerHandler extends Handler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<Sticker> stickers = stickerService.getStickerSets(chatId);
         Integer messageId = context.getUpdate().getMessage().getMessageId();
+
         if (stickers.isEmpty()) {
             return getReplyMessage(chatId, messageId,
                     "No sticker sets available");

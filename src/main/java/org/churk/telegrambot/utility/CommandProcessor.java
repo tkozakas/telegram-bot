@@ -33,8 +33,8 @@ public class CommandProcessor {
             return handleBotAddedToGroup(update);
         }
         Message message = update.getMessage();
-        String messageText = message.getText();
         String firstName = message.getFrom().getFirstName();
+        String messageText = message.getText();
         log.info("{}: {}", firstName, messageText);
 
         List<String> arguments = List.of(messageText.split(" ")).subList(1, messageText.split(" ").length);

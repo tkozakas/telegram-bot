@@ -7,4 +7,5 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RedditPost {
     private String url;
+    private String title;
 }
