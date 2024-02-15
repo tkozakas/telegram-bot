@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -26,8 +25,8 @@ public class RegisterHandler extends Handler {
     }
 
     private List<Validable> getRegister(Long chatId, Long userId, String firstName, Integer messageId) {
-        Optional<Stat> userStats = statsService.getStatsByChatIdAndUserId(chatId, userId);
-        if (userStats.isPresent()) {
+        List<Stat> userStats = statsService.getStatsByChatIdAndUserId(chatId, userId);
+        if (!userStats.isEmpty()) {
             return getReplyMessage(chatId, messageId,
                     dailyMessageService.getKeyNameSentence("registered_header").formatted(firstName));
         }
