@@ -1,7 +1,7 @@
 package org.churk.telegrambot.builder;
 
 import lombok.NoArgsConstructor;
-import org.churk.telegrambot.handler.MessageParams;
+import org.churk.telegrambot.handler.game.message.MessageParams;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;

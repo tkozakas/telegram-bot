@@ -20,8 +20,8 @@ bot:
 
   random-response-chance: 0.2
 
-download-media:
-  # instagram-access-token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
+media:
+  # instagram-token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
 
   path: /tmp/
   file-name: file

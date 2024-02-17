@@ -13,7 +13,6 @@ public enum Command {
     HELP(List.of(".*/help\\b.*"), "Get help"),
     REGISTER(List.of(".*/%sreg\\b.*"), "Register yourself as a %s"),
     DAILY_MESSAGE(List.of(".*/%s\\b.*"), "Get today's %s"),
-    REELS(List.of(".*/reels\\b.*", ".*/reel\\b.*"), "Random reels video (use /reels <link> for specific reels video)"),
     NEWS(List.of(".*/news\\b.*"), "Get news (use /news <query> for specific news by query)"),
 
     STATS(List.of(".*/%sstats\\b.*"), "Get stats (use /%sstats <year> for specific year)"),
