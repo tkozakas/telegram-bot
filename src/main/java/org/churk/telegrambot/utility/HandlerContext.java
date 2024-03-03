@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public final class HandlerContext {
-    private Update update;
     private List<String> args;
+    private Update update;
     private boolean isReply;
 }

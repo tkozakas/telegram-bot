@@ -74,4 +74,9 @@ public class StatsService {
     public Long getUserIdByChatIdAndFirstName(Long chatId, String firstName) {
         return statsRepository.getUserIdByChatIdAndFirstName(chatId, firstName);
     }
+
+    public String getRandomFirstName(Long chatId, int year) {
+        List<Stat> stats = statsRepository.getStatsByChatIdAndYear(chatId, year);
+        return stats.get((int) (Math.random() * stats.size())).getFirstName();
+    }
 }
