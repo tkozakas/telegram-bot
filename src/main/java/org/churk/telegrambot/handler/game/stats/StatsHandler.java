@@ -23,7 +23,7 @@ public class StatsHandler extends Handler {
         String subCommand = args.isEmpty() ? "all" : args.getFirst().toLowerCase();
 
         if (isInteger(subCommand)) {
-            return handleStatsByYear(context, List.of(subCommand), null);
+            return handleStatsByYear(context, List.of(subCommand));
         }
 
         return switch (subCommand) {
@@ -35,10 +35,10 @@ public class StatsHandler extends Handler {
 
     private List<Validable> handleYearStats(HandlerContext context) {
         List<String> args = context.getArgs().subList(1, context.getArgs().size());
-        return handleStatsByYear(context, args, null);
+        return handleStatsByYear(context, args);
     }
 
-    private List<Validable> handleStatsByYear(HandlerContext context, List<String> args, String customHeader) {
+    private List<Validable> handleStatsByYear(HandlerContext context, List<String> args) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         int year;
@@ -49,7 +49,7 @@ public class StatsHandler extends Handler {
         }
 
         List<Stat> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
-        String header = (customHeader != null) ? customHeader : dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
+        String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
         return constructStatsMessage(chatId, messageId, stats, header);
     }
 
