@@ -70,4 +70,8 @@ public class StatsService {
         stats.forEach(stat -> stat.setIsWinner(Boolean.FALSE));
         statsRepository.saveAll(stats);
     }
+
+    public Long getUserIdByChatIdAndFirstName(Long chatId, String firstName) {
+        return statsRepository.getUserIdByChatIdAndFirstName(chatId, firstName);
+    }
 }

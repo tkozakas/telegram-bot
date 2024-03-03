@@ -22,6 +22,10 @@ public class StatsHandler extends Handler {
         List<String> args = context.getArgs();
         String subCommand = args.isEmpty() ? "all" : args.getFirst().toLowerCase();
 
+        if (isInteger(subCommand)) {
+            return handleStatsByYear(context, List.of(subCommand), null);
+        }
+
         return switch (subCommand) {
             case "year" -> handleYearStats(context);
             case "user" -> handleUserStats(context);
@@ -30,10 +34,13 @@ public class StatsHandler extends Handler {
     }
 
     private List<Validable> handleYearStats(HandlerContext context) {
+        List<String> args = context.getArgs().subList(1, context.getArgs().size());
+        return handleStatsByYear(context, args, null);
+    }
+
+    private List<Validable> handleStatsByYear(HandlerContext context, List<String> args, String customHeader) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-        List<String> args = context.getArgs().subList(1, context.getArgs().size());
-
         int year;
         try {
             year = determineYear(args);
@@ -42,8 +49,17 @@ public class StatsHandler extends Handler {
         }
 
         List<Stat> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
-        String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
+        String header = (customHeader != null) ? customHeader : dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
         return constructStatsMessage(chatId, messageId, stats, header);
+    }
+
+    public static boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+        } catch (NumberFormatException | NullPointerException e) {
+            return false;
+        }
+        return true;
     }
 
     private int determineYear(List<String> args) throws NumberFormatException {
@@ -53,10 +69,14 @@ public class StatsHandler extends Handler {
     private List<Validable> handleUserStats(HandlerContext context) {
         Message message = context.getUpdate().getMessage();
         Long chatId = message.getChatId();
-        Long userId = message.getFrom().getId();
         Integer messageId = message.getMessageId();
-        String firstName = message.getFrom().getFirstName();
-        long total = statsService.getTotalScoreByChatIdAndUserId(chatId, userId);
+        String firstName = context.getArgs().size() == 2 ? context.getArgs().get(1) : message.getFrom().getFirstName();
+        Long userIdFromFirstName = statsService.getUserIdByChatIdAndFirstName(chatId, firstName);
+        long total = statsService.getTotalScoreByChatIdAndUserId(chatId, userIdFromFirstName);
+
+        if (userIdFromFirstName == null) {
+            return getReplyMessage(chatId, messageId, "No stats available for " + firstName);
+        }
 
         String header = dailyMessageService.getKeyNameSentence("me_header").formatted(firstName, botProperties.getWinnerName(), total);
         return getReplyMessageWithMarkdown(chatId, messageId, header);
