@@ -21,8 +21,6 @@ bot:
   random-response-chance: 0.2
 
 media:
-  # instagram-token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
-
   path: /tmp/
   file-name: file
 

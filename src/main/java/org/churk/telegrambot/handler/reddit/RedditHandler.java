@@ -11,20 +11,98 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.UnaryOperator;
 
 @Component
 @RequiredArgsConstructor
 public class RedditHandler extends Handler {
+    private static final String REDDIT_URL = "https://www.reddit.com/r/";
     private final SubredditService subredditService;
 
+    @Override
     public List<Validable> handle(HandlerContext context) {
+        List<String> args = context.getArgs();
+        String subCommand = args.isEmpty() ? "get" : args.getFirst().toLowerCase();
+
+        return switch (subCommand) {
+            case "add" -> handleAdd(context);
+            case "list" -> handleList(context);
+            case "remove" -> handleRemove(context);
+            default -> handleGetRandomPost(context);
+        };
+    }
+
+    private List<Validable> handleAdd(HandlerContext context) {
+        Long chatId = context.getUpdate().getMessage().getChatId();
+        Integer messageId = context.getUpdate().getMessage().getMessageId();
+        List<String> args = context.getArgs().subList(1, context.getArgs().size());
+
+        if (args.isEmpty() || !subredditService.isValidSubreddit(args.getFirst())) {
+            return getReplyMessage(chatId, messageId,
+                    "Please provide a valid name /reddit add <subreddit>");
+        }
+        String subreddit = args.getFirst();
+        if (subreddit.startsWith(REDDIT_URL)) {
+            subreddit = subreddit.replace(REDDIT_URL, "");
+        }
+        if (subredditService.existsByChatIdAndSubredditName(chatId, subreddit)) {
+            return getReplyMessage(chatId, messageId,
+                    "Subreddit %s already exists in the list".formatted(subreddit));
+        }
+        subredditService.addSubreddit(chatId, subreddit);
+        return getReplyMessage(chatId, messageId,
+                "Subreddit %s added".formatted(subreddit));
+    }
+
+    private List<Validable> handleList(HandlerContext context) {
+        Long chatId = context.getUpdate().getMessage().getChatId();
+        Integer messageId = context.getUpdate().getMessage().getMessageId();
+        List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
+
+        UnaryOperator<String> escapeMarkdown = name -> name
+                .replaceAll("([_\\\\*\\[\\]()~`>#+\\-=|{}.!])", "\\\\$1");
+
+        String message = "*Subreddits:*\n" +
+                subreddits.stream()
+                        .limit(20)
+                        .map(Subreddit::getSubredditName)
+                        .map(escapeMarkdown)
+                        .reduce("", (a, b) -> a + "- r/" + b + "\n");
+        return subreddits.isEmpty() ?
+                getReplyMessage(chatId, messageId, "No subreddits available") :
+                getMessageWithMarkdown(chatId, message);
+    }
+
+    private List<Validable> handleRemove(HandlerContext context) {
+        List<String> args = context.getArgs().subList(1, context.getArgs().size());
+        Long chatId = context.getUpdate().getMessage().getChatId();
+        Integer messageId = context.getUpdate().getMessage().getMessageId();
+
+        if (args.isEmpty() || !subredditService.isValidSubreddit(args.getFirst())) {
+            return getReplyMessage(chatId, messageId,
+                    "Please provide a valid name /reddit remove <subreddit>");
+        }
+        if (!subredditService.existsByChatIdAndSubredditName(chatId, args.getFirst())) {
+            return getReplyMessage(chatId, messageId,
+                    "Subreddit " + args.getFirst() + " does not exist in the list");
+        }
+        subredditService.deleteSubreddit(chatId, args.getFirst());
+        return getReplyMessage(chatId, messageId,
+                "Subreddit " + args.getFirst() + " removed");
+    }
+
+    private List<Validable> handleGetRandomPost(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         String subreddit = chooseSubreddit(context, chatId);
 
+        return getRedditPost(subreddit, chatId, messageId);
+    }
+
+    private List<Validable> getRedditPost(String subreddit, Long chatId, Integer messageId) {
         if (subreddit == null) {
             return getReplyMessage(chatId, messageId,
-                    "No subreddits available use /redditadd <subreddit>");
+                    "No subreddits available use /reddit add <subreddit>");
         }
         if (!subredditService.isValidSubreddit(subreddit)) {
             return getReplyMessage(chatId, messageId,
