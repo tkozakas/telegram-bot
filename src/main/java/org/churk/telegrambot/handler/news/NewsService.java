@@ -25,7 +25,7 @@ public class NewsService {
         String categoryQuery = "q=+" + category;
         String apiKey = newsProperties.getApiKey();
         String language = newsProperties.getLanguage();
-        LocalDateTime from = LocalDateTime.now().minusDays(31);
+        LocalDateTime from = LocalDateTime.now().minusDays(2);
         String formattedDate = from.format(DateTimeFormatter.ISO_LOCAL_DATE);
         Map<String, Object> jsonObject = newsClient.getNewsByCategory(categoryQuery, apiKey, formattedDate, language);
         NewsResponse newsResponse = new ObjectMapper().convertValue(jsonObject, new TypeReference<>() {
