@@ -37,7 +37,7 @@ class HandlerFactoryTest {
 
     @Test
     void getUnsupportedCommandHandlerTest() {
-        CommandHandler handler = handlerFactory.getHandler(null);
+        CommandHandler handler = handlerFactory.getHandler(Command.NONE);
         assertEquals(randomResponseHandler, handler, "Handler should be of type RandomResponseHandler");
     }
 }
