@@ -4,7 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.handler.Command;
+import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.utility.CommandProcessor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

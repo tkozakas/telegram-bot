@@ -1,11 +1,13 @@
 package org.churk.telegrambot.handler;
 
-import org.churk.telegrambot.handler.other.RandomResponseHandler;
+import org.churk.telegrambot.model.Command;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.churk.telegrambot.model.Command.NONE;
 
 @Service
 public class HandlerFactory {
@@ -20,9 +22,6 @@ public class HandlerFactory {
     }
 
     public CommandHandler getHandler(Command command) {
-        if (command == null) {
-            return randomResponseHandler;
-        }
-        return handlerMap.get(command);
+        return command == NONE ? randomResponseHandler : handlerMap.get(command);
     }
 }

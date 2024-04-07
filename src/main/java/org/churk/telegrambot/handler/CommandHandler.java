@@ -1,5 +1,6 @@
 package org.churk.telegrambot.handler;
 
+import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 

@@ -1,6 +1,6 @@
 package org.churk.telegrambot.builder;
 
-import org.churk.telegrambot.handler.MessageType;
+import org.churk.telegrambot.model.MessageType;
 import org.springframework.stereotype.Service;
 
 @Service

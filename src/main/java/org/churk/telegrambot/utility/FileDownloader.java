@@ -93,11 +93,11 @@ public class FileDownloader {
             switch (extension) {
                 case ".gif" -> builder
                         .setComplexFilter(FilterGraph.of(
-                        FilterChain.of(
-                                Filter.withName("fps").addArgument("fps=8"),
-                                Filter.withName("setpts").addArgument("4/10*PTS")
-                        )
-                ));
+                                FilterChain.of(
+                                        Filter.withName("fps").addArgument("fps=8"),
+                                        Filter.withName("setpts").addArgument("4/10*PTS")
+                                )
+                        ));
                 case ".mp4" -> builder.addArguments("-q:v", COMPRESSION_QUALITY)
                         .addArgument("-vcodec")
                         .addArgument("libx265")

@@ -5,8 +5,10 @@ import lombok.NoArgsConstructor;
 import org.churk.telegrambot.builder.MessageBuilder;
 import org.churk.telegrambot.builder.MessageBuilderFactory;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.handler.game.dailymessage.DailyMessageService;
-import org.churk.telegrambot.handler.sticker.Sticker;
+import org.churk.telegrambot.model.MessageParams;
+import org.churk.telegrambot.model.MessageType;
+import org.churk.telegrambot.service.DailyMessageService;
+import org.churk.telegrambot.model.sticker.Sticker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
