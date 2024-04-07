@@ -1,25 +1,25 @@
 package org.churk.telegrambot.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.client.RedditClient;
 import org.churk.telegrambot.config.DownloadMediaProperties;
-import org.churk.telegrambot.model.reddit.RedditPost;
-import org.churk.telegrambot.model.reddit.Subreddit;
+import org.churk.telegrambot.model.RedditPost;
+import org.churk.telegrambot.model.Subreddit;
 import org.churk.telegrambot.repository.SubredditRepository;
 import org.churk.telegrambot.utility.FileDownloader;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -60,24 +60,22 @@ public class SubredditService {
 
     private List<RedditPost> getRedditPosts(String subreddit) {
         try {
-            String jsonResponse = redditClient.getRedditMemeFromSubreddit(subreddit);
+            Map<String, Object> jsonResponse = redditClient.getRedditMemeFromSubreddit(subreddit);
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode rootNode = mapper.readTree(jsonResponse);
+            Map<String, Object> responseMap = mapper.convertValue(jsonResponse, new TypeReference<>() {
+            });
+            if (responseMap.containsKey("memes") && responseMap.get("memes") instanceof List) {
+                List<Map<String, Object>> memes = (List<Map<String, Object>>) responseMap.get("memes");
+                return memes.stream()
+                        .map(memeMap -> mapper.convertValue(memeMap, RedditPost.class))
+                        .collect(Collectors.toList());
+            }
+            return List.of(mapper.convertValue(responseMap, RedditPost.class));
 
-            if (!rootNode.has("count") && !rootNode.has("memes")) {
-                return List.of(mapper.treeToValue(rootNode, RedditPost.class));
-            }
-            JsonNode memesNode = rootNode.path("memes");
-            if (memesNode.isArray()) {
-                return mapper.convertValue(memesNode, new TypeReference<>() {
-                });
-            }
         } catch (FeignException.NotFound e) {
             log.error("Subreddit not found", e);
         } catch (FeignException e) {
             log.error("Error with Feign client", e);
-        } catch (JsonProcessingException e) {
-            log.error("Error with parsing JSON", e);
         }
         return List.of();
     }

@@ -26,9 +26,19 @@ import static java.lang.Thread.sleep;
 @Component
 @RequiredArgsConstructor
 public class TelegramBot extends TelegramLongPollingBot {
-    private static final boolean ENABLED = true;
     private final BotProperties botProperties;
     private final CommandProcessor commandProcessor;
+
+    @Override
+    public String getBotUsername() {
+        return botProperties.getUsername();
+    }
+
+    @Override
+    public String getBotToken() {
+        return botProperties.getToken();
+    }
+
 
     @PostConstruct
     private void registerBotCommands() throws TelegramApiException {
@@ -46,21 +56,8 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     @Override
-    public String getBotUsername() {
-        return botProperties.getUsername();
-    }
-
-    @Override
-    public String getBotToken() {
-        return botProperties.getToken();
-    }
-
-    @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            if (!ENABLED) {
-                return;
-            }
             executeMessages(commandProcessor.handleCommand(update));
         }
     }

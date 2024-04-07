@@ -1,4 +1,4 @@
-package org.churk.telegrambot.model.reddit;
+package org.churk.telegrambot.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

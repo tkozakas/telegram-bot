@@ -20,7 +20,6 @@ import java.util.concurrent.ThreadLocalRandom;
 @Component
 @RequiredArgsConstructor
 public class DailyMessageHandler extends Handler {
-    private static final boolean ENABLED = true;
     private final StatsService statsService;
 
     public static boolean isInteger(String s) {
@@ -152,9 +151,6 @@ public class DailyMessageHandler extends Handler {
         }
 
         Stat randomWinner = statByChatIdAndYear.get(ThreadLocalRandom.current().nextInt(statByChatIdAndYear.size()));
-        if (ENABLED) {
-            statsService.updateStats(randomWinner);
-        }
 
         List<Sentence> sentences = dailyMessageService.getRandomGroupSentences();
         String mentionedUser = "[" + randomWinner.getFirstName() + "](tg://user?id=" + randomWinner.getUserId() + ")";

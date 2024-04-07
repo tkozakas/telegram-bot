@@ -8,7 +8,7 @@ import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.model.MessageParams;
 import org.churk.telegrambot.model.MessageType;
 import org.churk.telegrambot.service.DailyMessageService;
-import org.churk.telegrambot.model.sticker.Sticker;
+import org.churk.telegrambot.model.Sticker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 

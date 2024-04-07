@@ -1,19 +1,18 @@
 package org.churk.telegrambot.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.client.StickerClient;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.model.sticker.StickerResponse;
-import org.churk.telegrambot.model.sticker.Sticker;
+import org.churk.telegrambot.model.Sticker;
 import org.churk.telegrambot.repository.StickerRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 
 @Slf4j
@@ -33,12 +32,8 @@ public class StickerService {
     }
 
     public void addSticker(Long chatId, String stickerSetName) {
-        StickerResponse stickerSet = getStickerSet(stickerSetName).orElseThrow();
-        stickerSet.getResult().getStickers().forEach(sticker -> {
-            sticker.setChatId(chatId);
-            sticker.setStickerSetName(stickerSetName);
-        });
-        stickerRepository.saveAll(stickerSet.getResult().getStickers());
+        List<Sticker> stickerSet = getStickerSet(chatId, stickerSetName);
+        stickerRepository.saveAll(stickerSet);
     }
 
     public void deleteSticker(Long chatId, String stickerSetName) {
@@ -46,24 +41,35 @@ public class StickerService {
     }
 
     public boolean isValidSticker(String stickerSetName) {
-        return getStickerSet(stickerSetName).isPresent();
+        return !getStickerSet(0L, stickerSetName).isEmpty();
     }
 
     public boolean existsByChatIdAndStickerName(Long chatId, String first) {
         return stickerRepository.existsByChatIdAndStickerSetName(chatId, first);
     }
 
-    private Optional<StickerResponse> getStickerSet(String stickerSetName) {
+    private List<Sticker> getStickerSet(Long chatId, String stickerSetName) {
         String botToken = botConfig.getToken();
         try {
-            String response = stickerClient.getStickerSet(botToken, stickerSetName);
+            Map<String, Object> response = stickerClient.getStickerSet(botToken, stickerSetName);
             ObjectMapper mapper = new ObjectMapper();
-            return Optional.of(mapper.readValue(response, StickerResponse.class));
+            Map<String, Object> responseMap = mapper.convertValue(response.get("result"), new TypeReference<>() {
+            });
+            if (responseMap.containsKey("stickers") && responseMap.get("stickers") instanceof List) {
+                List<Map<String, Object>> stickersMapList = (List<Map<String, Object>>) responseMap.get("stickers");
+                return stickersMapList.stream()
+                        .map(stickerMap -> {
+                            Sticker sticker = mapper.convertValue(stickerMap, Sticker.class);
+                            sticker.setChatId(chatId);
+                            sticker.setStickerSetName(stickerSetName);
+                            return sticker;
+                        })
+                        .toList();
+            }
         } catch (FeignException e) {
             log.error("Error with Feign client", e);
-        } catch (JsonProcessingException e) {
-            log.error("Error with parsing JSON", e);
         }
-        return Optional.empty();
+        return List.of();
     }
+
 }

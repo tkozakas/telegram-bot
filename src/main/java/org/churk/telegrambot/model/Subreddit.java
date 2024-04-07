@@ -1,4 +1,4 @@
-package org.churk.telegrambot.model.reddit;
+package org.churk.telegrambot.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

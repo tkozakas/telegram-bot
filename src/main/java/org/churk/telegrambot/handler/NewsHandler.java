@@ -2,7 +2,7 @@ package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.model.news.Article;
+import org.churk.telegrambot.model.Article;
 import org.churk.telegrambot.service.NewsService;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;

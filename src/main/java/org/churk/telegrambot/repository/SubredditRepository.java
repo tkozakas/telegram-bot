@@ -1,6 +1,6 @@
 package org.churk.telegrambot.repository;
 
-import org.churk.telegrambot.model.reddit.Subreddit;
+import org.churk.telegrambot.model.Subreddit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

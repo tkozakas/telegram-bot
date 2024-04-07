@@ -12,7 +12,10 @@ public enum SubCommand {
     STATS("stats"),
     ALL("all"),
     YEAR("year"),
-    USER("user");
+    USER("user"),
+    ADD("add"),
+    LIST("list"),
+    REMOVE("remove");
 
     private final String command;
 

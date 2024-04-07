@@ -2,8 +2,9 @@ package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
+import org.churk.telegrambot.model.Sticker;
+import org.churk.telegrambot.model.SubCommand;
 import org.churk.telegrambot.service.StickerService;
-import org.churk.telegrambot.model.sticker.Sticker;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -19,13 +20,15 @@ public class StickerHandler extends Handler {
 
     @Override
     public List<Validable> handle(HandlerContext context) {
-        List<String> args = context.getArgs();
-        String subCommand = args.isEmpty() ? "get" : args.getFirst().toLowerCase();
+        if (context.getArgs().isEmpty()) {
+            return handleGetRandomSticker(context);
+        }
 
+        SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst().toLowerCase());
         return switch (subCommand) {
-            case "add" -> handleAdd(context);
-            case "list" -> handleList(context);
-            case "remove" -> handleRemove(context);
+            case ADD -> handleAdd(context);
+            case LIST -> handleList(context);
+            case REMOVE -> handleRemove(context);
             default -> handleGetRandomSticker(context);
         };
     }
@@ -46,21 +49,17 @@ public class StickerHandler extends Handler {
     }
 
     private List<Validable> handleRemove(HandlerContext context) {
-        List<String> args = context.getArgs().subList(1, context.getArgs().size());
+        String subCommand = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
-        if (args.isEmpty() || !stickerService.isValidSticker(args.getFirst())) {
+        if (!stickerService.existsByChatIdAndStickerName(chatId, subCommand)) {
             return getReplyMessage(chatId, messageId,
-                    "Please provide a valid name /sticker remove <name>");
+                    "Sticker set " + subCommand + " does not exist in the list");
         }
-        if (!stickerService.existsByChatIdAndStickerName(chatId, args.getFirst())) {
-            return getReplyMessage(chatId, messageId,
-                    "Sticker set " + args.getFirst() + " does not exist in the list");
-        }
-        stickerService.deleteSticker(chatId, args.getFirst());
+        stickerService.deleteSticker(chatId, subCommand);
         return getReplyMessage(chatId, messageId,
-                "Sticker set " + args.getFirst() + " removed");
+                "Sticker set " + subCommand + " removed");
     }
 
     private List<Validable> handleList(HandlerContext context) {
@@ -81,21 +80,21 @@ public class StickerHandler extends Handler {
     }
 
     private List<Validable> handleAdd(HandlerContext context) {
-        List<String> args = context.getArgs().subList(1, context.getArgs().size());
+        String subCommand = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
-        if (args.isEmpty() || !stickerService.isValidSticker(args.getFirst())) {
+        if (subCommand.isEmpty() || !stickerService.isValidSticker(subCommand)) {
             return getReplyMessage(chatId, messageId,
                     "Please provide a valid name /sticker add <name>");
         }
-        if (stickerService.existsByChatIdAndStickerName(chatId, args.getFirst())) {
+        if (stickerService.existsByChatIdAndStickerName(chatId, subCommand)) {
             return getReplyMessage(chatId, messageId,
-                    "Sticker set " + args.getFirst() + " already exists in the list");
+                    "Sticker set " + subCommand + " already exists in the list");
         }
-        stickerService.addSticker(chatId, args.getFirst());
+        stickerService.addSticker(chatId, subCommand);
         return getReplyMessage(chatId, messageId,
-                "Sticker set " + args.getFirst() + " added");
+                "Sticker set " + subCommand + " added");
     }
 
     @Override

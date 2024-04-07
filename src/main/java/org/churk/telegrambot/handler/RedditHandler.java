@@ -2,8 +2,8 @@ package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.model.reddit.RedditPost;
-import org.churk.telegrambot.model.reddit.Subreddit;
+import org.churk.telegrambot.model.RedditPost;
+import org.churk.telegrambot.model.Subreddit;
 import org.churk.telegrambot.service.SubredditService;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
