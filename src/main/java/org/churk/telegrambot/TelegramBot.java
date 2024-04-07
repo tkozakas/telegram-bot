@@ -33,6 +33,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     @PostConstruct
     private void registerBotCommands() throws TelegramApiException {
         List<BotCommand> botCommandList = Stream.of(Command.values())
+                .filter(command -> command != Command.NONE)
                 .map(command -> new BotCommand(command.getPatterns().stream()
                         .findFirst()
                         .orElse("")
