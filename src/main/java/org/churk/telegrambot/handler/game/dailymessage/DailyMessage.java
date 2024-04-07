@@ -1,8 +1,9 @@
-package org.churk.telegrambot.handler.game.message;
+package org.churk.telegrambot.handler.game.dailymessage;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
+import org.churk.telegrambot.handler.game.sentence.Sentence;
 
 import java.util.ArrayList;
 import java.util.List;

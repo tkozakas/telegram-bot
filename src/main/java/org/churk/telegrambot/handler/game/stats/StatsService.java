@@ -71,7 +71,7 @@ public class StatsService {
         statsRepository.saveAll(stats);
     }
 
-    public Long getUserIdByChatIdAndFirstName(Long chatId, String firstName) {
-        return statsRepository.getUserIdByChatIdAndFirstName(chatId, firstName).getFirst();
+    public List<Stat> getUserIdByChatIdAndFirstName(Long chatId, String firstName) {
+        return statsRepository.getUserIdByChatIdAndFirstName(chatId, firstName);
     }
 }

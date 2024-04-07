@@ -1,4 +1,4 @@
-package org.churk.telegrambot.handler.game.message;
+package org.churk.telegrambot.handler;
 
 import lombok.Getter;
 

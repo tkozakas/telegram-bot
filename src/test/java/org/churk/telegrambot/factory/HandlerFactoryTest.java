@@ -2,8 +2,8 @@ package org.churk.telegrambot.factory;
 
 import org.churk.telegrambot.handler.CommandHandler;
 import org.churk.telegrambot.handler.HandlerFactory;
-import org.churk.telegrambot.handler.game.RandomResponseHandler;
-import org.churk.telegrambot.handler.game.StartHandler;
+import org.churk.telegrambot.handler.other.RandomResponseHandler;
+import org.churk.telegrambot.handler.other.StartHandler;
 import org.churk.telegrambot.handler.Command;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

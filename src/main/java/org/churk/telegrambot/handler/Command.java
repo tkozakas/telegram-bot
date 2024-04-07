@@ -11,11 +11,9 @@ import java.util.List;
 public enum Command {
     START(List.of(".*/start\\b.*"), "Activate bot"),
     HELP(List.of(".*/help\\b.*"), "Get help"),
-    REGISTER(List.of(".*/%sreg\\b.*"), "Sign-up as %s"),
-    DAILY_MESSAGE(List.of(".*/%s\\b.*"), "Get today's %s"),
+    DAILY_MESSAGE(List.of(".*/%s\\b.*"), "Daily %s game. /%s, /%s stats <user> or <year>, /%s register"),
     NEWS(List.of(".*/news\\b.*"), "Latest news. /news <query> for specifics"),
-    STATS(List.of(".*/%sstats\\b.*"), "Statistics. /stats year or /stats user for details"),
-    FACT(List.of(".*/fact\\b.*"), "Random Fact. /fact add to add a fact"),
+    FACT(List.of(".*/fact\\b.*"), "Random Fact. /fact add <fact>"),
     STICKER(List.of(".*/sticker\\b.*"), "Random Sticker. /sticker add <name>, /sticker remove <name>, /sticker list for management"),
     REDDIT(List.of(".*/reddit\\b.*", ".*/meme\\b.*"), "Random Reddit pic. /reddit <subreddit>, /reddit add <name> /reddit remove <name>, /reddit list for management");
 

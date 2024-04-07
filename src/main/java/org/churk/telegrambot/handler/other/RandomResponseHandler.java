@@ -1,4 +1,4 @@
-package org.churk.telegrambot.handler.game;
+package org.churk.telegrambot.handler.other;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.handler.Command;

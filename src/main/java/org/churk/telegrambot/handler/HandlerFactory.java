@@ -1,6 +1,6 @@
 package org.churk.telegrambot.handler;
 
-import org.churk.telegrambot.handler.game.RandomResponseHandler;
+import org.churk.telegrambot.handler.other.RandomResponseHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;

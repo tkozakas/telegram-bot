@@ -21,6 +21,6 @@ public interface StatsRepository extends JpaRepository<Stat, UUID> {
     @Query("SELECT s FROM Stat s WHERE s.chatId = ?1 AND s.year = ?2")
     List<Stat> findAllByChatIdAndYear(Long chatId, int year);
 
-    @Query("SELECT s.userId FROM Stat s WHERE s.chatId = ?1 AND s.firstName = ?2")
-    List<Long> getUserIdByChatIdAndFirstName(Long chatId, String firstName);
+    @Query("SELECT s FROM Stat s WHERE s.chatId = ?1 AND s.firstName = ?2")
+    List<Stat> getUserIdByChatIdAndFirstName(Long chatId, String firstName);
 }

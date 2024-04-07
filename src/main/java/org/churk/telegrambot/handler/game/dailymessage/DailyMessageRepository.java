@@ -1,4 +1,4 @@
-package org.churk.telegrambot.handler.game.message;
+package org.churk.telegrambot.handler.game.dailymessage;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
