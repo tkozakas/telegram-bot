@@ -39,6 +39,11 @@
             <artifactId>spring-cloud-starter-openfeign</artifactId>
             <version>4.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>3.2.1</version>
+        </dependency>
 
         <dependency>
             <groupId>javax.xml.bind</groupId>
@@ -104,11 +109,6 @@
             <artifactId>instancio-junit</artifactId>
             <version>4.0.0</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-            <version>3.2.1</version>
         </dependency>
     </dependencies>
 
