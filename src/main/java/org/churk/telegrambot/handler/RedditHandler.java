@@ -98,6 +98,9 @@ public class RedditHandler extends Handler {
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         String subreddit = chooseSubreddit(context, chatId);
 
+        if (subredditService.getSubreddits(chatId).isEmpty()) {
+            return List.of();
+        }
         return getRedditPost(subreddit, chatId, messageId);
     }
 
