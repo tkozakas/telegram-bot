@@ -25,6 +25,13 @@ public class StickerHandler extends Handler {
         }
 
         SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst().toLowerCase());
+
+        if (subCommand == null) {
+            return getReplyMessage(context.getUpdate().getMessage().getChatId(),
+                    context.getUpdate().getMessage().getMessageId(),
+                    "Invalid command, please use /sticker <add/list/remove>");
+        }
+
         return switch (subCommand) {
             case ADD -> handleAdd(context);
             case LIST -> handleList(context);

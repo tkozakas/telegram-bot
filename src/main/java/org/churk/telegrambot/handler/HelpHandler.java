@@ -22,7 +22,7 @@ public class HelpHandler extends Handler {
                                 .replace("]", "")
                                 .replace(".*/", "/")
                                 .replace("\\b.*", "") + "* - " +
-                                command.getDescription().formatted(botProperties.getWinnerName()))
+                                command.getDescription().replace("%s", botProperties.getWinnerName()))
                 .reduce((s1, s2) -> s1 + "\n" + s2)
                 .orElse("No commands available");
 

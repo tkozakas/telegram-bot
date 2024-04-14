@@ -3,6 +3,7 @@ package org.churk.telegrambot.handler;
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.RedditPost;
+import org.churk.telegrambot.model.SubCommand;
 import org.churk.telegrambot.model.Subreddit;
 import org.churk.telegrambot.service.SubredditService;
 import org.churk.telegrambot.utility.HandlerContext;
@@ -23,27 +24,49 @@ public class RedditHandler extends Handler {
 
     @Override
     public List<Validable> handle(HandlerContext context) {
-        List<String> args = context.getArgs();
-        String subCommand = args.isEmpty() ? "get" : args.getFirst().toLowerCase();
+        if (context.getArgs().isEmpty()) {
+            return handleRandomPost(context);
+        }
+
+        SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst().toUpperCase());
+
+        if (subCommand == null) {
+            return getReplyMessage(context.getUpdate().getMessage().getChatId(),
+                    context.getUpdate().getMessage().getMessageId(),
+                    "Invalid command, please use /reddit <add/list/remove/random>");
+        }
 
         return switch (subCommand) {
-            case "add" -> handleAdd(context);
-            case "list" -> handleList(context);
-            case "remove" -> handleRemove(context);
-            default -> handleGetRandomPost(context);
+            case ADD -> handleAdd(context);
+            case LIST -> handleList(context);
+            case REMOVE -> handleRemove(context);
+            case RANDOM -> handleRandomPost(context);
+            default -> handlePost(context);
         };
+    }
+
+    private List<Validable> handleRandomPost(HandlerContext context) {
+        Long chatId = context.getUpdate().getMessage().getChatId();
+        Integer messageId = context.getUpdate().getMessage().getMessageId();
+
+        if (subredditService.getSubreddits(chatId).isEmpty()) {
+            return getReplyMessage(chatId, messageId,
+                    "No subreddits available use /reddit add <subreddit>");
+        }
+
+        return handlePost(context);
     }
 
     private List<Validable> handleAdd(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-        List<String> args = context.getArgs().subList(1, context.getArgs().size());
+        String args = context.getArgs().getLast();
 
-        if (args.isEmpty() || !subredditService.isValidSubreddit(args.getFirst())) {
+        if (args.isEmpty() || !subredditService.isValidSubreddit(args)) {
             return getReplyMessage(chatId, messageId,
                     "Please provide a valid name /reddit add <subreddit>");
         }
-        String subreddit = args.getFirst();
+        String subreddit = args;
         if (subreddit.startsWith(REDDIT_URL)) {
             subreddit = subreddit.replace(REDDIT_URL, "");
         }
@@ -76,31 +99,28 @@ public class RedditHandler extends Handler {
     }
 
     private List<Validable> handleRemove(HandlerContext context) {
-        List<String> args = context.getArgs().subList(1, context.getArgs().size());
+        String args = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
-        if (args.isEmpty() || !subredditService.isValidSubreddit(args.getFirst())) {
+        if (args.isEmpty() || !subredditService.isValidSubreddit(args)) {
             return getReplyMessage(chatId, messageId,
                     "Please provide a valid name /reddit remove <subreddit>");
         }
-        if (!subredditService.existsByChatIdAndSubredditName(chatId, args.getFirst())) {
+        if (!subredditService.existsByChatIdAndSubredditName(chatId, args)) {
             return getReplyMessage(chatId, messageId,
-                    "Subreddit " + args.getFirst() + " does not exist in the list");
+                    "Subreddit " + args + " does not exist in the list");
         }
-        subredditService.deleteSubreddit(chatId, args.getFirst());
+        subredditService.deleteSubreddit(chatId, args);
         return getReplyMessage(chatId, messageId,
-                "Subreddit " + args.getFirst() + " removed");
+                "Subreddit " + args + " removed");
     }
 
-    private List<Validable> handleGetRandomPost(HandlerContext context) {
+    private List<Validable> handlePost(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         String subreddit = chooseSubreddit(context, chatId);
 
-        if (subredditService.getSubreddits(chatId).isEmpty()) {
-            return List.of();
-        }
         return getRedditPost(subreddit, chatId, messageId);
     }
 

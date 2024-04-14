@@ -4,25 +4,28 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
 public enum SubCommand {
-    REGISTER("register"),
-    STATS("stats"),
-    ALL("all"),
-    YEAR("year"),
-    USER("user"),
-    ADD("add"),
-    LIST("list"),
-    REMOVE("remove");
+    REGISTER(List.of("register", "reg")),
+    STATS(List.of("stats")),
+    ALL(List.of("all")),
+    YEAR(List.of("year")),
+    USER(List.of("user")),
+    ADD(List.of("add")),
+    LIST(List.of("list")),
+    REMOVE(List.of("remove")),
+    RANDOM(List.of("random")),
+    NONE(List.of(""));
 
-    private final String command;
+    private final List<String> command;
 
     public static SubCommand getSubCommand(String lowerCase) {
-        return Arrays.stream(SubCommand.values())
-                .filter(subCommand -> subCommand.getCommand().equals(lowerCase))
+        return Arrays.stream(values())
+                .filter(subCommand -> subCommand.getCommand().contains(lowerCase))
                 .findFirst()
-                .orElse(ALL);
+                .orElse(NONE);
     }
 }

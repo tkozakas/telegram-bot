@@ -20,6 +20,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.List;
 import java.util.Map;
 
+import static org.churk.telegrambot.model.SubCommand.RANDOM;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -77,7 +79,7 @@ public class CommandProcessor {
         return chats.stream().flatMap(chat ->
                 handler.handle(HandlerContext.builder()
                         .update(chat.getUpdate())
-                        .args(List.of())
+                        .args(List.of(RANDOM.getCommand().getFirst()))
                         .build()).stream()).toList();
     }
 
