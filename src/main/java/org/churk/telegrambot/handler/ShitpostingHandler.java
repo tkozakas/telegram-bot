@@ -53,7 +53,7 @@ public class ShitpostingHandler extends Handler {
             file.get().deleteOnExit();
             return getVideo(chatId, file.get(), caption);
         } else {
-            return getReplyMessage(chatId, messageId, "Error while downloading the file");
+            return getReplyMessage(chatId, messageId, "Not found");
         }
     }
 

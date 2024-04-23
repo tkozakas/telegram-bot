@@ -12,7 +12,7 @@ public interface ShitpostingClient {
     @GetMapping("/random")
     Map<String, Object> getShitpost();
 
-    @GetMapping("/random")
+    @GetMapping("/search")
     Map<String, Object> getShitpost(@RequestParam("search") String search);
 
     @GetMapping("/quote/random")
