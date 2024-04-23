@@ -120,6 +120,10 @@ public class RedditHandler extends Handler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         String subreddit = chooseSubreddit(context, chatId);
+        if (subreddit == null) {
+            return getReplyMessage(chatId, messageId,
+                    "No subreddits available use /reddit add <subreddit>");
+        }
 
         return getRedditPost(subreddit, chatId, messageId);
     }
