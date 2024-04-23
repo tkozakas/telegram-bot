@@ -3,6 +3,7 @@ package org.churk.telegrambot.handler;
 import lombok.AllArgsConstructor;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Quote;
+import org.churk.telegrambot.model.Shitpost;
 import org.churk.telegrambot.model.SubCommand;
 import org.churk.telegrambot.service.ShitpostingService;
 import org.churk.telegrambot.utility.HandlerContext;
@@ -21,16 +22,20 @@ public class ShitpostingHandler extends Handler {
     @Override
     public List<Validable> handle(HandlerContext context) {
         if (context.getArgs().isEmpty()) {
-            String url = shitpostingService.getShitpost();
-            return handlePost(context, url, "Random Shitpost");
+            Shitpost shitpost = shitpostingService.getShitpost();
+            return shitpost.isError() ?
+                    getReplyMessage(context.getUpdate().getMessage().getChatId(), context.getUpdate().getMessage().getMessageId(), "Not found") :
+                    handlePost(context, shitpost.getUrl(), "Random Shitpost");
         }
 
         SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst().toLowerCase());
         return switch (subCommand) {
             case QUOTE -> handleQuote(context);
             default -> {
-                String url = shitpostingService.getShitpostByName(context.getArgs().getFirst());
-                yield handlePost(context, url, "Shitpost: " + context.getArgs().getFirst())  ;
+                Shitpost shitpost = shitpostingService.getShitpostByName(context.getArgs().getFirst());
+                yield shitpost.isError() ?
+                        getReplyMessage(context.getUpdate().getMessage().getChatId(), context.getUpdate().getMessage().getMessageId(), "Not found") :
+                        handlePost(context, shitpost.getUrl(), "Shitpost: " + context.getArgs().getFirst());
             }
         };
     }
@@ -53,7 +58,7 @@ public class ShitpostingHandler extends Handler {
             file.get().deleteOnExit();
             return getVideo(chatId, file.get(), caption);
         } else {
-            return getReplyMessage(chatId, messageId, "Not found");
+            return getReplyMessage(chatId, messageId, "Error downloading file");
         }
     }
 

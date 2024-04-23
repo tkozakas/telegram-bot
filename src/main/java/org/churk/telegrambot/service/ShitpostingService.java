@@ -4,11 +4,11 @@ import lombok.AllArgsConstructor;
 import org.churk.telegrambot.client.ShitpostingClient;
 import org.churk.telegrambot.config.DownloadMediaProperties;
 import org.churk.telegrambot.model.Quote;
+import org.churk.telegrambot.model.Shitpost;
 import org.churk.telegrambot.utility.FileDownloader;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -18,14 +18,12 @@ public class ShitpostingService {
     private final ShitpostingClient shitpostingClient;
     private final DownloadMediaProperties downloadMediaProperties;
 
-    public String getShitpost() {
-        Map<String, Object> jsonObject = shitpostingClient.getShitpost();
-        return (String) jsonObject.get("url");
+    public Shitpost getShitpost() {
+        return shitpostingClient.getShitpost();
     }
 
-    public String getShitpostByName(String search) {
-        Map<String, Object> jsonObject = shitpostingClient.getShitpost(search);
-        return (String) jsonObject.get("url");
+    public Shitpost getShitpostByName(String search) {
+        return shitpostingClient.getShitpost(search);
     }
 
     public CompletableFuture<Optional<File>> getFile(String post) {
