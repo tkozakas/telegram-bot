@@ -94,10 +94,11 @@ public abstract class Handler implements CommandHandler {
         ));
     }
 
-    protected List<Validable> getVideo(Long chatId, File file) {
+    protected List<Validable> getVideo(Long chatId, File file, String caption) {
         return createMessage(MessageType.VIDEO, Map.of(
                 MessageParams.CHAT_ID, chatId,
-                MessageParams.VIDEO, file
+                MessageParams.VIDEO, file,
+                MessageParams.CAPTION, caption
         ));
     }
 }

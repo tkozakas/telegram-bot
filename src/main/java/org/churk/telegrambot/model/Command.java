@@ -16,6 +16,7 @@ public enum Command {
     FACT(List.of(".*/fact\\b.*"), "Random Fact. /fact add <fact>"),
     STICKER(List.of(".*/sticker\\b.*"), "Random Sticker. /sticker add <name>, /sticker remove <name>, /sticker list for management"),
     REDDIT(List.of(".*/reddit\\b.*", ".*/meme\\b.*"), "Random Reddit pic. /reddit <subreddit>, /reddit add <name> /reddit remove <name>, /reddit list for management"),
+    SHITPOST(List.of(".*/shitpost\\b.*"), "Random Shitpost. /shitpost <name>"),
     NONE(List.of(""), "");
 
     private final List<String> patterns;

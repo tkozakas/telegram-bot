@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public class VideoMessageBuilder implements MessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case MessageParams.CHAT_ID -> message.setChatId(String.valueOf(value));
-                case MessageParams.VIDEO -> message.setVideo(new InputFile((String) value));
+                case MessageParams.VIDEO -> message.setVideo(new InputFile((File) value));
                 case MessageParams.CAPTION -> message.setCaption((String) value);
                 case MessageParams.REPLY_TO_MESSAGE_ID -> message.setReplyToMessageId((Integer) value);
                 default -> throw new IllegalStateException("Unexpected value: " + key);

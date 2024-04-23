@@ -18,6 +18,7 @@ public enum SubCommand {
     LIST(List.of("list")),
     REMOVE(List.of("remove")),
     RANDOM(List.of("random")),
+    QUOTE(List.of("quote")),
     NONE(List.of(""));
 
     private final List<String> command;
