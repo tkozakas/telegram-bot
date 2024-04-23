@@ -28,7 +28,7 @@ public class RedditHandler extends Handler {
             return handleRandomPost(context);
         }
 
-        SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst().toUpperCase());
+        SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst().toLowerCase());
 
         if (subCommand == null) {
             return getReplyMessage(context.getUpdate().getMessage().getChatId(),
