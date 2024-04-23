@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @AllArgsConstructor
@@ -26,7 +25,7 @@ public class ShitpostingService {
         return shitpostingClient.getShitpost(search);
     }
 
-    public CompletableFuture<Optional<File>> getFile(String post) {
+    public Optional<File> getFile(String post) {
         String extension = post.substring(post.lastIndexOf("."));
         return FileDownloader.downloadAndCompressMediaAsync(post, downloadMediaProperties, extension);
     }

@@ -17,7 +17,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -80,7 +79,7 @@ public class SubredditService {
         return List.of();
     }
 
-    public CompletableFuture<Optional<File>> getFile(RedditPost redditPost) {
+    public Optional<File> getFile(RedditPost redditPost) {
         String mediaUrl = redditPost.getUrl();
         String extension = mediaUrl.substring(mediaUrl.lastIndexOf("."));
         return FileDownloader.downloadAndCompressMediaAsync(mediaUrl, redditProperties, extension);

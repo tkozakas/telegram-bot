@@ -53,7 +53,7 @@ public class ShitpostingHandler extends Handler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
-        Optional<File> file = shitpostingService.getFile(url).join();
+        Optional<File> file = shitpostingService.getFile(url);
         if (file.isPresent()) {
             file.get().deleteOnExit();
             return getVideo(chatId, file.get(), caption);

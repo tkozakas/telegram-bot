@@ -41,7 +41,7 @@ public class RedditHandler extends Handler {
             case LIST -> handleList(context);
             case REMOVE -> handleRemove(context);
             case RANDOM -> handleRandomPost(context);
-            default -> handlePost(context);
+            default -> handlePost(context, context.getArgs().getFirst());
         };
     }
 
@@ -53,8 +53,8 @@ public class RedditHandler extends Handler {
             return getReplyMessage(chatId, messageId,
                     "No subreddits available use /reddit add <subreddit>");
         }
-
-        return handlePost(context);
+        String subreddit = chooseSubreddit(context, chatId);
+        return handlePost(context, subreddit);
     }
 
     private List<Validable> handleAdd(HandlerContext context) {
@@ -116,23 +116,14 @@ public class RedditHandler extends Handler {
                 "Subreddit " + args + " removed");
     }
 
-    private List<Validable> handlePost(HandlerContext context) {
+    private List<Validable> handlePost(HandlerContext context, String subreddit) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-        String subreddit = chooseSubreddit(context, chatId);
-        if (subreddit == null) {
-            return getReplyMessage(chatId, messageId,
-                    "No subreddits available use /reddit add <subreddit>");
-        }
 
         return getRedditPost(subreddit, chatId, messageId);
     }
 
     private List<Validable> getRedditPost(String subreddit, Long chatId, Integer messageId) {
-        if (subreddit == null) {
-            return getReplyMessage(chatId, messageId,
-                    "No subreddits available use /reddit add <subreddit>");
-        }
         if (!subredditService.isValidSubreddit(subreddit)) {
             return getReplyMessage(chatId, messageId,
                     "This subreddit does not exist");
@@ -155,7 +146,7 @@ public class RedditHandler extends Handler {
             Optional<RedditPost> redditPost = subredditService.getMemeFromSubreddit(subreddit);
             if (redditPost.isPresent()) {
                 RedditPost post = redditPost.get();
-                Optional<File> file = subredditService.getFile(post).join();
+                Optional<File> file = subredditService.getFile(post);
                 if (file.isEmpty()) {
                     return postWithoutFileResponse(chatId, post, subreddit);
                 }
