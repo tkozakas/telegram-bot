@@ -12,7 +12,8 @@ All configuration is done through environment variables or application.yaml.
 Deploy using Docker and Maven, or directly through IntelliJ with specific environment variables (`BOT_USERNAME`, `BOT_TOKEN`, `BOT_WINNER_NAME`).
 ### Docker Setup
 ```bash
-cd docker && docker-compose -f dev-compose.yaml up -d && cd ..
+# inside the project folder
+docker-compose -f docker/dev-compose.yaml up -d
 ```
 ### Maven Setup
 ```bash
