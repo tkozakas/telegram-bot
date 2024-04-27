@@ -46,13 +46,13 @@ public class CommandProcessor {
         List<String> arguments = List.of(messageText.split(" ")).subList(1, messageText.split(" ").length);
         Command command = Command.getTextCommand(messageText, botProperties.getWinnerName());
         CommandHandler handler = handlerFactory.getHandler(command);
-        return handler == null ? handleUnkownCommand(message) : handler.handle(HandlerContext.builder()
+        return handler == null ? handleUnknownCommand(message) : handler.handle(HandlerContext.builder()
                 .update(update)
                 .args(arguments)
                 .build());
     }
 
-    private List<Validable> handleUnkownCommand(Message message) {
+    private List<Validable> handleUnknownCommand(Message message) {
         return messageBuilderFactory.getBuilder(MessageType.TEXT).build(Map.of(
                 MessageParams.CHAT_ID, message.getChatId(),
                 MessageParams.TEXT, "I don't know what to do with this command. Try /help for more info."
