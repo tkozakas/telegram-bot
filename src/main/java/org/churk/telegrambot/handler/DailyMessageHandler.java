@@ -6,6 +6,7 @@ import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Sentence;
 import org.churk.telegrambot.model.Stat;
 import org.churk.telegrambot.model.SubCommand;
+import org.churk.telegrambot.repository.StatsRepository;
 import org.churk.telegrambot.service.StatsService;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class DailyMessageHandler extends Handler {
     private final StatsService statsService;
+    private final StatsRepository statsRepository;
 
     public static boolean isInteger(String s) {
         try {
@@ -151,6 +153,7 @@ public class DailyMessageHandler extends Handler {
         }
 
         Stat randomWinner = statByChatIdAndYear.get(ThreadLocalRandom.current().nextInt(statByChatIdAndYear.size()));
+        statsRepository.setIsWinnerByUserIdAndYear(randomWinner.getChatId(), randomWinner.getUserId(), year);
 
         List<Sentence> sentences = dailyMessageService.getRandomGroupSentences();
         String mentionedUser = "[" + randomWinner.getFirstName() + "](tg://user?id=" + randomWinner.getUserId() + ")";
