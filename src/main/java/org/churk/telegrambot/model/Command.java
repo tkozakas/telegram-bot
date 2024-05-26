@@ -5,21 +5,23 @@ import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @AllArgsConstructor
 public enum Command {
-    START(List.of(".*/start\\b.*"), "Activate bot"),
-    HELP(List.of(".*/help\\b.*"), "Get help"),
-    DAILY_MESSAGE(List.of(".*/%s\\b.*"), "Daily %s game. /%s, /%s stats <user> or <year>, /%s register"),
-    NEWS(List.of(".*/news\\b.*"), "Latest news. /news <query> for specifics"),
-    FACT(List.of(".*/fact\\b.*"), "Random Fact. /fact add <fact>"),
-    STICKER(List.of(".*/sticker\\b.*"), "Random Sticker. /sticker add <name>, /sticker remove <name>, /sticker list for management"),
-    REDDIT(List.of(".*/reddit\\b.*", ".*/meme\\b.*"), "Random Reddit pic. /reddit <subreddit>, /reddit add <name> /reddit remove <name>, /reddit list for management"),
-    SHITPOST(List.of(".*/shitpost\\b.*"), "Random Shitpost. /shitpost <name>"),
-    NONE(List.of(""), "");
+    START(List.of(".*/start\\b.*"), List.of(SubCommand.NONE), "Activate bot"),
+    HELP(List.of(".*/help\\b.*"), List.of(SubCommand.NONE), "Get help"),
+    DAILY_MESSAGE(List.of(".*/%s\\b.*"), List.of(SubCommand.ALL), "Daily game"),
+    NEWS(List.of(".*/news\\b.*"), List.of(SubCommand.NONE), "Latest news"),
+    FACT(List.of(".*/fact\\b.*"), List.of(SubCommand.ADD), "Random fact"),
+    STICKER(List.of(".*/sticker\\b.*"), List.of(SubCommand.ADD, SubCommand.REMOVE, SubCommand.LIST), "Manage stickers"),
+    REDDIT(List.of(".*/reddit\\b.*", ".*/meme\\b.*"), List.of(SubCommand.ADD, SubCommand.REMOVE, SubCommand.LIST), "Reddit pics"),
+    SHITPOST(List.of(".*/shitpost\\b.*"), List.of(SubCommand.NONE), "Random shitpost"),
+    NONE(List.of(""), List.of(SubCommand.NONE), "");
 
     private final List<String> patterns;
+    private final List<SubCommand> subCommands;
     private final String description;
 
     public static Command getTextCommand(String text, String botName) {
@@ -28,5 +30,18 @@ public enum Command {
                         .anyMatch(pattern -> text.matches(pattern.formatted(botName))))
                 .findFirst()
                 .orElse(NONE);
+    }
+
+    public String getSubCommandsString() {
+        return getSubCommands().stream()
+                .filter(subCommand -> subCommand != SubCommand.NONE)
+                .map(subCommand -> subCommand.getCommand().getFirst())
+                .collect(Collectors.joining(","));
+    }
+
+    public String getPatternCleaned(String botName) {
+        return getPatterns().getFirst().formatted(botName)
+                        .replace(".*/", "/")
+                        .replace("\\b.*", "");
     }
 }

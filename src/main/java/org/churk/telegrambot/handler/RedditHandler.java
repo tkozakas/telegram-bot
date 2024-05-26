@@ -30,12 +30,6 @@ public class RedditHandler extends Handler {
 
         SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst().toLowerCase());
 
-        if (subCommand == null) {
-            return getReplyMessage(context.getUpdate().getMessage().getChatId(),
-                    context.getUpdate().getMessage().getMessageId(),
-                    "Invalid command, please use /reddit <add/list/remove/random>");
-        }
-
         return switch (subCommand) {
             case ADD -> handleAdd(context);
             case LIST -> handleList(context);
@@ -51,9 +45,10 @@ public class RedditHandler extends Handler {
 
         if (subredditService.getSubreddits(chatId).isEmpty()) {
             return getReplyMessage(chatId, messageId,
-                    "No subreddits available use /reddit add <subreddit>");
+                    "No subreddits available. Use %s <%s>"
+                            .formatted(Command.REDDIT.getPatterns().getFirst(), SubCommand.ADD.getCommand().getFirst()));
         }
-        String subreddit = chooseSubreddit(context, chatId);
+        String subreddit = chooseSubreddit(chatId);
         return handlePost(context, subreddit);
     }
 
@@ -62,14 +57,12 @@ public class RedditHandler extends Handler {
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         String args = context.getArgs().getLast();
 
-        if (args.isEmpty() || !subredditService.isValidSubreddit(args)) {
+        if (args.length() != 2 || !subredditService.isValidSubreddit(args)) {
             return getReplyMessage(chatId, messageId,
-                    "Please provide a valid name /reddit add <subreddit>");
+                    "Please provide a valid name %s %s <subreddit>"
+                            .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.ADD.getCommand().getFirst()));
         }
-        String subreddit = args;
-        if (subreddit.startsWith(REDDIT_URL)) {
-            subreddit = subreddit.replace(REDDIT_URL, "");
-        }
+        String subreddit = args.startsWith(REDDIT_URL) ? args.replace(REDDIT_URL, "") : args;
         if (subredditService.existsByChatIdAndSubredditName(chatId, subreddit)) {
             return getReplyMessage(chatId, messageId,
                     "Subreddit %s already exists in the list".formatted(subreddit));
@@ -95,7 +88,7 @@ public class RedditHandler extends Handler {
                         .reduce("", (a, b) -> a + "- r/" + b + "\n");
         return subreddits.isEmpty() ?
                 getReplyMessage(chatId, messageId, "No subreddits available") :
-                getMessageWithMarkdown(chatId, message);
+                getMessageWithMarkdown(chatId, "- r/" + message);
     }
 
     private List<Validable> handleRemove(HandlerContext context) {
@@ -103,17 +96,18 @@ public class RedditHandler extends Handler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
-        if (args.isEmpty() || !subredditService.isValidSubreddit(args)) {
+        if (args.length() != 2 || !subredditService.isValidSubreddit(args)) {
             return getReplyMessage(chatId, messageId,
-                    "Please provide a valid name /reddit remove <subreddit>");
+                    "Please provide a valid name %s %s <subreddit>"
+                            .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.REMOVE.getCommand().getFirst()));
         }
         if (!subredditService.existsByChatIdAndSubredditName(chatId, args)) {
             return getReplyMessage(chatId, messageId,
-                    "Subreddit " + args + " does not exist in the list");
+                    "Subreddit %s does not exist in the list".formatted(args));
         }
         subredditService.deleteSubreddit(chatId, args);
         return getReplyMessage(chatId, messageId,
-                "Subreddit " + args + " removed");
+                "Subreddit %s removed".formatted(args));
     }
 
     private List<Validable> handlePost(HandlerContext context, String subreddit) {
@@ -131,14 +125,10 @@ public class RedditHandler extends Handler {
         return fetchAndProcessMeme(chatId, messageId, subreddit);
     }
 
-    private String chooseSubreddit(HandlerContext context, Long chatId) {
+    private String chooseSubreddit(Long chatId) {
         List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
-        if (context.getArgs().isEmpty()) {
-            return subreddits.isEmpty() ? null :
-                    subreddits.get(ThreadLocalRandom.current().nextInt(subreddits.size())).getSubredditName();
-        } else {
-            return context.getArgs().getFirst();
-        }
+        return subreddits.isEmpty() ? null :
+                subreddits.get(ThreadLocalRandom.current().nextInt(subreddits.size())).getSubredditName();
     }
 
     private List<Validable> fetchAndProcessMeme(Long chatId, Integer messageId, String subreddit) {
@@ -153,19 +143,21 @@ public class RedditHandler extends Handler {
                 return postWithFileResponse(chatId, post, file.get(), subreddit);
             }
         } catch (Exception e) {
-            getReplyMessage(chatId, messageId, "Something went wrong, please try again later");
+            return getReplyMessage(chatId, messageId, "Something went wrong, please try again later");
         }
         return getReplyMessage(chatId, messageId, "Something went wrong, please try again later");
     }
 
     private List<Validable> postWithoutFileResponse(Long chatId, RedditPost post, String subreddit) {
-        String caption = (post.getTitle() != null ? post.getTitle() + "\n" : "") + "<Image unavailable>\n" + "From r/" + subreddit;
+        String caption = "%s%n<Image unavailable>%nFrom r/%s"
+                .formatted(post.getTitle() != null ? post.getTitle() : "", subreddit);
         return getMessage(chatId, caption);
     }
 
     private List<Validable> postWithFileResponse(Long chatId, RedditPost post, File file, String subreddit) {
         file.deleteOnExit();
-        String caption = (post.getTitle() != null ? post.getTitle() + "\n" : "") + "From r/" + subreddit;
+        String caption = "%s%nFrom r/%s"
+                .formatted(post.getTitle() != null ? post.getTitle() : "", subreddit);
         String fileName = file.getName().toLowerCase();
         return fileName.endsWith(".gif") ?
                 getAnimation(chatId, file, caption) :
