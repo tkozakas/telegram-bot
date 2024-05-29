@@ -13,7 +13,6 @@ public class MessageBuilderFactory {
             case STICKER -> new StickerMessageBuilder();
             case VIDEO -> new VideoMessageBuilder();
             case MEDIA_GROUP -> new MediaGroupMessageBuilder();
-            default -> throw new IllegalArgumentException("Unsupported message type: " + messageType);
         };
     }
 }
