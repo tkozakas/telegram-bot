@@ -9,10 +9,14 @@ import org.churk.telegrambot.service.SubredditService;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -138,34 +142,29 @@ public class RedditHandler extends Handler {
             return getReplyMessage(chatId, messageId,
                     "No posts available in r/%s".formatted(subreddit));
         }
-        return fetchAndProcessMemes(chatId, messageId, posts, subreddit);
+        return fetchAndProcessMemes(chatId, posts, subreddit);
     }
 
-    private List<Validable> fetchAndProcessMemes(Long chatId, Integer messageId, List<RedditPost> posts, String subreddit) {
-        return posts.stream()
-                .map(post -> fetchAndProcessMeme(chatId, messageId, post, subreddit))
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+    private List<Validable> fetchAndProcessMemes(Long chatId, List<RedditPost> posts, String subreddit) {
+        List<File> files = posts.stream().map(subredditService::getFile).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+
+        if (files.isEmpty()) {
+            return posts.stream().map(post -> postWithoutFileResponse(chatId, post, subreddit)).flatMap(List::stream).collect(Collectors.toList());
+        }
+
+        if (files.size() == 1) {
+            File file = files.getFirst();
+            file.deleteOnExit();
+            return postWithFileResponse(chatId, posts.getFirst(), file, subreddit);
+        } else {
+            return getMediaGroup(chatId, files);
+        }
     }
 
     private String chooseSubreddit(Long chatId) {
         List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
         return subreddits.isEmpty() ? null :
                 subreddits.get(ThreadLocalRandom.current().nextInt(subreddits.size())).getSubredditName();
-    }
-
-    private List<Validable> fetchAndProcessMeme(Long chatId, Integer messageId, RedditPost post, String subreddit) {
-        try {
-            Optional<File> file = subredditService.getFile(post);
-
-            if (file.isEmpty()) {
-                return postWithoutFileResponse(chatId, post, subreddit);
-            }
-            file.get().deleteOnExit();
-            return postWithFileResponse(chatId, post, file.get(), subreddit);
-        } catch (Exception e) {
-            return getReplyMessage(chatId, messageId, "Something went wrong, please try again later");
-        }
     }
 
     private List<Validable> postWithoutFileResponse(Long chatId, RedditPost post, String subreddit) {

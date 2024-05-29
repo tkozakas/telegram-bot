@@ -71,6 +71,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     case SendPhoto sendphoto -> execute(sendphoto);
                     case SendAnimation sendanimation -> execute(sendanimation);
                     case SendVideo sendvideo -> execute(sendvideo);
+                    case SendMediaGroup sendmediagroup -> execute(sendmediagroup);
                     default -> {
                     }
                 }

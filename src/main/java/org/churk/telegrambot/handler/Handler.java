@@ -101,4 +101,11 @@ public abstract class Handler implements CommandHandler {
                 MessageParams.CAPTION, caption
         ));
     }
+
+    protected List<Validable> getMediaGroup(Long chatId, List<File> files) {
+        return createMessage(MessageType.MEDIA_GROUP, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.MEDIA_GROUP, files
+        ));
+    }
 }

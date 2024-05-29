@@ -6,17 +6,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class MessageBuilderFactory {
     public MessageBuilder getBuilder(MessageType messageType) {
-        if (messageType == MessageType.TEXT) {
-            return new TextMessageBuilder();
-        } else if (messageType == MessageType.PHOTO) {
-            return new PhotoMessageBuilder();
-        } else if (messageType == MessageType.ANIMATION) {
-            return new AnimationMessageBuilder();
-        } else if (messageType == MessageType.STICKER) {
-            return new StickerMessageBuilder();
-        } else if (messageType == MessageType.VIDEO) {
-            return new VideoMessageBuilder();
-        }
-        throw new IllegalArgumentException("Unsupported message type: " + messageType);
+        return switch (messageType) {
+            case TEXT -> new TextMessageBuilder();
+            case PHOTO -> new PhotoMessageBuilder();
+            case ANIMATION -> new AnimationMessageBuilder();
+            case STICKER -> new StickerMessageBuilder();
+            case VIDEO -> new VideoMessageBuilder();
+            case MEDIA_GROUP -> new MediaGroupMessageBuilder();
+            default -> throw new IllegalArgumentException("Unsupported message type: " + messageType);
+        };
     }
 }
