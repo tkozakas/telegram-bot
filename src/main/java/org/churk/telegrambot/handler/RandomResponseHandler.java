@@ -15,7 +15,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RandomResponseHandler extends Handler {
     private final FactHandler factHandler;
     private final StickerHandler stickerHandler;
-    private final ShitpostingHandler shitpostingHandler;
     private final Random random = new Random();
 
     private boolean shouldTriggerRandomResponse() {
@@ -25,8 +24,7 @@ public class RandomResponseHandler extends Handler {
     private CommandHandler selectRandomHandler() {
         List<CommandHandler> handlersToChooseFrom = List.of(
                 factHandler,
-                stickerHandler,
-                shitpostingHandler
+                stickerHandler
         );
         int index = random.nextInt(handlersToChooseFrom.size());
         return handlersToChooseFrom.get(index);
@@ -39,17 +37,8 @@ public class RandomResponseHandler extends Handler {
         }
         CommandHandler randomHandler = selectRandomHandler();
         context.setReply(ThreadLocalRandom.current().nextBoolean());
-        configureHandler(context, randomHandler);
 
         return randomHandler.handle(context);
-    }
-
-    private void configureHandler(HandlerContext context, CommandHandler randomHandler) {
-        switch (randomHandler.getSupportedCommand()) {
-            case SHITPOST:
-                context.setArgs(List.of("quote"));
-                break;
-        }
     }
 
     @Override
