@@ -22,7 +22,6 @@ bot:
 
 media:
   path: /tmp/
-  file-name: file
 
 schedule:
   daily-message: 0 0 12 * * *

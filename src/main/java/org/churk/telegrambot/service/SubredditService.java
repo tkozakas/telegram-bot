@@ -17,10 +17,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,7 +26,6 @@ public class SubredditService {
     private final SubredditRepository subredditRepository;
     private final DownloadMediaProperties redditProperties;
     private final RedditClient redditClient;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     public void addSubreddit(Long chatId, String subreddit) {
         subredditRepository.save(new Subreddit(chatId, subreddit));
@@ -42,7 +37,7 @@ public class SubredditService {
     }
 
     public boolean isValidSubreddit(String subreddit) {
-        return !getRedditPosts(subreddit).isEmpty();
+        return !getRedditPosts(subreddit, 1).isEmpty();
     }
 
     public boolean existsByChatIdAndSubredditName(Long chatId, String subreddit) {
@@ -53,17 +48,9 @@ public class SubredditService {
         return subredditRepository.findAllByChatId(chatId);
     }
 
-    public Optional<RedditPost> getMemeFromSubreddit(String subreddit) throws feign.FeignException.NotFound {
-        List<RedditPost> redditMeme = getRedditPosts(subreddit);
-        if (redditMeme.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(redditMeme.get(ThreadLocalRandom.current().nextInt(redditMeme.size())));
-    }
-
-    private List<RedditPost> getRedditPosts(String subreddit) {
+    public List<RedditPost> getRedditPosts(String subreddit, int count) {
         try {
-            Map<String, Object> jsonResponse = redditClient.getRedditMemeFromSubreddit(subreddit);
+            Map<String, Object> jsonResponse = redditClient.getRedditMemes(subreddit, count);
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> responseMap = mapper.convertValue(jsonResponse, new TypeReference<>() {
             });
@@ -83,11 +70,9 @@ public class SubredditService {
         return List.of();
     }
 
-    public Optional<File> getFile(RedditPost redditPost) throws ExecutionException, InterruptedException {
-        return executorService.submit(() -> {
-            String mediaUrl = redditPost.getUrl();
-            String extension = mediaUrl.substring(mediaUrl.lastIndexOf("."));
-            return FileDownloader.downloadAndCompressMedia(mediaUrl, redditProperties, extension);
-        }).get();
+    public Optional<File> getFile(RedditPost redditPost) {
+        String mediaUrl = redditPost.getUrl();
+        String extension = mediaUrl.substring(mediaUrl.lastIndexOf("."));
+        return FileDownloader.downloadAndCompressMedia(mediaUrl, redditProperties, extension);
     }
 }

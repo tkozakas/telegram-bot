@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -24,32 +25,43 @@ public class RedditHandler extends Handler {
 
     @Override
     public List<Validable> handle(HandlerContext context) {
-        if (context.getArgs().isEmpty()) {
-            return handleRandomPost(context);
+        List<String> args = context.getArgs();
+
+        if (args.isEmpty()) {
+            return handleRandomPost(context, 1);
         }
-
-        SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst().toLowerCase());
-
+        SubCommand subCommand = SubCommand.getSubCommand(args.getFirst().toLowerCase());
         return switch (subCommand) {
             case ADD -> handleAdd(context);
             case LIST -> handleList(context);
             case REMOVE -> handleRemove(context);
-            case RANDOM -> handleRandomPost(context);
-            default -> handlePost(context, context.getArgs().getFirst());
+            case RANDOM -> {
+                int count = parseCount(context);
+                yield handleRandomPost(context, count);
+            }
+            case NONE -> {
+                String firstArg = context.getArgs().getFirst();
+                if (isNumeric(firstArg)) {
+                    int count = Integer.parseInt(firstArg);
+                    yield handleRandomPost(context, count);
+                }
+                yield handlePost(context, firstArg, 1);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + subCommand);
         };
     }
 
-    private List<Validable> handleRandomPost(HandlerContext context) {
+    private List<Validable> handleRandomPost(HandlerContext context, int count) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
         if (subredditService.getSubreddits(chatId).isEmpty()) {
             return getReplyMessage(chatId, messageId,
                     "No subreddits available. Use %s <%s>"
-                            .formatted(Command.REDDIT.getPatterns().getFirst(), SubCommand.ADD.getCommand().getFirst()));
+                            .formatted(Command.REDDIT.getPatternCleaned(), SubCommand.ADD.getCommand().getFirst()));
         }
         String subreddit = chooseSubreddit(chatId);
-        return handlePost(context, subreddit);
+        return handlePost(context, subreddit, count);
     }
 
     private List<Validable> handleAdd(HandlerContext context) {
@@ -57,7 +69,7 @@ public class RedditHandler extends Handler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
-        if (args.isEmpty() || !subredditService.isValidSubreddit(args)) {
+        if (context.getArgs().size() != 2 || !subredditService.isValidSubreddit(args)) {
             return getReplyMessage(chatId, messageId,
                     "Please provide a valid name %s %s <subreddit>"
                             .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.ADD.getCommand().getFirst()));
@@ -96,7 +108,7 @@ public class RedditHandler extends Handler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
-        if (args.isEmpty() || !subredditService.isValidSubreddit(args)) {
+        if (context.getArgs().size() != 2 || !subredditService.isValidSubreddit(args)) {
             return getReplyMessage(chatId, messageId,
                     "Please provide a valid name %s %s <subreddit>"
                             .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.REMOVE.getCommand().getFirst()));
@@ -110,19 +122,30 @@ public class RedditHandler extends Handler {
                 "Subreddit %s removed".formatted(args));
     }
 
-    private List<Validable> handlePost(HandlerContext context, String subreddit) {
+    private List<Validable> handlePost(HandlerContext context, String subreddit, int count) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-
-        return getRedditPost(subreddit, chatId, messageId);
+        return getRedditPosts(subreddit, chatId, messageId, count);
     }
 
-    private List<Validable> getRedditPost(String subreddit, Long chatId, Integer messageId) {
+    private List<Validable> getRedditPosts(String subreddit, Long chatId, Integer messageId, int count) {
         if (!subredditService.isValidSubreddit(subreddit)) {
             return getReplyMessage(chatId, messageId,
                     "This subreddit does not exist");
         }
-        return fetchAndProcessMeme(chatId, messageId, subreddit);
+        List<RedditPost> posts = subredditService.getRedditPosts(subreddit, count);
+        if (posts.isEmpty()) {
+            return getReplyMessage(chatId, messageId,
+                    "No posts available in r/%s".formatted(subreddit));
+        }
+        return fetchAndProcessMemes(chatId, messageId, posts, subreddit);
+    }
+
+    private List<Validable> fetchAndProcessMemes(Long chatId, Integer messageId, List<RedditPost> posts, String subreddit) {
+        return posts.stream()
+                .map(post -> fetchAndProcessMeme(chatId, messageId, post, subreddit))
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
     }
 
     private String chooseSubreddit(Long chatId) {
@@ -131,21 +154,18 @@ public class RedditHandler extends Handler {
                 subreddits.get(ThreadLocalRandom.current().nextInt(subreddits.size())).getSubredditName();
     }
 
-    private List<Validable> fetchAndProcessMeme(Long chatId, Integer messageId, String subreddit) {
+    private List<Validable> fetchAndProcessMeme(Long chatId, Integer messageId, RedditPost post, String subreddit) {
         try {
-            Optional<RedditPost> redditPost = subredditService.getMemeFromSubreddit(subreddit);
-            if (redditPost.isPresent()) {
-                RedditPost post = redditPost.get();
-                Optional<File> file = subredditService.getFile(post);
-                if (file.isEmpty()) {
-                    return postWithoutFileResponse(chatId, post, subreddit);
-                }
-                return postWithFileResponse(chatId, post, file.get(), subreddit);
+            Optional<File> file = subredditService.getFile(post);
+
+            if (file.isEmpty()) {
+                return postWithoutFileResponse(chatId, post, subreddit);
             }
+            file.get().deleteOnExit();
+            return postWithFileResponse(chatId, post, file.get(), subreddit);
         } catch (Exception e) {
             return getReplyMessage(chatId, messageId, "Something went wrong, please try again later");
         }
-        return getReplyMessage(chatId, messageId, "Something went wrong, please try again later");
     }
 
     private List<Validable> postWithoutFileResponse(Long chatId, RedditPost post, String subreddit) {
@@ -162,6 +182,21 @@ public class RedditHandler extends Handler {
         return fileName.endsWith(".gif") ?
                 getAnimation(chatId, file, caption) :
                 getPhoto(chatId, file, caption);
+    }
+
+    private int parseCount(HandlerContext context) {
+        if (context.getArgs().size() > 1) {
+            try {
+                return Integer.parseInt(context.getArgs().getFirst());
+            } catch (NumberFormatException ignored) {
+                // If the first argument is not a number, use the default count
+            }
+        }
+        return 1;
+    }
+
+    private boolean isNumeric(String str) {
+        return str.matches("\\d+");
     }
 
     @Override

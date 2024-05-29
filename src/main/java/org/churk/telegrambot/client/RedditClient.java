@@ -12,6 +12,6 @@ public interface RedditClient {
     @GetMapping("/gimme")
     String getRedditMeme();
 
-    @GetMapping("/gimme/{subreddit}")
-    Map<String, Object> getRedditMemeFromSubreddit(@PathVariable String subreddit);
+    @GetMapping("/gimme/{subreddit}/{count}")
+    Map<String, Object> getRedditMemes(@PathVariable String subreddit, @PathVariable int count);
 }

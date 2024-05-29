@@ -10,16 +10,12 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Service
 @AllArgsConstructor
 public class ShitpostingService {
     private final ShitpostingClient shitpostingClient;
     private final DownloadMediaProperties downloadMediaProperties;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     public Shitpost getShitpost() {
         return shitpostingClient.getShitpost();
@@ -29,11 +25,9 @@ public class ShitpostingService {
         return shitpostingClient.getShitpost(search);
     }
 
-    public Optional<File> getFile(String post) throws ExecutionException, InterruptedException {
-        return executorService.submit(() -> {
-            String extension = post.substring(post.lastIndexOf("."));
-            return FileDownloader.downloadAndCompressMedia(post, downloadMediaProperties, extension);
-        }).get();
+    public Optional<File> getFile(String post) {
+        String extension = post.substring(post.lastIndexOf("."));
+        return FileDownloader.downloadAndCompressMedia(post, downloadMediaProperties, extension);
     }
 
     public Quote getQuote() {

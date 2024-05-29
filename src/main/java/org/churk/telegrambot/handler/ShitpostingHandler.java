@@ -22,20 +22,20 @@ public class ShitpostingHandler extends Handler {
     @Override
     public List<Validable> handle(HandlerContext context) {
         if (context.getArgs().isEmpty()) {
-            Shitpost shitpost = shitpostingService.getShitpost();
-            return shitpost.isError() ?
+            Shitpost post = shitpostingService.getShitpost();
+            return post.isError() ?
                     getReplyMessage(context.getUpdate().getMessage().getChatId(), context.getUpdate().getMessage().getMessageId(), "Not found") :
-                    handlePost(context, shitpost.getUrl(), "Random Shitpost");
+                    handlePost(context, post.getUrl(), "Random Shitpost");
         }
 
         SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst().toLowerCase());
         return switch (subCommand) {
             case QUOTE -> handleQuote(context);
             default -> {
-                Shitpost shitpost = shitpostingService.getShitpostByName(context.getArgs().getFirst());
-                yield shitpost.isError() ?
+                Shitpost post = shitpostingService.getShitpostByName(context.getArgs().getFirst());
+                yield post.isError() ?
                         getReplyMessage(context.getUpdate().getMessage().getChatId(), context.getUpdate().getMessage().getMessageId(), "Not found") :
-                        handlePost(context, shitpost.getUrl(), "Shitpost: " + context.getArgs().getFirst());
+                        handlePost(context, post.getUrl(), "Shitpost: " + context.getArgs().getFirst());
             }
         };
     }
@@ -54,17 +54,13 @@ public class ShitpostingHandler extends Handler {
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
         try {
-            Optional<File> downloadedFile = shitpostingService.getFile(url);
-
-            if (downloadedFile.isPresent()) {
-                List<Validable> result = getVideo(chatId, downloadedFile.get(), caption);
-                if (downloadedFile.get().exists()) {
-                    downloadedFile.get().delete();
-                }
-                return result;
-            } else {
+            Optional<File> file = shitpostingService.getFile(url);
+            if (file.isEmpty()) {
                 return getReplyMessage(chatId, messageId, "Error downloading file");
             }
+            file.get().deleteOnExit();
+            return getVideo(chatId, file.get(), caption);
+
         } catch (Exception e) {
             return getReplyMessage(chatId, messageId, "Error processing file");
         }

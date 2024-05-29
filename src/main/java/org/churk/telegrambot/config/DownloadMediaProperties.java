@@ -7,6 +7,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("media")
 public class DownloadMediaProperties {
     private String path;
-    private String fileName;
     private String schedule;
 }
