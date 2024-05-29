@@ -29,7 +29,8 @@ public class NewsHandler extends Handler {
         List<String> args = context.getArgs();
 
         if (args.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "Please provide a query /news <query>");
+            return getReplyMessage(chatId, messageId, "Please provide a query %s <query>"
+                    .formatted(Command.NEWS.getPatternCleaned()));
         }
 
         String query = args.stream().reduce("", (a, b) -> a + " " + b);

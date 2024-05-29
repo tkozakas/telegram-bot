@@ -44,4 +44,10 @@ public enum Command {
                         .replace(".*/", "/")
                         .replace("\\b.*", "");
     }
+
+    public String getPatternCleaned() {
+        return getPatterns().getFirst()
+                .replace(".*/", "/")
+                .replace("\\b.*", "");
+    }
 }

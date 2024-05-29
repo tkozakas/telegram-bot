@@ -29,7 +29,7 @@ public class StickerHandler extends Handler {
         if (subCommand == null) {
             return getReplyMessage(context.getUpdate().getMessage().getChatId(),
                     context.getUpdate().getMessage().getMessageId(),
-                    "Invalid command, please use /sticker <add/list/remove>");
+                    "Invalid command, please use %s %s".formatted(Command.STICKER.getPatternCleaned(), Command.STICKER.getSubCommands()));
         }
 
         return switch (subCommand) {
@@ -60,6 +60,10 @@ public class StickerHandler extends Handler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
+        if (subCommand.isEmpty()) {
+            return getReplyMessage(chatId, messageId,
+                    "Please provide a valid name %s %s <name>".formatted(Command.STICKER.getPatternCleaned(), SubCommand.REMOVE.getCommand().getFirst()));
+        }
         if (!stickerService.existsByChatIdAndStickerName(chatId, subCommand)) {
             return getReplyMessage(chatId, messageId,
                     "Sticker set " + subCommand + " does not exist in the list");
@@ -93,7 +97,7 @@ public class StickerHandler extends Handler {
 
         if (subCommand.isEmpty() || !stickerService.isValidSticker(subCommand)) {
             return getReplyMessage(chatId, messageId,
-                    "Please provide a valid name /sticker add <name>");
+                    "Please provide a valid name %s %s <name>".formatted(Command.STICKER.getPatternCleaned(), SubCommand.ADD.getCommand().getFirst()));
         }
         if (stickerService.existsByChatIdAndStickerName(chatId, subCommand)) {
             return getReplyMessage(chatId, messageId,
