@@ -53,11 +53,11 @@ public class RedditHandler extends Handler {
     }
 
     private List<Validable> handleAdd(HandlerContext context) {
+        String args = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-        String args = context.getArgs().getLast();
 
-        if (args.length() != 2 || !subredditService.isValidSubreddit(args)) {
+        if (args.isEmpty() || !subredditService.isValidSubreddit(args)) {
             return getReplyMessage(chatId, messageId,
                     "Please provide a valid name %s %s <subreddit>"
                             .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.ADD.getCommand().getFirst()));
@@ -96,7 +96,7 @@ public class RedditHandler extends Handler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
-        if (args.length() != 2 || !subredditService.isValidSubreddit(args)) {
+        if (args.isEmpty() || !subredditService.isValidSubreddit(args)) {
             return getReplyMessage(chatId, messageId,
                     "Please provide a valid name %s %s <subreddit>"
                             .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.REMOVE.getCommand().getFirst()));

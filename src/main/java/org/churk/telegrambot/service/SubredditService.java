@@ -17,6 +17,9 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,7 @@ public class SubredditService {
     private final SubredditRepository subredditRepository;
     private final DownloadMediaProperties redditProperties;
     private final RedditClient redditClient;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     public void addSubreddit(Long chatId, String subreddit) {
         subredditRepository.save(new Subreddit(chatId, subreddit));
@@ -79,9 +83,11 @@ public class SubredditService {
         return List.of();
     }
 
-    public Optional<File> getFile(RedditPost redditPost) {
-        String mediaUrl = redditPost.getUrl();
-        String extension = mediaUrl.substring(mediaUrl.lastIndexOf("."));
-        return FileDownloader.downloadAndCompressMediaAsync(mediaUrl, redditProperties, extension);
+    public Optional<File> getFile(RedditPost redditPost) throws ExecutionException, InterruptedException {
+        return executorService.submit(() -> {
+            String mediaUrl = redditPost.getUrl();
+            String extension = mediaUrl.substring(mediaUrl.lastIndexOf("."));
+            return FileDownloader.downloadAndCompressMedia(mediaUrl, redditProperties, extension);
+        }).get();
     }
 }

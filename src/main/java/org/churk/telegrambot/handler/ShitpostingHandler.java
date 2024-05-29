@@ -53,15 +53,22 @@ public class ShitpostingHandler extends Handler {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
-        Optional<File> file = shitpostingService.getFile(url);
-        if (file.isPresent()) {
-            file.get().deleteOnExit();
-            return getVideo(chatId, file.get(), caption);
-        } else {
-            return getReplyMessage(chatId, messageId, "Error downloading file");
+        try {
+            Optional<File> downloadedFile = shitpostingService.getFile(url);
+
+            if (downloadedFile.isPresent()) {
+                List<Validable> result = getVideo(chatId, downloadedFile.get(), caption);
+                if (downloadedFile.get().exists()) {
+                    downloadedFile.get().delete();
+                }
+                return result;
+            } else {
+                return getReplyMessage(chatId, messageId, "Error downloading file");
+            }
+        } catch (Exception e) {
+            return getReplyMessage(chatId, messageId, "Error processing file");
         }
     }
-
     @Override
     public Command getSupportedCommand() {
         return Command.SHITPOST;

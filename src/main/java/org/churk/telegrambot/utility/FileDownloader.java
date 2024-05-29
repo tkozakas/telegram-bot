@@ -2,6 +2,7 @@ package org.churk.telegrambot.utility;
 
 import com.github.kokorin.jaffree.ffmpeg.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.churk.telegrambot.config.DownloadMediaProperties;
 import org.springframework.stereotype.Component;
 
@@ -11,55 +12,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Component
 public class FileDownloader {
-    private static final int TIME_OUT_SECONDS = 30;
     private static final String COMPRESSION_QUALITY = "10";
 
-    public static Optional<File> downloadAndCompressMediaAsync(String apiUrl, DownloadMediaProperties properties, String extension) {
-        try {
-            downloadFileFromUrl(apiUrl, properties.getPath(), properties.getFileName(), extension);
-            String downloadedFilePath = waitForDownload(properties.getPath(), properties.getFileName(), extension);
+    public static String generateUniqueFileName(String extension) {
+        return UUID.randomUUID() + "." + extension;
+    }
 
-            if (downloadedFilePath == null) {
-                return Optional.empty();
-            }
-            return Optional.of(new File(downloadedFilePath));
+    public static Optional<File> downloadAndCompressMedia(String apiUrl, DownloadMediaProperties properties, String extension) {
+        try {
+            String fileName = generateUniqueFileName(extension);
+            String filePath = downloadFileFromUrl(apiUrl, properties.getPath(), fileName, extension);
+            return Optional.of(new File(filePath));
         } catch (Exception e) {
-            log.error("Error in async download/compression", e);
+            log.error("Error in download/compression", e);
             return Optional.empty();
         }
     }
 
 
-    public static String waitForDownload(String downloadDirectory, String fileName, String extension) {
-        String filePath = downloadDirectory + fileName + "_compressed" + extension;
-        long startTime = System.currentTimeMillis();
-        while (true) {
-            if (System.currentTimeMillis() - startTime > TIME_OUT_SECONDS * 1000) {
-                log.error("Timeout while waiting for meme download");
-                return null;
-            }
-            if (isDownloaded(filePath)) {
-                log.info("File downloaded successfully: {}", filePath);
-                long endTime = System.currentTimeMillis();
-                long elapsedTimeInSeconds = (endTime - startTime) / 1000;
-                log.info("File download time: " + elapsedTimeInSeconds + " seconds");
-                return filePath;
-            }
-        }
-    }
-
-    private static boolean isDownloaded(String filePath) {
-        File f = new File(filePath);
-        return f.exists() && !f.isDirectory();
-    }
-
-    public static void downloadFileFromUrl(String apiUrl, String downloadDirectory, String fileName, String extension) {
-        String filePath = downloadDirectory + fileName + extension;
-        String compressedFilePath = downloadDirectory + fileName + "_compressed" + extension;
+    public static String downloadFileFromUrl(String apiUrl, String downloadDirectory, String fileName, String extension) throws IOException {
+        String filePath = downloadDirectory + fileName;
+        String compressedFilePath = downloadDirectory + FilenameUtils.getBaseName(fileName) + "_compressed." + extension;
         log.info("Downloading file from {}", apiUrl);
 
         int bufferSize = 2048 * 1024;
@@ -73,10 +51,10 @@ public class FileDownloader {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
             compressFile(extension, filePath, compressedFilePath);
-            File file = new File(filePath);
-            file.deleteOnExit();
+            return compressedFilePath;
         } catch (IOException e) {
             log.error("Error while downloading or compressing file", e);
+            throw e;
         }
     }
 
