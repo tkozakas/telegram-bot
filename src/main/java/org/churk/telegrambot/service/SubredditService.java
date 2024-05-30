@@ -2,7 +2,6 @@ package org.churk.telegrambot.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.client.RedditClient;
@@ -49,29 +48,17 @@ public class SubredditService {
     }
 
     public List<RedditPost> getRedditPosts(String subreddit, int count) {
-        try {
-            Map<String, Object> jsonResponse = redditClient.getRedditMemes(subreddit, count);
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> responseMap = mapper.convertValue(jsonResponse, new TypeReference<>() {
-            });
-            if (responseMap.containsKey("memes") && responseMap.get("memes") instanceof List) {
-                List<Map<String, Object>> memes = (List<Map<String, Object>>) responseMap.get("memes");
-                return memes.stream()
-                        .map(memeMap -> mapper.convertValue(memeMap, RedditPost.class))
-                        .collect(Collectors.toList());
-            }
-            return List.of(mapper.convertValue(responseMap, RedditPost.class));
-
-        } catch (FeignException.NotFound e) {
-            log.error("Subreddit not found", e);
-            throw new IllegalArgumentException("Subreddit not found");
-        } catch (FeignException e) {
-            log.error("Error with Feign client", e);
-            throw new IllegalStateException("Error with Feign client");
-        } catch (Exception e) {
-            log.error("Error with Reddit API", e);
-            throw new IllegalStateException("Error with Reddit API");
+        Map<String, Object> jsonResponse = redditClient.getRedditMemes(subreddit, count);
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> responseMap = mapper.convertValue(jsonResponse, new TypeReference<>() {
+        });
+        if (responseMap.containsKey("memes") && responseMap.get("memes") instanceof List) {
+            List<Map<String, Object>> memes = (List<Map<String, Object>>) responseMap.get("memes");
+            return memes.stream()
+                    .map(memeMap -> mapper.convertValue(memeMap, RedditPost.class))
+                    .collect(Collectors.toList());
         }
+        return List.of(mapper.convertValue(responseMap, RedditPost.class));
     }
 
     public Optional<File> getFile(RedditPost redditPost) {

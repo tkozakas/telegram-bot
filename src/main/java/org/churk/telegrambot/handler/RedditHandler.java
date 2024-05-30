@@ -150,12 +150,14 @@ public class RedditHandler extends Handler {
                         "No posts available in r/%s".formatted(subreddit));
             }
             return fetchAndProcessMemes(chatId, posts, subreddit);
-        } catch (FeignException.NotFound e) {
-            return getReplyMessage(chatId, messageId,
-                    "Subreddit not found");
-        } catch (Exception e) {
-            return getReplyMessage(chatId, messageId,
-                    "Fucking api is dead again :)");
+        } catch (FeignException.BadGateway |
+                 FeignException.InternalServerError |
+                 FeignException.GatewayTimeout e) {
+            return getReplyMessage(chatId, messageId, "The api is dead :)");
+        } catch (FeignException.ServiceUnavailable e) {
+            return getReplyMessage(chatId, messageId, "This subreddit does not exist");
+        } catch (FeignException e) {
+            return getReplyMessage(chatId, messageId, "An error occurred");
         }
     }
 
