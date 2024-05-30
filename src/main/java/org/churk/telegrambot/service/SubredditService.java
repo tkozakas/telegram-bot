@@ -64,10 +64,14 @@ public class SubredditService {
 
         } catch (FeignException.NotFound e) {
             log.error("Subreddit not found", e);
+            throw new IllegalArgumentException("Subreddit not found");
         } catch (FeignException e) {
             log.error("Error with Feign client", e);
+            throw new IllegalStateException("Error with Feign client");
+        } catch (Exception e) {
+            log.error("Error with Reddit API", e);
+            throw new IllegalStateException("Error with Reddit API");
         }
-        return List.of();
     }
 
     public Optional<File> getFile(RedditPost redditPost) {
