@@ -9,14 +9,10 @@ import org.churk.telegrambot.service.SubredditService;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -35,6 +31,7 @@ public class RedditHandler extends Handler {
             return handleRandomPost(context, 1);
         }
         SubCommand subCommand = SubCommand.getSubCommand(args.getFirst().toLowerCase());
+
         return switch (subCommand) {
             case ADD -> handleAdd(context);
             case LIST -> handleList(context);
@@ -45,9 +42,17 @@ public class RedditHandler extends Handler {
             }
             case NONE -> {
                 String firstArg = context.getArgs().getFirst();
-                if (isNumeric(firstArg)) {
-                    int count = Integer.parseInt(firstArg);
-                    yield handleRandomPost(context, count);
+                if (args.size() == 1) {
+                    if (isNumeric(firstArg)) {
+                        int count = Integer.parseInt(firstArg);
+                        yield handleRandomPost(context, count);
+                    }
+                } else {
+                    String secondArg = context.getArgs().get(1);
+                    if (isNumeric(secondArg)) {
+                        int count = Integer.parseInt(secondArg);
+                        yield handlePost(context, firstArg, count);
+                    }
                 }
                 yield handlePost(context, firstArg, 1);
             }
