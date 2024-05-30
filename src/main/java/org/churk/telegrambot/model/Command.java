@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public enum Command {
     START(List.of(".*/start\\b.*"), List.of(SubCommand.NONE), "Activate bot"),
     HELP(List.of(".*/help\\b.*"), List.of(SubCommand.NONE), "Get help"),
-    DAILY_MESSAGE(List.of(".*/%s\\b.*"), List.of(SubCommand.ALL), "Daily game"),
+    DAILY_MESSAGE(List.of(".*/%s\\b.*"), List.of(SubCommand.ALL, SubCommand.STATS, SubCommand.YEAR), "Daily game"),
     NEWS(List.of(".*/news\\b.*"), List.of(SubCommand.NONE), "Latest news"),
     FACT(List.of(".*/fact\\b.*"), List.of(SubCommand.ADD), "Random fact"),
     STICKER(List.of(".*/sticker\\b.*"), List.of(SubCommand.ADD, SubCommand.REMOVE, SubCommand.LIST), "Manage stickers"),
