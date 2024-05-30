@@ -18,6 +18,8 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import static java.lang.Thread.sleep;
@@ -28,6 +30,7 @@ import static java.lang.Thread.sleep;
 public class TelegramBot extends TelegramLongPollingBot {
     private final BotProperties botProperties;
     private final CommandProcessor commandProcessor;
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     @Override
     public String getBotUsername() {
@@ -57,6 +60,10 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        executorService.submit(() -> processUpdate(update));
+    }
+
+    private void processUpdate(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             executeMessages(commandProcessor.handleCommand(update));
         }
