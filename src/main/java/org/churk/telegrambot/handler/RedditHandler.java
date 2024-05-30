@@ -1,5 +1,6 @@
 package org.churk.telegrambot.handler;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.RedditPost;
@@ -11,11 +12,11 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
 import java.io.File;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -138,27 +139,46 @@ public class RedditHandler extends Handler {
     }
 
     private List<Validable> getRedditPosts(String subreddit, Long chatId, Integer messageId, int count) {
-        if (!subredditService.isValidSubreddit(subreddit)) {
+        try {
+            if (!subredditService.isValidSubreddit(subreddit)) {
             return getReplyMessage(chatId, messageId,
                     "This subreddit does not exist");
         }
-        List<RedditPost> posts = subredditService.getRedditPosts(subreddit, count);
-        if (posts.isEmpty()) {
+            List<RedditPost> posts = subredditService.getRedditPosts(subreddit, count);
+            if (posts.isEmpty()) {
+                return getReplyMessage(chatId, messageId,
+                        "No posts available in r/%s".formatted(subreddit));
+            }
+            return fetchAndProcessMemes(chatId, posts, subreddit);
+        } catch (FeignException.NotFound e) {
             return getReplyMessage(chatId, messageId,
-                    "No posts available in r/%s".formatted(subreddit));
+                    "Subreddit not found");
+        } catch (Exception e) {
+            return getReplyMessage(chatId, messageId,
+                    "Fucking api is dead again :)");
         }
-        return fetchAndProcessMemes(chatId, posts, subreddit);
     }
 
     private List<Validable> fetchAndProcessMemes(Long chatId, List<RedditPost> posts, String subreddit) {
-        List<File> files = posts.stream().map(subredditService::getFile).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+        List<AbstractMap.SimpleEntry<String, File>> files = posts.stream()
+                .map(post -> {
+                    Optional<File> optionalFile = subredditService.getFile(post);
+                    return optionalFile.map(file -> new AbstractMap.SimpleEntry<>(
+                            "%s%nFrom r/%s".formatted(post.getTitle() != null ? post.getTitle() : "", subreddit), file));
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
 
         if (files.isEmpty()) {
-            return posts.stream().map(post -> postWithoutFileResponse(chatId, post, subreddit)).flatMap(List::stream).collect(Collectors.toList());
+            return posts.stream()
+                    .map(post -> postWithoutFileResponse(chatId, post, subreddit))
+                    .flatMap(List::stream)
+                    .toList();
         }
 
         if (files.size() == 1) {
-            File file = files.getFirst();
+            File file = files.getFirst().getValue();
             file.deleteOnExit();
             return postWithFileResponse(chatId, posts.getFirst(), file, subreddit);
         } else {

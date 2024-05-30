@@ -23,16 +23,18 @@ public class MediaGroupMessageBuilder implements MessageBuilder {
             switch (key) {
                 case MessageParams.CHAT_ID -> message.setChatId(String.valueOf(value));
                 case MessageParams.MEDIA_GROUP -> {
-                    List<?> files = (List<?>) value;
-                    List<InputMedia> medias = files.stream()
-                            .filter(File.class::isInstance)
-                            .map(userContent -> {
+                    List<Map.Entry<String, File>> captionFilePairs = (List<Map.Entry<String, File>>) value;
+                    List<InputMedia> medias = captionFilePairs.stream()
+                            .map(pair -> {
+                                String caption = pair.getKey();
+                                File file = pair.getValue();
                                 String mediaName = UUID.randomUUID().toString();
                                 return (InputMedia) InputMediaPhoto.builder()
                                         .media("attach://" + mediaName)
                                         .mediaName(mediaName)
+                                        .caption(caption)
                                         .isNewMedia(true)
-                                        .newMediaFile((File) userContent)
+                                        .newMediaFile(file)
                                         .parseMode(ParseMode.HTML)
                                         .build();
                             }).toList();
