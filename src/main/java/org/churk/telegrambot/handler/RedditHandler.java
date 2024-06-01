@@ -11,13 +11,19 @@ import org.churk.telegrambot.service.SubredditService;
 import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo;
 
 import java.io.File;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -156,13 +162,9 @@ public class RedditHandler extends ListHandler<Subreddit> {
 
     private List<Validable> fetchAndProcessMemes(Long chatId, List<RedditPost> posts, String subreddit) {
         List<AbstractMap.SimpleEntry<String, File>> files = posts.stream()
-                .map(post -> {
-                    Optional<File> optionalFile = subredditService.getFile(post);
-                    return optionalFile.map(file -> new AbstractMap.SimpleEntry<>(
-                            "%s%nFrom r/%s".formatted(post.getTitle() != null ? post.getTitle() : "", subreddit), file));
-                })
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .map(post -> subredditService.getFile(post)
+                        .map(file -> new AbstractMap.SimpleEntry<>(formatCaption(post, subreddit), file)))
+                .flatMap(Optional::stream)
                 .toList();
 
         if (files.isEmpty()) {
@@ -177,9 +179,64 @@ public class RedditHandler extends ListHandler<Subreddit> {
             file.deleteOnExit();
             return postWithFileResponse(chatId, posts.getFirst(), file, subreddit);
         } else {
-            return getMediaGroup(chatId, files);
+            convertGifsToMp4(files);
+            List<InputMedia> medias = createInputMediaList(files);
+            return getMediaGroup(chatId, medias);
         }
     }
+
+    private String formatCaption(RedditPost post, String subreddit) {
+        return "%s%nFrom r/%s".formatted(post.getTitle() != null ? post.getTitle() : "", subreddit);
+    }
+
+    private void convertGifsToMp4(List<AbstractMap.SimpleEntry<String, File>> files) {
+        files.forEach(entry -> {
+            File file = entry.getValue();
+            if (file.getName().toLowerCase().endsWith(".gif")) {
+                File mp4File = subredditService.convertGifToMp4(file);
+                entry.setValue(mp4File);
+            }
+        });
+    }
+
+    private List<InputMedia> createInputMediaList(List<AbstractMap.SimpleEntry<String, File>> files) {
+        return files.stream()
+                .map(pair -> {
+                    String caption = pair.getKey();
+                    File file = pair.getValue();
+                    String mediaName = UUID.randomUUID().toString();
+                    return createInputMedia(file, mediaName, caption);
+                })
+                .collect(Collectors.toList());
+    }
+
+    private InputMedia createInputMedia(File file, String mediaName, String caption) {
+        if (isVideoFile(file)) {
+            return InputMediaVideo.builder()
+                    .media("attach://" + mediaName)
+                    .mediaName(mediaName)
+                    .caption(caption)
+                    .isNewMedia(true)
+                    .newMediaFile(file)
+                    .parseMode(ParseMode.HTML)
+                    .build();
+        } else {
+            return InputMediaPhoto.builder()
+                    .media("attach://" + mediaName)
+                    .mediaName(mediaName)
+                    .caption(caption)
+                    .isNewMedia(true)
+                    .newMediaFile(file)
+                    .parseMode(ParseMode.HTML)
+                    .build();
+        }
+    }
+
+    private boolean isVideoFile(File file) {
+        String fileName = file.getName().toLowerCase();
+        return fileName.endsWith(".mp4") || fileName.endsWith(".mov") || fileName.endsWith(".wmv") || fileName.endsWith(".avi");
+    }
+
 
     private String chooseSubreddit(Long chatId) {
         List<Subreddit> subreddits = subredditService.getSubreddits(chatId);

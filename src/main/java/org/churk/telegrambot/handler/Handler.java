@@ -10,9 +10,9 @@ import org.churk.telegrambot.model.Sticker;
 import org.churk.telegrambot.service.DailyMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 
 import java.io.File;
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,7 +101,7 @@ public abstract class Handler implements CommandHandler {
         ));
     }
 
-    protected List<Validable> getMediaGroup(Long chatId, List<AbstractMap.SimpleEntry<String, File>> files) {
+    protected List<Validable> getMediaGroup(Long chatId, List<InputMedia> files) {
         return createMessage(MessageType.MEDIA_GROUP, Map.of(
                 MessageParams.CHAT_ID, chatId,
                 MessageParams.MEDIA_GROUP, files

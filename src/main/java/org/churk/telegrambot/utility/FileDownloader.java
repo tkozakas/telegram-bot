@@ -35,7 +35,7 @@ public class FileDownloader {
             File downloadedFile = downloadTask.get();
 
             Future<File> compressTask = executorService.submit(() -> {
-                String compressedFilePath = Paths.get(properties.getPath(), FilenameUtils.getBaseName(fileName) + "_compressed." + extension).toString();
+                String compressedFilePath = Paths.get(properties.getPath(), FilenameUtils.getBaseName(fileName) + "_compressed" + extension).toString();
                 compressFile(extension, downloadedFile.getPath(), compressedFilePath);
                 return new File(compressedFilePath);
             });
@@ -97,5 +97,19 @@ public class FileDownloader {
         }
         builder.execute();
         log.info("File compressed and saved as: {}", compressedFilePath);
+    }
+
+    public static File convertGifToMp4(File file) {
+        String filePath = file.getPath();
+        String mp4FilePath = filePath.replace(".gif", ".mp4");
+        FFmpeg.atPath()
+                .addInput(UrlInput.fromPath(Paths.get(filePath)))
+                .addOutput(UrlOutput.toPath(Paths.get(mp4FilePath)))
+                .addArguments("-loglevel", "panic")
+                .addArguments("-c:v", "libx265")
+                .addArguments("-crf", "30")
+                .addArguments("-preset", "fast")
+                .execute();
+        return new File(mp4FilePath);
     }
 }

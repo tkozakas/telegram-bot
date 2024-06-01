@@ -66,4 +66,8 @@ public class SubredditService {
         String extension = mediaUrl.substring(mediaUrl.lastIndexOf("."));
         return FileDownloader.downloadAndCompressMedia(mediaUrl, redditProperties, extension);
     }
+
+    public File convertGifToMp4(File file) {
+        return FileDownloader.convertGifToMp4(file);
+    }
 }
