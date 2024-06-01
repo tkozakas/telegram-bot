@@ -2,7 +2,7 @@ package org.churk.telegrambot.utility;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.builder.UnifiedMessageBuilder;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.CommandHandler;
 import org.churk.telegrambot.handler.HandlerFactory;
@@ -31,7 +31,7 @@ public class CommandProcessor {
     private final ChatService chatService;
     private final HandlerFactory handlerFactory;
     private final BotProperties botProperties;
-    private final MessageBuilderFactory messageBuilderFactory;
+    private final UnifiedMessageBuilder unifiedMessageBuilder;
     private final DailyMessageService dailyMessageService;
 
     public List<Validable> handleCommand(Update update) {
@@ -53,7 +53,7 @@ public class CommandProcessor {
     }
 
     private List<Validable> handleUnknownCommand(Message message) {
-        return messageBuilderFactory.getBuilder(MessageType.TEXT).build(Map.of(
+        return unifiedMessageBuilder.build(MessageType.TEXT, Map.of(
                 MessageParams.CHAT_ID, message.getChatId(),
                 MessageParams.TEXT, "I don't know what to do with this command. Try /help for more info."
         ));
@@ -67,7 +67,7 @@ public class CommandProcessor {
 
         log.info("Bot added to group: {} (ID: {})", groupName, chatId);
         chatService.addChat(update);
-        return messageBuilderFactory.getBuilder(MessageType.TEXT).build(Map.of(
+        return unifiedMessageBuilder.build(MessageType.TEXT, Map.of(
                 MessageParams.CHAT_ID, chatId,
                 MessageParams.REPLY_TO_MESSAGE_ID, messageId,
                 MessageParams.TEXT, dailyMessageService.getKeyNameSentence("welcome_message").formatted(firstName)

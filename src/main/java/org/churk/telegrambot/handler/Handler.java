@@ -2,8 +2,7 @@ package org.churk.telegrambot.handler;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.churk.telegrambot.builder.MessageBuilder;
-import org.churk.telegrambot.builder.MessageBuilderFactory;
+import org.churk.telegrambot.builder.UnifiedMessageBuilder;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.model.MessageParams;
 import org.churk.telegrambot.model.MessageType;
@@ -25,11 +24,10 @@ public abstract class Handler implements CommandHandler {
     @Autowired
     protected DailyMessageService dailyMessageService;
     @Autowired
-    protected MessageBuilderFactory messageBuilderFactory;
+    protected UnifiedMessageBuilder unifiedMessageBuilder;
 
     protected List<Validable> createMessage(MessageType messageType, Map<MessageParams, Object> params) {
-        MessageBuilder builder = messageBuilderFactory.getBuilder(messageType);
-        return builder.build(params);
+        return unifiedMessageBuilder.build(messageType, params);
     }
 
     protected List<Validable> getReplyMessage(Long chatId, Integer messageId, String message) {
