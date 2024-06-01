@@ -1,6 +1,7 @@
 package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.builder.ListHandler;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Sticker;
 import org.churk.telegrambot.model.SubCommand;
@@ -15,7 +16,7 @@ import java.util.function.UnaryOperator;
 
 @Component
 @RequiredArgsConstructor
-public class StickerHandler extends Handler {
+public class StickerHandler extends ListHandler<String> {
     private final StickerService stickerService;
 
     @Override
@@ -75,19 +76,13 @@ public class StickerHandler extends Handler {
 
     private List<Validable> handleList(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<String> stickerSets = stickerService.getStickerSetNames(chatId);
-
-        UnaryOperator<String> escapeMarkdown = name -> name
-                .replaceAll("([_\\\\*\\[\\]()~`>#+\\-=|{}.!])", "\\\\$1");
-
-        String message = "*Sticker sets:*\n" + stickerSets.stream()
-                .limit(20)
-                .map(escapeMarkdown)
-                .reduce("", (a, b) -> a + "- " + b + "\n");
-        return stickerSets.isEmpty() ?
-                getReplyMessage(chatId, messageId, "No sticker sets available") :
-                getMessageWithMarkdown(chatId, message);
+        UnaryOperator<String> stickerFormatter = "- *%s*"::formatted;
+        return formatListResponse(context, stickerSets, stickerFormatter,
+                "Sticker sets:\n",
+                "",
+                "No sticker sets available",
+                true);
     }
 
     private List<Validable> handleAdd(HandlerContext context) {

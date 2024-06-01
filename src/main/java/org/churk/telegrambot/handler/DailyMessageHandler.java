@@ -1,7 +1,7 @@
 package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
-import org.churk.telegrambot.builder.StatsListDecorator;
+import org.churk.telegrambot.builder.ListHandler;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Sentence;
 import org.churk.telegrambot.model.Stat;
@@ -17,21 +17,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
-public class DailyMessageHandler extends Handler {
+public class DailyMessageHandler extends ListHandler<Stat> {
     private final StatsService statsService;
     private final StatsRepository statsRepository;
-
-    public static boolean isInteger(String s) {
-        try {
-            Integer.parseInt(s);
-        } catch (NumberFormatException | NullPointerException e) {
-            return false;
-        }
-        return true;
-    }
 
     @Override
     public List<Validable> handle(HandlerContext context) {
@@ -51,27 +43,32 @@ public class DailyMessageHandler extends Handler {
 
     private List<Validable> handleStats(HandlerContext context) {
         if (context.getArgs().size() < 2) {
-            return handleAllStats(context);
+            return handleYearStats(context, "");
         }
 
         if (context.getArgs().size() < 3 && (isInteger(context.getArgs().getLast()))) {
-            return handleYearStats(context);
+            return handleYearStats(context, context.getArgs().getLast());
         }
 
         String subCommandArg = context.getArgs().get(1).toLowerCase();
         SubCommand subCommandEnum = SubCommand.getSubCommand(subCommandArg);
 
         return switch (subCommandEnum) {
-            case YEAR -> handleYearStats(context);
+            case YEAR -> handleYearStats(context, context.getArgs().getLast());
             case USER -> handleUserStats(context);
-            default -> handleAllStats(context);
+            case ALL -> handleAllStats(context);
+            default -> getReplyMessage(context.getUpdate().getMessage().getChatId(),
+                    context.getUpdate().getMessage().getMessageId(),
+                    "Invalid command, please use %s %s".formatted(Command.DAILY_MESSAGE.getPatternCleaned(), Command.DAILY_MESSAGE.getSubCommands()));
         };
     }
 
-    private List<Validable> handleYearStats(HandlerContext context) {
-        String yearString = context.getArgs().getLast();
+    private List<Validable> handleYearStats(HandlerContext context, String yearString) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
+        if (yearString.isEmpty()) {
+            return handleStatsByYear(context, LocalDateTime.now().getYear());
+        }
         int year;
         try {
             year = determineYear(yearString);
@@ -83,10 +80,29 @@ public class DailyMessageHandler extends Handler {
 
     private List<Validable> handleStatsByYear(HandlerContext context, int year) {
         Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<Stat> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
         String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
-        return constructStatsMessage(chatId, messageId, stats, header);
+        return constructStatsMessage(context, stats, header);
+    }
+
+    private List<Validable> handleAllStats(HandlerContext context) {
+        Long chatId = context.getUpdate().getMessage().getChatId();
+        List<Stat> stats = statsService.getAllStatsByChatId(chatId);
+
+        String header = dailyMessageService.getKeyNameSentence("stats_all_header");
+        return constructStatsMessage(context, stats, header);
+    }
+
+    private List<Validable> constructStatsMessage(HandlerContext context, List<Stat> stats, String header) {
+        String statsTable = dailyMessageService.getKeyNameSentence("stats_table");
+        String emptyMessage = dailyMessageService.getKeyNameSentence("no_stats_available");
+        String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
+        Function<Stat, String> statFormatter = stat -> String.format(statsTable, stats.indexOf(stat) + 1, stat.getFirstName(), stat.getScore());
+        return formatListResponse(context, stats, statFormatter,
+                header,
+                footer,
+                emptyMessage,
+                true);
     }
 
     private List<Validable> handleUserStats(HandlerContext context) {
@@ -106,27 +122,6 @@ public class DailyMessageHandler extends Handler {
         long total = statsService.getTotalScoreByChatIdAndUserId(chatId, userIdsFromFirstName.getFirst().getUserId());
         String header = dailyMessageService.getKeyNameSentence("me_header").formatted(firstName, botProperties.getWinnerName(), total);
         return getReplyMessageWithMarkdown(chatId, messageId, header);
-    }
-
-    private List<Validable> handleAllStats(HandlerContext context) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
-        List<Stat> stats = statsService.getAllStatsByChatId(chatId);
-
-        String header = dailyMessageService.getKeyNameSentence("stats_all_header");
-        return constructStatsMessage(chatId, messageId, stats, header);
-    }
-
-    private List<Validable> constructStatsMessage(Long chatId, Integer messageId, List<Stat> stats, String header) {
-        if (stats.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "No stats available");
-        }
-
-        String statsTable = dailyMessageService.getKeyNameSentence("stats_table");
-        String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
-        String text = new StatsListDecorator(stats).getFormattedStats(statsTable, header, footer, 10);
-
-        return getMessageWithMarkdown(chatId, text);
     }
 
     private List<Validable> handleMessage(HandlerContext context) {
@@ -179,6 +174,15 @@ public class DailyMessageHandler extends Handler {
         statsService.registerByUserIdAndChatId(userId, chatId, firstName);
         return getReplyMessage(chatId, messageId,
                 dailyMessageService.getKeyNameSentence("registered_now_header").formatted(firstName));
+    }
+
+    public static boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+        } catch (NumberFormatException | NullPointerException e) {
+            return false;
+        }
+        return true;
     }
 
     private int determineYear(String yearString) throws NumberFormatException {

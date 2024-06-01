@@ -2,6 +2,7 @@ package org.churk.telegrambot.handler;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.builder.ListHandler;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.RedditPost;
 import org.churk.telegrambot.model.SubCommand;
@@ -16,11 +17,11 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
-public class RedditHandler extends Handler {
+public class RedditHandler extends ListHandler<Subreddit> {
     private static final String REDDIT_URL = "https://www.reddit.com/r/";
     private final SubredditService subredditService;
 
@@ -96,21 +97,13 @@ public class RedditHandler extends Handler {
 
     private List<Validable> handleList(HandlerContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
-
-        UnaryOperator<String> escapeMarkdown = name -> name
-                .replaceAll("([_\\\\*\\[\\]()~`>#+\\-=|{}.!])", "\\\\$1");
-
-        String message = "*Subreddits:*\n" +
-                subreddits.stream()
-                        .limit(20)
-                        .map(Subreddit::getSubredditName)
-                        .map(escapeMarkdown)
-                        .reduce("", (a, b) -> a + "- r/" + b + "\n");
-        return subreddits.isEmpty() ?
-                getReplyMessage(chatId, messageId, "No subreddits available") :
-                getMessageWithMarkdown(chatId, "- r/" + message);
+        Function<Subreddit, String> subredditFormatter = subreddit -> String.format("- r/*%s*", subreddit.getSubredditName());
+        return formatListResponse(context, subreddits, subredditFormatter,
+                "Subreddits:\n",
+                "",
+                "No subreddits available",
+                true);
     }
 
     private List<Validable> handleRemove(HandlerContext context) {

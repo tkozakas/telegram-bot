@@ -1,35 +1,37 @@
 package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.builder.ListHandler;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.utility.HandlerContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
-public class HelpHandler extends Handler {
+public class HelpHandler extends ListHandler<Command> {
     @Override
     public List<Validable> handle(HandlerContext context) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
-        String message = Arrays.stream(Command.values())
-                .map(command -> {
-                    String commandName = command.getPatterns().getFirst().formatted(botProperties.getWinnerName())
-                            .replace(".*/", "/")
-                            .replace("\\b.*", "");
-                    String subCommands = command.getSubCommandsString();
-                    return String.format("*%s %s* - %s",
-                            commandName,
-                            subCommands.isEmpty() ? "" : "<" + subCommands + ">",
-                            command.getDescription().replace("%s", botProperties.getWinnerName()));
-                })
-                .reduce((s1, s2) -> s1 + "\n" + s2)
-                .orElse("No commands available");
+        List<Command> commands = Stream.of(Command.values()).filter(c -> c != Command.NONE).toList();
+        return formatListResponse(context, commands, this::formatCommand,
+                "Available commands:\n",
+                "",
+                "No commands available",
+                true);
+    }
 
-        return getMessageWithMarkdown(chatId, message);
+    private String formatCommand(Command command) {
+        String commandName = command.getPatterns().getFirst().formatted(botProperties.getWinnerName())
+                .replace(".*/", "/")
+                .replace("\\b.*", "");
+        String subCommands = command.getSubCommandsString();
+        return String.format("*%s %s* - %s",
+                commandName,
+                subCommands.isEmpty() ? "" : "<" + subCommands + ">",
+                command.getDescription().replace("%s", botProperties.getWinnerName()));
     }
 
     @Override
