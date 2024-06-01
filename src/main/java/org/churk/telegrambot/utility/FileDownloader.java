@@ -36,7 +36,7 @@ public class FileDownloader {
 
             Future<File> compressTask = executorService.submit(() -> {
                 String compressedFilePath = Paths.get(properties.getPath(), FilenameUtils.getBaseName(fileName) + "_compressed" + extension).toString();
-                compressFile(extension, downloadedFile.getPath(), compressedFilePath);
+                compressFile(extension, downloadedFile.getPath(), compressedFilePath, "12");
                 return new File(compressedFilePath);
             });
             File compressedFile = compressTask.get();
@@ -69,7 +69,7 @@ public class FileDownloader {
         }
     }
 
-    private static void compressFile(String extension, String filePath, String compressedFilePath) throws IOException {
+    private static void compressFile(String extension, String filePath, String compressedFilePath, String fps) {
         FFmpeg builder = FFmpeg.atPath()
                 .addInput(UrlInput.fromPath(Paths.get(filePath)))
                 .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
@@ -89,7 +89,7 @@ public class FileDownloader {
                     .addArguments("-preset", "fast")
                     .setComplexFilter(FilterGraph.of(
                             FilterChain.of(
-                                    Filter.withName("fps").addArgument("fps=12")
+                                    Filter.withName("fps").addArgument("fps=" + fps)
                             )
                     ));
             default -> builder.addArguments("-c:v", "mjpeg")
@@ -100,16 +100,8 @@ public class FileDownloader {
     }
 
     public static File convertGifToMp4(File file) {
-        String filePath = file.getPath();
-        String mp4FilePath = filePath.replace(".gif", ".mp4");
-        FFmpeg.atPath()
-                .addInput(UrlInput.fromPath(Paths.get(filePath)))
-                .addOutput(UrlOutput.toPath(Paths.get(mp4FilePath)))
-                .addArguments("-loglevel", "panic")
-                .addArguments("-c:v", "libx265")
-                .addArguments("-crf", "30")
-                .addArguments("-preset", "fast")
-                .execute();
-        return new File(mp4FilePath);
+        String compressedFilePath = Paths.get(file.getParent(), FilenameUtils.getBaseName(file.getName()) + ".mp4").toString();
+        compressFile(".mp4", file.getPath(), compressedFilePath, "30");
+        return new File(compressedFilePath);
     }
 }
