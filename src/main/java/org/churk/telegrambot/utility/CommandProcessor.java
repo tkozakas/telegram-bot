@@ -46,7 +46,7 @@ public class CommandProcessor {
         List<String> arguments = List.of(messageText.split(" ")).subList(1, messageText.split(" ").length);
         Command command = Command.getTextCommand(messageText, botProperties.getWinnerName());
         CommandHandler handler = handlerFactory.getHandler(command);
-        return handler == null ? handleUnknownCommand(message) : handler.handle(HandlerContext.builder()
+        return handler == null ? handleUnknownCommand(message) : handler.handle(UpdateContext.builder()
                 .update(update)
                 .args(arguments)
                 .build());
@@ -78,7 +78,7 @@ public class CommandProcessor {
         CommandHandler handler = handlerFactory.getHandler(command);
         List<Chat> chats = chatService.getAllChats();
         return chats.stream().flatMap(chat ->
-                handler.handle(HandlerContext.builder()
+                handler.handle(UpdateContext.builder()
                         .update(chat.getUpdate())
                         .args(List.of(RANDOM.getCommand().getFirst()))
                         .build()).stream()).toList();

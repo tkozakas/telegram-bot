@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @Builder
 @AllArgsConstructor
-public final class HandlerContext {
+public final class UpdateContext {
     private List<String> args;
     private Update update;
     private boolean isReply;

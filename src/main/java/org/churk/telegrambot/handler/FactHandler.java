@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Fact;
 import org.churk.telegrambot.service.FactService;
-import org.churk.telegrambot.utility.HandlerContext;
+import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -18,7 +18,7 @@ public class FactHandler extends Handler {
 
 
     @Override
-    public List<Validable> handle(HandlerContext context) {
+    public List<Validable> handle(UpdateContext context) {
         List<String> args = context.getArgs();
         if (!args.isEmpty() && args.getFirst().equalsIgnoreCase("add")) {
             return handleFactAdd(context);
@@ -26,7 +26,7 @@ public class FactHandler extends Handler {
         return handleFactRetrieve(context);
     }
 
-    private List<Validable> handleFactAdd(HandlerContext context) {
+    private List<Validable> handleFactAdd(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<String> factArgs = context.getArgs().subList(1, context.getArgs().size());
@@ -40,7 +40,7 @@ public class FactHandler extends Handler {
         return getReplyMessage(chatId, messageId, "Fact: " + fact + " added");
     }
 
-    private List<Validable> handleFactRetrieve(HandlerContext context) {
+    private List<Validable> handleFactRetrieve(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<Fact> facts = factService.getAllFacts();

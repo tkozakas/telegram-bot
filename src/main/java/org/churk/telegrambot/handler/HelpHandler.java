@@ -3,7 +3,7 @@ package org.churk.telegrambot.handler;
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.builder.ListHandler;
 import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.utility.HandlerContext;
+import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class HelpHandler extends ListHandler<Command> {
     @Override
-    public List<Validable> handle(HandlerContext context) {
+    public List<Validable> handle(UpdateContext context) {
         List<Command> commands = Stream.of(Command.values()).filter(c -> c != Command.NONE).toList();
         return formatListResponse(context, commands, this::formatCommand,
                 "Available commands:\n",

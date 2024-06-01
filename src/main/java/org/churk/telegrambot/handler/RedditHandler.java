@@ -8,7 +8,7 @@ import org.churk.telegrambot.model.RedditPost;
 import org.churk.telegrambot.model.SubCommand;
 import org.churk.telegrambot.model.Subreddit;
 import org.churk.telegrambot.service.SubredditService;
-import org.churk.telegrambot.utility.HandlerContext;
+import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -26,7 +26,7 @@ public class RedditHandler extends ListHandler<Subreddit> {
     private final SubredditService subredditService;
 
     @Override
-    public List<Validable> handle(HandlerContext context) {
+    public List<Validable> handle(UpdateContext context) {
         List<String> args = context.getArgs();
 
         if (args.isEmpty()) {
@@ -62,7 +62,7 @@ public class RedditHandler extends ListHandler<Subreddit> {
         };
     }
 
-    private List<Validable> handleRandomPost(HandlerContext context, int count) {
+    private List<Validable> handleRandomPost(UpdateContext context, int count) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
 
@@ -75,7 +75,7 @@ public class RedditHandler extends ListHandler<Subreddit> {
         return handlePost(context, subreddit, count);
     }
 
-    private List<Validable> handleAdd(HandlerContext context) {
+    private List<Validable> handleAdd(UpdateContext context) {
         String args = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
@@ -95,7 +95,7 @@ public class RedditHandler extends ListHandler<Subreddit> {
                 "Subreddit %s added".formatted(subreddit));
     }
 
-    private List<Validable> handleList(HandlerContext context) {
+    private List<Validable> handleList(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
         Function<Subreddit, String> subredditFormatter = subreddit -> String.format("- r/*%s*", subreddit.getSubredditName());
@@ -106,7 +106,7 @@ public class RedditHandler extends ListHandler<Subreddit> {
                 true);
     }
 
-    private List<Validable> handleRemove(HandlerContext context) {
+    private List<Validable> handleRemove(UpdateContext context) {
         String args = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
@@ -125,7 +125,7 @@ public class RedditHandler extends ListHandler<Subreddit> {
                 "Subreddit %s removed".formatted(args));
     }
 
-    private List<Validable> handlePost(HandlerContext context, String subreddit, int count) {
+    private List<Validable> handlePost(UpdateContext context, String subreddit, int count) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         return getRedditPosts(subreddit, chatId, messageId, count);
@@ -203,7 +203,7 @@ public class RedditHandler extends ListHandler<Subreddit> {
                 getPhoto(chatId, file, caption);
     }
 
-    private int parseCount(HandlerContext context) {
+    private int parseCount(UpdateContext context) {
         if (context.getArgs().size() > 1) {
             try {
                 return Integer.parseInt(context.getArgs().getFirst());

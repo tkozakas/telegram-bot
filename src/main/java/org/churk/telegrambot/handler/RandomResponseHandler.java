@@ -2,7 +2,7 @@ package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.utility.HandlerContext;
+import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -31,7 +31,7 @@ public class RandomResponseHandler extends Handler {
     }
 
     @Override
-    public List<Validable> handle(HandlerContext context) {
+    public List<Validable> handle(UpdateContext context) {
         if (!shouldTriggerRandomResponse()) {
             return List.of();
         }

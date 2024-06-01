@@ -6,7 +6,7 @@ import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Sticker;
 import org.churk.telegrambot.model.SubCommand;
 import org.churk.telegrambot.service.StickerService;
-import org.churk.telegrambot.utility.HandlerContext;
+import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -20,7 +20,7 @@ public class StickerHandler extends ListHandler<String> {
     private final StickerService stickerService;
 
     @Override
-    public List<Validable> handle(HandlerContext context) {
+    public List<Validable> handle(UpdateContext context) {
         if (context.getArgs().isEmpty()) {
             return handleGetRandomSticker(context);
         }
@@ -41,7 +41,7 @@ public class StickerHandler extends ListHandler<String> {
         };
     }
 
-    private List<Validable> handleGetRandomSticker(HandlerContext context) {
+    private List<Validable> handleGetRandomSticker(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<Sticker> stickers = stickerService.getStickerSets(chatId);
         Integer messageId = context.getUpdate().getMessage().getMessageId();
@@ -56,7 +56,7 @@ public class StickerHandler extends ListHandler<String> {
                 getSticker(chatId, randomSticker);
     }
 
-    private List<Validable> handleRemove(HandlerContext context) {
+    private List<Validable> handleRemove(UpdateContext context) {
         String subCommand = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
@@ -74,7 +74,7 @@ public class StickerHandler extends ListHandler<String> {
                 "Sticker set " + subCommand + " removed");
     }
 
-    private List<Validable> handleList(HandlerContext context) {
+    private List<Validable> handleList(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<String> stickerSets = stickerService.getStickerSetNames(chatId);
         UnaryOperator<String> stickerFormatter = "- *%s*"::formatted;
@@ -85,7 +85,7 @@ public class StickerHandler extends ListHandler<String> {
                 true);
     }
 
-    private List<Validable> handleAdd(HandlerContext context) {
+    private List<Validable> handleAdd(UpdateContext context) {
         String subCommand = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();

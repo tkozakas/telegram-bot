@@ -8,7 +8,7 @@ import org.churk.telegrambot.model.Stat;
 import org.churk.telegrambot.model.SubCommand;
 import org.churk.telegrambot.repository.StatsRepository;
 import org.churk.telegrambot.service.StatsService;
-import org.churk.telegrambot.utility.HandlerContext;
+import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -26,7 +26,7 @@ public class DailyMessageHandler extends ListHandler<Stat> {
     private final StatsRepository statsRepository;
 
     @Override
-    public List<Validable> handle(HandlerContext context) {
+    public List<Validable> handle(UpdateContext context) {
         if (context.getArgs().isEmpty()) {
             return handleMessage(context);
         }
@@ -41,7 +41,7 @@ public class DailyMessageHandler extends ListHandler<Stat> {
         };
     }
 
-    private List<Validable> handleStats(HandlerContext context) {
+    private List<Validable> handleStats(UpdateContext context) {
         if (context.getArgs().size() < 2) {
             return handleYearStats(context, "");
         }
@@ -63,7 +63,7 @@ public class DailyMessageHandler extends ListHandler<Stat> {
         };
     }
 
-    private List<Validable> handleYearStats(HandlerContext context, String yearString) {
+    private List<Validable> handleYearStats(UpdateContext context, String yearString) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         if (yearString.isEmpty()) {
@@ -78,14 +78,14 @@ public class DailyMessageHandler extends ListHandler<Stat> {
         return handleStatsByYear(context, year);
     }
 
-    private List<Validable> handleStatsByYear(HandlerContext context, int year) {
+    private List<Validable> handleStatsByYear(UpdateContext context, int year) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<Stat> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
         String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
         return constructStatsMessage(context, stats, header);
     }
 
-    private List<Validable> handleAllStats(HandlerContext context) {
+    private List<Validable> handleAllStats(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<Stat> stats = statsService.getAllStatsByChatId(chatId);
 
@@ -93,7 +93,7 @@ public class DailyMessageHandler extends ListHandler<Stat> {
         return constructStatsMessage(context, stats, header);
     }
 
-    private List<Validable> constructStatsMessage(HandlerContext context, List<Stat> stats, String header) {
+    private List<Validable> constructStatsMessage(UpdateContext context, List<Stat> stats, String header) {
         String statsTable = dailyMessageService.getKeyNameSentence("stats_table");
         String emptyMessage = dailyMessageService.getKeyNameSentence("no_stats_available");
         String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
@@ -105,7 +105,7 @@ public class DailyMessageHandler extends ListHandler<Stat> {
                 true);
     }
 
-    private List<Validable> handleUserStats(HandlerContext context) {
+    private List<Validable> handleUserStats(UpdateContext context) {
         Message message = context.getUpdate().getMessage();
         Long chatId = message.getChatId();
         Integer messageId = message.getMessageId();
@@ -124,7 +124,7 @@ public class DailyMessageHandler extends ListHandler<Stat> {
         return getReplyMessageWithMarkdown(chatId, messageId, header);
     }
 
-    private List<Validable> handleMessage(HandlerContext context) {
+    private List<Validable> handleMessage(UpdateContext context) {
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         Long chatId = context.getUpdate().getMessage().getChatId();
         int year = LocalDateTime.now().getYear();
@@ -160,7 +160,7 @@ public class DailyMessageHandler extends ListHandler<Stat> {
                 .toList();
     }
 
-    private List<Validable> handleRegister(HandlerContext context) {
+    private List<Validable> handleRegister(UpdateContext context) {
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         Long chatId = context.getUpdate().getMessage().getChatId();
         Long userId = context.getUpdate().getMessage().getFrom().getId();

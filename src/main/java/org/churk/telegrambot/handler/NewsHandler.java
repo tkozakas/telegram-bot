@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Article;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.service.NewsService;
-import org.churk.telegrambot.utility.HandlerContext;
+import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -23,7 +23,7 @@ public class NewsHandler extends Handler {
     }
 
     @Override
-    public List<Validable> handle(HandlerContext context) {
+    public List<Validable> handle(UpdateContext context) {
         Integer messageId = context.getUpdate().getMessage().getMessageId();
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<String> args = context.getArgs();
