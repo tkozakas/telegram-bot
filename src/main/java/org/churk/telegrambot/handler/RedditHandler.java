@@ -140,9 +140,9 @@ public class RedditHandler extends ListHandler<Subreddit> {
     private List<Validable> getRedditPosts(String subreddit, Long chatId, Integer messageId, int count) {
         try {
             if (!subredditService.isValidSubreddit(subreddit)) {
-            return getReplyMessage(chatId, messageId,
-                    "This subreddit does not exist");
-        }
+                return getReplyMessage(chatId, messageId,
+                        "This subreddit does not exist");
+            }
             List<RedditPost> posts = subredditService.getRedditPosts(subreddit, count);
             if (posts.isEmpty()) {
                 return getReplyMessage(chatId, messageId,

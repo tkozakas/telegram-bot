@@ -65,6 +65,7 @@ public class ShitpostingHandler extends Handler {
             return getReplyMessage(chatId, messageId, "Error processing file");
         }
     }
+
     @Override
     public Command getSupportedCommand() {
         return Command.SHITPOST;

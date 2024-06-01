@@ -41,8 +41,8 @@ public enum Command {
 
     public String getPatternCleaned(String botName) {
         return getPatterns().getFirst().formatted(botName)
-                        .replace(".*/", "/")
-                        .replace("\\b.*", "");
+                .replace(".*/", "/")
+                .replace("\\b.*", "");
     }
 
     public String getPatternCleaned() {

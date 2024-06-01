@@ -40,7 +40,7 @@ public class FileDownloader {
                 return new File(compressedFilePath);
             });
             File compressedFile = compressTask.get();
-            
+
             Files.deleteIfExists(downloadedFile.toPath());
             return Optional.of(compressedFile);
         } catch (Exception e) {
