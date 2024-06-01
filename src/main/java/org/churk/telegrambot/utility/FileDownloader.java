@@ -19,6 +19,7 @@ import java.util.concurrent.Future;
 @Slf4j
 @Component
 public class FileDownloader {
+    private static final String FPS = "12";
     private static final String COMPRESSION_QUALITY = "10";
     private static final int BUFFER_SIZE = 5048 * 1024;
     private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -36,7 +37,7 @@ public class FileDownloader {
 
             Future<File> compressTask = executorService.submit(() -> {
                 String compressedFilePath = Paths.get(properties.getPath(), FilenameUtils.getBaseName(fileName) + "_compressed" + extension).toString();
-                compressFile(extension, downloadedFile.getPath(), compressedFilePath, "12");
+                compressFile(extension, downloadedFile.getPath(), compressedFilePath, FPS, COMPRESSION_QUALITY);
                 return new File(compressedFilePath);
             });
             File compressedFile = compressTask.get();
@@ -69,7 +70,7 @@ public class FileDownloader {
         }
     }
 
-    private static void compressFile(String extension, String filePath, String compressedFilePath, String fps) {
+    private static void compressFile(String extension, String filePath, String compressedFilePath, String fps, String compressionQuality) {
         FFmpeg builder = FFmpeg.atPath()
                 .addInput(UrlInput.fromPath(Paths.get(filePath)))
                 .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
@@ -82,10 +83,10 @@ public class FileDownloader {
                                     Filter.withName("setpts").addArgument("4/10*PTS")
                             )
                     ));
-            case ".mp4" -> builder.addArguments("-q:v", COMPRESSION_QUALITY)
+            case ".mp4" -> builder.addArguments("-q:v", compressionQuality)
                     .addArgument("-vcodec")
                     .addArgument("libx265")
-                    .addArguments("-crf", "30")
+                    .addArguments("-crf", compressionQuality)
                     .addArguments("-preset", "fast")
                     .setComplexFilter(FilterGraph.of(
                             FilterChain.of(
@@ -93,7 +94,7 @@ public class FileDownloader {
                             )
                     ));
             default -> builder.addArguments("-c:v", "mjpeg")
-                    .addArguments("-q:v", COMPRESSION_QUALITY);
+                    .addArguments("-q:v", compressionQuality);
         }
         builder.execute();
         log.info("File compressed and saved as: {}", compressedFilePath);
@@ -101,7 +102,7 @@ public class FileDownloader {
 
     public static File convertGifToMp4(File file) {
         String compressedFilePath = Paths.get(file.getParent(), FilenameUtils.getBaseName(file.getName()) + ".mp4").toString();
-        compressFile(".mp4", file.getPath(), compressedFilePath, "30");
+        compressFile(".mp4", file.getPath(), compressedFilePath, "30", "8");
         return new File(compressedFilePath);
     }
 }
