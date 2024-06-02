@@ -6,6 +6,8 @@ import org.churk.telegrambot.model.Fact;
 import org.churk.telegrambot.service.FactService;
 import org.churk.telegrambot.service.VoiceOverService;
 import org.churk.telegrambot.utility.UpdateContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -17,6 +19,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Component
 @AllArgsConstructor
 public class FactHandler extends Handler {
+    private static final Logger log = LoggerFactory.getLogger(FactHandler.class);
     private final FactService factService;
     private final VoiceOverService ttsService;
 
@@ -54,12 +57,15 @@ public class FactHandler extends Handler {
 
         String randomFact = facts.get(ThreadLocalRandom.current().nextInt(facts.size())).getComment();
         Optional<File> audioMessage = ttsService.getSpeech(randomFact);
-        if (audioMessage.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "Error generating audio message");
+        if (audioMessage.isPresent()) {
+            return context.isReply() ?
+                    getReplyAudioMessage(chatId, messageId, randomFact, audioMessage.get()) :
+                    getAudioMessage(chatId, randomFact, audioMessage.get());
         }
+        log.error("Failed to generate audio message for fact: {}", randomFact);
         return context.isReply() ?
-                getReplyAudioMessage(chatId, messageId, randomFact, audioMessage.get()) :
-                getAudioMessage(chatId, randomFact, audioMessage.get());
+                getReplyMessage(chatId, messageId, randomFact) :
+                getMessage(chatId, randomFact);
     }
 
     @Override
