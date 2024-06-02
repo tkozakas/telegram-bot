@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +25,7 @@ public class FileDownloader {
     private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     public static String generateUniqueFileName(String extension) {
-        return UUID.randomUUID() + "." + extension;
+        return UUID.randomUUID() + extension;
     }
 
     public static Optional<File> downloadAndCompressMedia(String apiUrl, DownloadMediaProperties properties, String extension) {
@@ -32,6 +33,7 @@ public class FileDownloader {
             String fileName = generateUniqueFileName(extension);
             File downloadedFile = downloadFile(apiUrl, properties.getPath(), fileName);
             File compressedFile = compressMedia(downloadedFile, properties.getPath(), extension, FPS, COMPRESSION_QUALITY);
+            deleteFile(downloadedFile);
             return Optional.of(compressedFile);
         } catch (Exception e) {
             log.error("Error while downloading and compressing media", e);
@@ -41,9 +43,7 @@ public class FileDownloader {
 
     private static File downloadFile(String apiUrl, String downloadDirectory, String fileName) throws Exception {
         Future<File> downloadTask = executorService.submit(() -> downloadFileFromUrl(apiUrl, downloadDirectory, fileName));
-        File downloadedFile = downloadTask.get();
-        downloadedFile.deleteOnExit();
-        return downloadedFile;
+        return downloadTask.get();
     }
 
     private static File compressMedia(File file, String directory, String extension, String fps, String quality) throws Exception {
@@ -52,9 +52,7 @@ public class FileDownloader {
             compressFile(extension, file.getPath(), compressedFilePath, fps, quality);
             return new File(compressedFilePath);
         });
-        File compressedFile = compressTask.get();
-        compressedFile.deleteOnExit();
-        return compressedFile;
+        return compressTask.get();
     }
 
     private static File downloadFileFromUrl(String apiUrl, String downloadDirectory, String fileName) throws IOException {
@@ -80,7 +78,7 @@ public class FileDownloader {
         FFmpeg builder = FFmpeg.atPath()
                 .addInput(UrlInput.fromPath(Paths.get(filePath)))
                 .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
-                .addArguments("-loglevel", "panic");
+                .addArguments("-loglevel", "info");
 
         configureFFmpegBuilder(extension, builder, fps, compressionQuality);
 
@@ -116,7 +114,7 @@ public class FileDownloader {
         FFmpeg.atPath()
                 .addInput(UrlInput.fromPath(Paths.get(sourceFilePath)))
                 .addOutput(UrlOutput.toPath(Paths.get(targetFilePath)))
-                .addArguments("-loglevel", "panic")
+                .addArguments("-loglevel", "info")
                 .addArguments("-movflags", "faststart")
                 .addArguments("-pix_fmt", "yuv420p")
                 .execute();
@@ -128,13 +126,22 @@ public class FileDownloader {
             String extension = ".mp4";
             String mp4FilePath = Paths.get(properties.getPath(), FilenameUtils.getBaseName(file.getName()) + extension).toString();
             convertGif(file.getPath(), mp4FilePath);
-            File mp4File = new File(mp4FilePath);
-            mp4File.deleteOnExit();
-            file.deleteOnExit();
-            return Optional.of(mp4File);
+            deleteFile(file);
+            return Optional.of(new File(mp4FilePath));
         } catch (Exception e) {
             log.error("Error while converting gif to mp4", e);
             return Optional.empty();
+        }
+    }
+
+    public static void deleteFile(File file) {
+        if (file != null && file.exists()) {
+            try {
+                Files.deleteIfExists(file.toPath());
+                log.info("File deleted successfully: {}", file.getAbsolutePath());
+            } catch (IOException e) {
+                log.error("Error while deleting file: {}", file.getAbsolutePath(), e);
+            }
         }
     }
 }

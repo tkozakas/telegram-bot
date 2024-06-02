@@ -1,5 +1,6 @@
 package org.churk.telegrambot.builder;
 
+import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.model.MessageParams;
 import org.churk.telegrambot.model.MessageType;
 import org.springframework.stereotype.Service;
@@ -10,11 +11,35 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class UnifiedMessageBuilder {
+    public static List<File> files = new ArrayList<>();
+
+    public static void clearFiles() {
+        UnifiedMessageBuilder.files.forEach(UnifiedMessageBuilder::deleteFile);
+        UnifiedMessageBuilder.files = new ArrayList<>();
+    }
+
+    private static void deleteFile(File file) {
+        try {
+            String path = file.getPath();
+            if (path.contains("attach:")) {
+                path = path.replace("attach:", "");
+            }
+            Files.deleteIfExists(Path.of(path));
+        } catch (IOException e) {
+            log.error("Error while deleting file: {}", file.getAbsolutePath(), e);
+            throw new RuntimeException(e);
+        }
+    }
 
     private SendMessage createSendMessage(Map<MessageParams, Object> params) {
         SendMessage sendMessage = new SendMessage();
@@ -35,7 +60,11 @@ public class UnifiedMessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendPhoto.setChatId(String.valueOf(value));
-                case PHOTO -> sendPhoto.setPhoto(new InputFile((File) value));
+                case PHOTO -> {
+                    File photoFile = (File) value;
+                    sendPhoto.setPhoto(new InputFile(photoFile));
+                    files.add(photoFile);
+                }
                 case CAPTION -> sendPhoto.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendPhoto.setReplyToMessageId((Integer) value);
                 default -> throw new IllegalStateException("Unexpected value: " + key);
@@ -49,7 +78,11 @@ public class UnifiedMessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendAnimation.setChatId(String.valueOf(value));
-                case ANIMATION -> sendAnimation.setAnimation(new InputFile((File) value));
+                case ANIMATION -> {
+                    File animationFile = (File) value;
+                    sendAnimation.setAnimation(new InputFile(animationFile));
+                    files.add(animationFile);
+                }
                 case CAPTION -> sendAnimation.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendAnimation.setReplyToMessageId((Integer) value);
                 default -> throw new IllegalStateException("Unexpected value: " + key);
@@ -63,8 +96,12 @@ public class UnifiedMessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendSticker.setChatId(String.valueOf(value));
-                case STICKER -> sendSticker.setSticker(new InputFile((String) value));
                 case REPLY_TO_MESSAGE_ID -> sendSticker.setReplyToMessageId((Integer) value);
+                case STICKER -> {
+                    String stickerFilePath = (String) value;
+                    sendSticker.setSticker(new InputFile(stickerFilePath));
+                    files.add(new File(stickerFilePath));
+                }
                 default -> throw new IllegalStateException("Unexpected value: " + key);
             }
         });
@@ -76,7 +113,11 @@ public class UnifiedMessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendVideo.setChatId(String.valueOf(value));
-                case VIDEO -> sendVideo.setVideo(new InputFile((File) value));
+                case VIDEO -> {
+                    File videoFile = (File) value;
+                    sendVideo.setVideo(new InputFile(videoFile));
+                    files.add(videoFile);
+                }
                 case CAPTION -> sendVideo.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendVideo.setReplyToMessageId((Integer) value);
                 default -> throw new IllegalStateException("Unexpected value: " + key);
@@ -90,7 +131,11 @@ public class UnifiedMessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendMediaGroup.setChatId(String.valueOf(value));
-                case MEDIA_GROUP -> sendMediaGroup.setMedias((List<InputMedia>) value);
+                case MEDIA_GROUP -> {
+                    List<InputMedia> mediaGroup = (List<InputMedia>) value;
+                    sendMediaGroup.setMedias(mediaGroup);
+                    mediaGroup.forEach(media -> files.add(new File(media.getMedia())));
+                }
                 case MESSAGE_ID -> sendMediaGroup.setReplyToMessageId((Integer) value);
                 default -> throw new IllegalStateException("Unexpected value: " + key);
             }

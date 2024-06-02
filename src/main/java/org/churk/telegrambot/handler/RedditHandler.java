@@ -21,7 +21,6 @@ import java.io.File;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -183,7 +182,6 @@ public class RedditHandler extends ListHandler<Subreddit> {
 
         if (files.size() == 1) {
             File file = files.getFirst().getValue();
-            file.deleteOnExit();
             return postWithFileResponse(chatId, posts.getFirst(), file, subreddit);
         } else {
             convertGifsToMp4(files);
@@ -214,7 +212,7 @@ public class RedditHandler extends ListHandler<Subreddit> {
                 .map(pair -> {
                     String caption = pair.getKey();
                     File file = pair.getValue();
-                    String mediaName = UUID.randomUUID().toString();
+                    String mediaName = file.getPath();
                     return createInputMedia(file, mediaName, caption);
                 })
                 .collect(Collectors.toList());
@@ -261,7 +259,6 @@ public class RedditHandler extends ListHandler<Subreddit> {
     }
 
     private List<Validable> postWithFileResponse(Long chatId, RedditPost post, File file, String subreddit) {
-        file.deleteOnExit();
         String caption = "%s%nFrom r/%s"
                 .formatted(post.getTitle() != null ? post.getTitle() : "", subreddit);
         String fileName = file.getName().toLowerCase();

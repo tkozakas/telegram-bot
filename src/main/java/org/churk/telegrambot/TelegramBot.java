@@ -3,6 +3,7 @@ package org.churk.telegrambot;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.churk.telegrambot.builder.UnifiedMessageBuilder;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.utility.CommandProcessor;
@@ -81,6 +82,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                     case SendMediaGroup sendmediagroup -> execute(sendmediagroup);
                     default -> {
                     }
+                }
+                if (!(sendMessage instanceof SendMessage)) {
+                    UnifiedMessageBuilder.clearFiles();
                 }
                 sleep(1000);
             } catch (TelegramApiException | InterruptedException e) {
