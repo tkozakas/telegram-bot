@@ -1,21 +1,24 @@
 package org.churk.telegrambot.handler;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Fact;
 import org.churk.telegrambot.service.FactService;
+import org.churk.telegrambot.service.VoiceOverService;
 import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
+import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class FactHandler extends Handler {
     private final FactService factService;
-
+    private final VoiceOverService ttsService;
 
     @Override
     public List<Validable> handle(UpdateContext context) {
@@ -50,9 +53,13 @@ public class FactHandler extends Handler {
         }
 
         String randomFact = facts.get(ThreadLocalRandom.current().nextInt(facts.size())).getComment();
+        Optional<File> audioMessage = ttsService.getSpeech(randomFact);
+        if (audioMessage.isEmpty()) {
+            return getReplyMessage(chatId, messageId, "Error generating audio message");
+        }
         return context.isReply() ?
-                getReplyMessage(chatId, messageId, randomFact) :
-                getMessageWithMarkdown(chatId, randomFact);
+                getReplyAudioMessage(chatId, messageId, randomFact, audioMessage.get()) :
+                getAudioMessage(chatId, randomFact, audioMessage.get());
     }
 
     @Override

@@ -14,5 +14,5 @@ public enum MessageParams {
     VIDEO,
     REPLY_TO_MESSAGE_ID,
     MEDIA_GROUP,
-    MARKDOWN
+    AUDIO, MARKDOWN
 }

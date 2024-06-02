@@ -143,6 +143,24 @@ public class UnifiedMessageBuilder {
         return sendMediaGroup;
     }
 
+    private SendAudio createSendAudio(Map<MessageParams, Object> params) {
+        SendAudio sendAudio = new SendAudio();
+        params.forEach((key, value) -> {
+            switch (key) {
+                case CHAT_ID -> sendAudio.setChatId(String.valueOf(value));
+                case AUDIO -> {
+                    File audioFile = (File) value;
+                    sendAudio.setAudio(new InputFile(audioFile));
+                    files.add(audioFile);
+                }
+                case CAPTION -> sendAudio.setCaption((String) value);
+                case REPLY_TO_MESSAGE_ID -> sendAudio.setReplyToMessageId((Integer) value);
+                default -> throw new IllegalStateException("Unexpected value: " + key);
+            }
+        });
+        return sendAudio;
+    }
+
     public List<Validable> build(MessageType messageType, Map<MessageParams, Object> params) {
         return switch (messageType) {
             case TEXT -> List.of(createSendMessage(params));
@@ -151,6 +169,7 @@ public class UnifiedMessageBuilder {
             case STICKER -> List.of(createSendSticker(params));
             case VIDEO -> List.of(createSendVideo(params));
             case MEDIA_GROUP -> List.of(createSendMediaGroup(params));
+            case AUDIO -> List.of(createSendAudio(params));
         };
     }
 }

@@ -107,4 +107,21 @@ public abstract class Handler implements CommandHandler {
                 MessageParams.MEDIA_GROUP, files
         ));
     }
+
+    protected List<Validable> getReplyAudioMessage(Long chatId, Integer messageId, String message, File audioMessage) {
+        return createMessage(MessageType.AUDIO, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.AUDIO, audioMessage,
+                MessageParams.CAPTION, message,
+                MessageParams.REPLY_TO_MESSAGE_ID, messageId
+        ));
+    }
+
+    protected List<Validable> getAudioMessage(Long chatId, String message, File audioMessage) {
+        return createMessage(MessageType.AUDIO, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.AUDIO, audioMessage,
+                MessageParams.CAPTION, message
+        ));
+    }
 }

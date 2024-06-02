@@ -6,6 +6,6 @@ public enum MessageType {
     PHOTO,
     STICKER,
     VIDEO,
-    MEDIA_GROUP
+    AUDIO, MEDIA_GROUP
 }
 

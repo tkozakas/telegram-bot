@@ -11,5 +11,6 @@ import java.util.Map;
 public interface StickerClient {
 
     @GetMapping("/bot{botToken}/getStickerSet")
-    Map<String, Object> getStickerSet(@PathVariable("botToken") String botToken, @RequestParam("name") String stickerSetName);
+    Map<String, Object> getStickerSet(@PathVariable("botToken") String botToken,
+                                      @RequestParam("name") String stickerSetName);
 }
