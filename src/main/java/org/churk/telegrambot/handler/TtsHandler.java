@@ -22,7 +22,7 @@ public class TtsHandler extends Handler {
         List<String> args = context.getArgs();
 
         if (args.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "Please provide a query %s <text>"
+            return getReplyMessage(chatId, messageId, "Please provide a text %s <text>"
                     .formatted(Command.TTS.getPatternCleaned()));
         }
 
