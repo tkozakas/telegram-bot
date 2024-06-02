@@ -1,13 +1,12 @@
 package org.churk.telegrambot.handler;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Fact;
 import org.churk.telegrambot.service.FactService;
 import org.churk.telegrambot.service.VoiceOverService;
 import org.churk.telegrambot.utility.UpdateContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
@@ -16,10 +15,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Slf4j
 @Component
 @AllArgsConstructor
 public class FactHandler extends Handler {
-    private static final Logger log = LoggerFactory.getLogger(FactHandler.class);
     private final FactService factService;
     private final VoiceOverService ttsService;
 

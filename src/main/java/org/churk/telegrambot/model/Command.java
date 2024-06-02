@@ -18,7 +18,8 @@ public enum Command {
     STICKER(List.of(".*/sticker\\b.*"), List.of(SubCommand.ADD, SubCommand.REMOVE, SubCommand.LIST), "Manage stickers"),
     REDDIT(List.of(".*/reddit\\b.*", ".*/meme\\b.*"), List.of(SubCommand.ADD, SubCommand.REMOVE, SubCommand.LIST), "Reddit pics"),
     SHITPOST(List.of(".*/shitpost\\b.*"), List.of(SubCommand.NONE), "Random shitpost"),
-    NONE(List.of(""), List.of(SubCommand.NONE), "");
+    NONE(List.of(""), List.of(SubCommand.NONE), ""),
+    TTS(List.of(".*/tts\\b.*"), List.of(SubCommand.NONE), "Text to speech");
 
     private final List<String> patterns;
     private final List<SubCommand> subCommands;
