@@ -130,6 +130,7 @@ public class FileDownloader {
             convertGif(file.getPath(), mp4FilePath);
             File mp4File = new File(mp4FilePath);
             mp4File.deleteOnExit();
+            file.deleteOnExit();
             return Optional.of(mp4File);
         } catch (Exception e) {
             log.error("Error while converting gif to mp4", e);
