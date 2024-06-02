@@ -9,6 +9,9 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/changelog-master.xml
 
+logging:
+  config: classpath:logback.xml
+
 news:
   language: en
   # api-key: <<PROVIDE USING ENVIRONMENT VARIABLES>>

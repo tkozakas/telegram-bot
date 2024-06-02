@@ -41,22 +41,20 @@ public class CommandProcessor {
         Message message = update.getMessage();
         String firstName = message.getFrom().getFirstName();
         String messageText = message.getText();
-        log.info("{}: {}", firstName, messageText);
 
         List<String> arguments = List.of(messageText.split(" ")).subList(1, messageText.split(" ").length);
         Command command = Command.getTextCommand(messageText, botProperties.getWinnerName());
         CommandHandler handler = handlerFactory.getHandler(command);
-        return handler == null ? handleUnknownCommand(message) : handler.handle(UpdateContext.builder()
+
+        if (command == Command.NONE) {
+            return List.of();
+        }
+
+        log.info("Command received from {}: {}", firstName, messageText);
+        return handler.handle(UpdateContext.builder()
                 .update(update)
                 .args(arguments)
                 .build());
-    }
-
-    private List<Validable> handleUnknownCommand(Message message) {
-        return unifiedMessageBuilder.build(MessageType.TEXT, Map.of(
-                MessageParams.CHAT_ID, message.getChatId(),
-                MessageParams.TEXT, "I don't know what to do with this command. Try /help for more info."
-        ));
     }
 
     private List<Validable> handleBotAddedToGroup(Update update) {
