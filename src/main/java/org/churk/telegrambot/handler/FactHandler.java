@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -40,7 +41,11 @@ public class FactHandler extends Handler {
             return getReplyMessage(chatId, messageId, "Save a fact using /fact add <fact>");
         }
 
-        String fact = String.join(" ", factArgs);
+        String fact = factArgs.stream()
+                .map(String::trim)
+                .collect(Collectors.joining(" "))
+                .replace("\n", " ")
+                .replace("\r", " ");
         factService.addFact(chatId, fact);
         return getReplyMessage(chatId, messageId, "Fact: " + fact + " added");
     }

@@ -5,6 +5,8 @@ import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Getter
@@ -18,8 +20,8 @@ public enum Command {
     STICKER(List.of(".*/sticker\\b.*"), List.of(SubCommand.ADD, SubCommand.REMOVE, SubCommand.LIST), "Manage stickers"),
     REDDIT(List.of(".*/reddit\\b.*", ".*/meme\\b.*"), List.of(SubCommand.ADD, SubCommand.REMOVE, SubCommand.LIST), "Reddit pics"),
     SHITPOST(List.of(".*/shitpost\\b.*"), List.of(SubCommand.NONE), "Random shitpost"),
-    NONE(List.of(""), List.of(SubCommand.NONE), ""),
-    TTS(List.of(".*/tts\\b.*"), List.of(SubCommand.NONE), "Text to speech");
+    TTS(List.of(".*/tts\\b.*"), List.of(SubCommand.NONE), "Text to speech"),
+    NONE(List.of(""), List.of(SubCommand.NONE), "");
 
     private final List<String> patterns;
     private final List<SubCommand> subCommands;
@@ -28,7 +30,11 @@ public enum Command {
     public static Command getTextCommand(String text, String botName) {
         return Arrays.stream(Command.values())
                 .filter(command -> command.getPatterns().stream()
-                        .anyMatch(pattern -> text.matches(pattern.formatted(botName))))
+                        .anyMatch(pattern -> {
+                            Pattern compiledPattern = Pattern.compile(pattern.formatted(botName), Pattern.DOTALL);
+                            Matcher matcher = compiledPattern.matcher(text);
+                            return matcher.find();
+                        }))
                 .findFirst()
                 .orElse(NONE);
     }

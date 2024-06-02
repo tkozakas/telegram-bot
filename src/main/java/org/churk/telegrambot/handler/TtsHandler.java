@@ -10,11 +10,13 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class TtsHandler extends Handler {
     private final VoiceOverService voiceOverService;
+
     @Override
     public List<Validable> handle(UpdateContext context) {
         Integer messageId = context.getUpdate().getMessage().getMessageId();
@@ -26,7 +28,11 @@ public class TtsHandler extends Handler {
                     .formatted(Command.TTS.getPatternCleaned()));
         }
 
-        String text = args.stream().reduce("", (a, b) -> a + " " + b);
+        String text = args.stream()
+                .map(String::trim)
+                .collect(Collectors.joining(" "))
+                .replace("\n", " ")
+                .replace("\r", " ");
         Optional<File> speechFile = voiceOverService.getSpeech(text);
         if (speechFile.isEmpty()) {
             return getReplyMessage(chatId, messageId, "Error generating speech");
