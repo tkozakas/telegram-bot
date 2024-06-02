@@ -19,6 +19,7 @@ import java.util.concurrent.Future;
 @Slf4j
 @Component
 public class FileDownloader {
+    private static final String DEBUG_INFO = "panic";
     private static final String FPS = "12";
     private static final String COMPRESSION_QUALITY = "10";
     private static final int BUFFER_SIZE = 5048 * 1024;
@@ -75,15 +76,31 @@ public class FileDownloader {
     }
 
     private static void compressFile(String extension, String filePath, String compressedFilePath, String fps, String compressionQuality) {
-        FFmpeg builder = FFmpeg.atPath()
-                .addInput(UrlInput.fromPath(Paths.get(filePath)))
-                .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
-                .addArguments("-loglevel", "info");
+        log.info("Starting compression for file: {}", filePath);
+        try {
+            FFmpeg builder = FFmpeg.atPath().addInput(UrlInput.fromPath(Paths.get(filePath)))
+                    .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
+                    .addArguments("-loglevel", DEBUG_INFO);
 
-        configureFFmpegBuilder(extension, builder, fps, compressionQuality);
+            configureFFmpegBuilder(extension, builder, fps, compressionQuality);
 
-        builder.execute();
-        log.info("File compressed and saved as: {}", compressedFilePath);
+            builder.execute();
+            log.info("File compressed and saved as: {}", compressedFilePath);
+        } catch (Exception e) {
+            log.error("Error during compression for file: {}", filePath, e);
+            throw e;
+        }
+    }
+
+    private static void convertGif(String sourceFilePath, String targetFilePath) {
+        FFmpeg.atPath()
+                .addInput(UrlInput.fromPath(Paths.get(sourceFilePath)))
+                .addOutput(UrlOutput.toPath(Paths.get(targetFilePath)))
+                .addArguments("-loglevel", DEBUG_INFO)
+                .addArguments("-movflags", "faststart")
+                .addArguments("-pix_fmt", "yuv420p")
+                .execute();
+        log.info("GIF converted to MP4 and saved as: {}", targetFilePath);
     }
 
     private static void configureFFmpegBuilder(String extension, FFmpeg builder, String fps, String compressionQuality) {
@@ -92,7 +109,8 @@ public class FileDownloader {
                     .setComplexFilter(FilterGraph.of(
                             FilterChain.of(
                                     Filter.withName("fps").addArgument("fps=8"),
-                                    Filter.withName("setpts").addArgument("4/10*PTS")
+                                    Filter.withName("setpts").addArgument("4/10*PTS"),
+                                    Filter.withName("scale").addArgument("trunc(iw/2)*2:trunc(ih/2)*2")
                             )
                     ));
             case ".mp4" -> builder.addArguments("-q:v", compressionQuality)
@@ -102,7 +120,8 @@ public class FileDownloader {
                     .addArguments("-preset", "fast")
                     .setComplexFilter(FilterGraph.of(
                             FilterChain.of(
-                                    Filter.withName("fps").addArgument("fps=" + fps)
+                                    Filter.withName("fps").addArgument("fps=" + fps),
+                                    Filter.withName("scale").addArgument("trunc(iw/2)*2:trunc(ih/2)*2")
                             )
                     ));
             default -> builder.addArguments("-c:v", "mjpeg")
@@ -110,16 +129,6 @@ public class FileDownloader {
         }
     }
 
-    private static void convertGif(String sourceFilePath, String targetFilePath) {
-        FFmpeg.atPath()
-                .addInput(UrlInput.fromPath(Paths.get(sourceFilePath)))
-                .addOutput(UrlOutput.toPath(Paths.get(targetFilePath)))
-                .addArguments("-loglevel", "info")
-                .addArguments("-movflags", "faststart")
-                .addArguments("-pix_fmt", "yuv420p")
-                .execute();
-        log.info("GIF converted to MP4 and saved as: {}", targetFilePath);
-    }
 
     public static Optional<File> convertGifToMp4(File file, DownloadMediaProperties properties) {
         try {
