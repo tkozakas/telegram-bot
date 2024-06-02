@@ -67,7 +67,7 @@ public class SubredditService {
         return FileDownloader.downloadAndCompressMedia(mediaUrl, redditProperties, extension);
     }
 
-    public File convertGifToMp4(File file) {
-        return FileDownloader.convertGifToMp4(file);
+    public Optional<File> convertGifToMp4(File file) {
+        return FileDownloader.convertGifToMp4(file, redditProperties);
     }
 }

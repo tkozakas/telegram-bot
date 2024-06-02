@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,26 +30,34 @@ public class FileDownloader {
     public static Optional<File> downloadAndCompressMedia(String apiUrl, DownloadMediaProperties properties, String extension) {
         try {
             String fileName = generateUniqueFileName(extension);
-
-            Future<File> downloadTask = executorService.submit(() -> downloadFileFromUrl(apiUrl, properties.getPath(), fileName));
-            File downloadedFile = downloadTask.get();
-
-            Future<File> compressTask = executorService.submit(() -> {
-                String compressedFilePath = Paths.get(properties.getPath(), FilenameUtils.getBaseName(fileName) + "_compressed" + extension).toString();
-                compressFile(extension, downloadedFile.getPath(), compressedFilePath, FPS, COMPRESSION_QUALITY);
-                return new File(compressedFilePath);
-            });
-            File compressedFile = compressTask.get();
-
-            Files.deleteIfExists(downloadedFile.toPath());
+            File downloadedFile = downloadFile(apiUrl, properties.getPath(), fileName);
+            File compressedFile = compressMedia(downloadedFile, properties.getPath(), extension, FPS, COMPRESSION_QUALITY);
             return Optional.of(compressedFile);
         } catch (Exception e) {
-            log.error("Error in download/compression", e);
+            log.error("Error while downloading and compressing media", e);
             return Optional.empty();
         }
     }
 
-    public static File downloadFileFromUrl(String apiUrl, String downloadDirectory, String fileName) throws IOException {
+    private static File downloadFile(String apiUrl, String downloadDirectory, String fileName) throws Exception {
+        Future<File> downloadTask = executorService.submit(() -> downloadFileFromUrl(apiUrl, downloadDirectory, fileName));
+        File downloadedFile = downloadTask.get();
+        downloadedFile.deleteOnExit();
+        return downloadedFile;
+    }
+
+    private static File compressMedia(File file, String directory, String extension, String fps, String quality) throws Exception {
+        Future<File> compressTask = executorService.submit(() -> {
+            String compressedFilePath = Paths.get(directory, FilenameUtils.getBaseName(file.getName()) + "_compressed" + extension).toString();
+            compressFile(extension, file.getPath(), compressedFilePath, fps, quality);
+            return new File(compressedFilePath);
+        });
+        File compressedFile = compressTask.get();
+        compressedFile.deleteOnExit();
+        return compressedFile;
+    }
+
+    private static File downloadFileFromUrl(String apiUrl, String downloadDirectory, String fileName) throws IOException {
         String filePath = Paths.get(downloadDirectory, fileName).toString();
         log.info("Downloading file from {}", apiUrl);
 
@@ -58,7 +65,6 @@ public class FileDownloader {
              FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
             byte[] dataBuffer = new byte[BUFFER_SIZE];
             int bytesRead;
-
             while ((bytesRead = in.read(dataBuffer, 0, BUFFER_SIZE)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
@@ -75,6 +81,14 @@ public class FileDownloader {
                 .addInput(UrlInput.fromPath(Paths.get(filePath)))
                 .addOutput(UrlOutput.toPath(Paths.get(compressedFilePath)))
                 .addArguments("-loglevel", "panic");
+
+        configureFFmpegBuilder(extension, builder, fps, compressionQuality);
+
+        builder.execute();
+        log.info("File compressed and saved as: {}", compressedFilePath);
+    }
+
+    private static void configureFFmpegBuilder(String extension, FFmpeg builder, String fps, String compressionQuality) {
         switch (extension) {
             case ".gif" -> builder
                     .setComplexFilter(FilterGraph.of(
@@ -96,13 +110,30 @@ public class FileDownloader {
             default -> builder.addArguments("-c:v", "mjpeg")
                     .addArguments("-q:v", compressionQuality);
         }
-        builder.execute();
-        log.info("File compressed and saved as: {}", compressedFilePath);
     }
 
-    public static File convertGifToMp4(File file) {
-        String compressedFilePath = Paths.get(file.getParent(), FilenameUtils.getBaseName(file.getName()) + ".mp4").toString();
-        compressFile(".mp4", file.getPath(), compressedFilePath, "30", "8");
-        return new File(compressedFilePath);
+    private static void convertGif(String sourceFilePath, String targetFilePath) {
+        FFmpeg.atPath()
+                .addInput(UrlInput.fromPath(Paths.get(sourceFilePath)))
+                .addOutput(UrlOutput.toPath(Paths.get(targetFilePath)))
+                .addArguments("-loglevel", "panic")
+                .addArguments("-movflags", "faststart")
+                .addArguments("-pix_fmt", "yuv420p")
+                .execute();
+        log.info("GIF converted to MP4 and saved as: {}", targetFilePath);
+    }
+
+    public static Optional<File> convertGifToMp4(File file, DownloadMediaProperties properties) {
+        try {
+            String extension = ".mp4";
+            String mp4FilePath = Paths.get(properties.getPath(), FilenameUtils.getBaseName(file.getName()) + extension).toString();
+            convertGif(file.getPath(), mp4FilePath);
+            File mp4File = new File(mp4FilePath);
+            mp4File.deleteOnExit();
+            return Optional.of(mp4File);
+        } catch (Exception e) {
+            log.error("Error while converting gif to mp4", e);
+            return Optional.empty();
+        }
     }
 }

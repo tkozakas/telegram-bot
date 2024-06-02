@@ -2,6 +2,7 @@ package org.churk.telegrambot.handler;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.builder.ListHandler;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.RedditPost;
@@ -25,6 +26,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RedditHandler extends ListHandler<Subreddit> {
@@ -152,10 +154,15 @@ public class RedditHandler extends ListHandler<Subreddit> {
         } catch (FeignException.BadGateway |
                  FeignException.InternalServerError |
                  FeignException.GatewayTimeout e) {
+            log.error("Reddit api is dead", e);
             return getReplyMessage(chatId, messageId, "The api is dead :)");
-        } catch (FeignException.ServiceUnavailable e) {
+        } catch (FeignException.ServiceUnavailable |
+                 FeignException.NotFound |
+                 FeignException.UnprocessableEntity e) {
+            log.error("Subreddit does not exist", e);
             return getReplyMessage(chatId, messageId, "This subreddit does not exist");
         } catch (FeignException e) {
+            log.error("An error occurred", e);
             return getReplyMessage(chatId, messageId, "An error occurred");
         }
     }
@@ -193,8 +200,11 @@ public class RedditHandler extends ListHandler<Subreddit> {
         files.forEach(entry -> {
             File file = entry.getValue();
             if (file.getName().toLowerCase().endsWith(".gif")) {
-                File mp4File = subredditService.convertGifToMp4(file);
-                entry.setValue(mp4File);
+                Optional<File> mp4File = subredditService.convertGifToMp4(file);
+                if (mp4File.isEmpty()) {
+                    return;
+                }
+                entry.setValue(mp4File.get());
             }
         });
     }
