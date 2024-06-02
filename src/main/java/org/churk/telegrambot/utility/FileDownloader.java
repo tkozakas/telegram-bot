@@ -128,14 +128,15 @@ public class FileDownloader {
     }
 
     public static Optional<File> convertGifToMp4(File file, DownloadMediaProperties properties) {
+        String extension = ".mp4";
+        String mp4FilePath = Paths.get(properties.getPath(), FilenameUtils.getBaseName(file.getName()) + extension).toString();
         try {
-            String extension = ".mp4";
-            String mp4FilePath = Paths.get(properties.getPath(), FilenameUtils.getBaseName(file.getName()) + extension).toString();
             convertGif(file.getPath(), mp4FilePath);
             deleteFile(file);
             return Optional.of(new File(mp4FilePath));
         } catch (Exception e) {
             log.error("Error while converting gif to mp4", e);
+            deleteFile(new File(mp4FilePath));
             return Optional.empty();
         }
     }
