@@ -109,8 +109,7 @@ public class FileDownloader {
                     .setComplexFilter(FilterGraph.of(
                             FilterChain.of(
                                     Filter.withName("fps").addArgument("fps=8"),
-                                    Filter.withName("setpts").addArgument("4/10*PTS"),
-                                    Filter.withName("scale").addArgument("trunc(iw/2)*2:trunc(ih/2)*2")
+                                    Filter.withName("setpts").addArgument("4/10*PTS")
                             )
                     ));
             case ".mp4" -> builder.addArguments("-q:v", compressionQuality)
@@ -120,15 +119,13 @@ public class FileDownloader {
                     .addArguments("-preset", "fast")
                     .setComplexFilter(FilterGraph.of(
                             FilterChain.of(
-                                    Filter.withName("fps").addArgument("fps=" + fps),
-                                    Filter.withName("scale").addArgument("trunc(iw/2)*2:trunc(ih/2)*2")
+                                    Filter.withName("fps").addArgument("fps=" + fps)
                             )
                     ));
             default -> builder.addArguments("-c:v", "mjpeg")
                     .addArguments("-q:v", compressionQuality);
         }
     }
-
 
     public static Optional<File> convertGifToMp4(File file, DownloadMediaProperties properties) {
         try {
@@ -144,13 +141,11 @@ public class FileDownloader {
     }
 
     public static void deleteFile(File file) {
-        if (file != null && file.exists()) {
-            try {
-                Files.deleteIfExists(file.toPath());
-                log.info("File deleted successfully: {}", file.getAbsolutePath());
-            } catch (IOException e) {
-                log.error("Error while deleting file: {}", file.getAbsolutePath(), e);
-            }
+        try {
+            Files.deleteIfExists(file.toPath());
+            log.info("File deleted successfully: {}", file.getAbsolutePath());
+        } catch (IOException e) {
+            log.error("Error while deleting file: {}", file.getAbsolutePath(), e);
         }
     }
 }
