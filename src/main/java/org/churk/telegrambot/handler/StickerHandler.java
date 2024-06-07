@@ -77,7 +77,7 @@ public class StickerHandler extends ListHandler<String> {
     private List<Validable> handleList(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<String> stickerSets = stickerService.getStickerSetNames(chatId);
-        UnaryOperator<String> stickerFormatter = "- *%s*"::formatted;
+        UnaryOperator<String> stickerFormatter = "- *%s*\n"::formatted;
         return formatListResponse(context, stickerSets, stickerFormatter,
                 "Sticker sets:\n",
                 "",

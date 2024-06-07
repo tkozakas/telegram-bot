@@ -28,7 +28,7 @@ public class HelpHandler extends ListHandler<Command> {
                 .replace(".*/", "/")
                 .replace("\\b.*", "");
         String subCommands = command.getSubCommandsString();
-        return String.format("*%s %s* - %s",
+        return String.format("*%s %s* - %s %n",
                 commandName,
                 subCommands.isEmpty() ? "" : "<" + subCommands + ">",
                 command.getDescription().replace("%s", botProperties.getWinnerName()));

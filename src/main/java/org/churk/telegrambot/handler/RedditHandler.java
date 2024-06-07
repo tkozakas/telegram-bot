@@ -105,7 +105,7 @@ public class RedditHandler extends ListHandler<Subreddit> {
     private List<Validable> handleList(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
-        Function<Subreddit, String> subredditFormatter = subreddit -> String.format("- r/*%s*", subreddit.getSubredditName());
+        Function<Subreddit, String> subredditFormatter = subreddit -> String.format("- r/*%s*\n", subreddit.getSubredditName());
         return formatListResponse(context, subreddits, subredditFormatter,
                 "Subreddits:\n",
                 "",

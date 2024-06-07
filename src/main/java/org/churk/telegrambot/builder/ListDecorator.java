@@ -18,7 +18,6 @@ public class ListDecorator<T> {
                 .limit(limit)
                 .map(itemNameExtractor)
                 .map(name -> !escapeMarkdown ? escapeMarkdown(name) : name)
-                .map(name -> name + "\n")
                 .collect(Collectors.joining());
 
         return header + formattedItems + footer;
