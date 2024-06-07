@@ -28,11 +28,30 @@ public class TtsHandler extends Handler {
                     .formatted(Command.TTS.getPatternCleaned()));
         }
 
-        String text = args.stream()
-                .map(String::trim)
-                .collect(Collectors.joining(" "))
-                .replace("\n", " ")
-                .replace("\r", " ");
+        String text;
+
+        Command command = Command.getTextCommand(args.getFirst(), botProperties.getWinnerName());
+        if (command != Command.NONE) {
+            HandlerFactory handlerFactory = context.getHandlerFactory();
+            CommandHandler handler = handlerFactory.getHandler(command);
+            List<Validable> result = handler.handle(UpdateContext.builder()
+                    .handlerFactory(handlerFactory)
+                    .update(context.getUpdate())
+                    .args(args.subList(1, args.size()))
+                    .build());
+            text = getAudioMessage(result).formatted(botProperties.getWinnerName());
+        } else {
+            text = args.stream()
+                    .map(String::trim)
+                    .collect(Collectors.joining(" "))
+                    .replace("\n", " ")
+                    .replace("\r", " ");
+        }
+        if (text.isBlank()) {
+            return getReplyMessage(chatId, messageId, "Please provide a text %s <text>"
+                    .formatted(Command.TTS.getPatternCleaned()));
+        }
+
         Optional<File> speechFile = voiceOverService.getSpeech(text);
         if (speechFile.isEmpty()) {
             return getReplyMessage(chatId, messageId, "Error generating speech");

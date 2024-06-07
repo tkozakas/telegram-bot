@@ -155,6 +155,7 @@ public class UnifiedMessageBuilder {
                 }
                 case CAPTION -> sendAudio.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendAudio.setReplyToMessageId((Integer) value);
+                case MARKDOWN -> sendAudio.setParseMode(ParseMode.MARKDOWN);
                 default -> throw new IllegalStateException("Unexpected value: " + key);
             }
         });

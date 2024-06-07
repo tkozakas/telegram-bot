@@ -28,11 +28,12 @@ public enum Command {
     private final String description;
 
     public static Command getTextCommand(String text, String botName) {
+        String command = String.valueOf(Arrays.stream(text.split(" ")).findFirst());
         return Arrays.stream(Command.values())
-                .filter(command -> command.getPatterns().stream()
+                .filter(c -> c.getPatterns().stream()
                         .anyMatch(pattern -> {
                             Pattern compiledPattern = Pattern.compile(pattern.formatted(botName), Pattern.DOTALL);
-                            Matcher matcher = compiledPattern.matcher(text);
+                            Matcher matcher = compiledPattern.matcher(command);
                             return matcher.find();
                         }))
                 .findFirst()

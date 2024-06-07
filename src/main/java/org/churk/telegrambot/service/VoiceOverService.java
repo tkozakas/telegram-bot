@@ -25,8 +25,10 @@ public class VoiceOverService {
         String voiceId = ttsApiKeyManager.getVoiceId();
         String outputFileName = voiceId + ".wav";
 
+        String prompt = removeUnnecessaryCharacters(text);
+
         TextToSpeechRequest request = new TextToSpeechRequest(
-                text,
+                prompt,
                 "eleven_multilingual_v2",
                 Map.of(
                         "stability", 0.5,
@@ -48,5 +50,14 @@ public class VoiceOverService {
             log.error("Error generating speech", e);
         }
         return Optional.empty();
+    }
+
+    private String removeUnnecessaryCharacters(String text) {
+        return text.replaceAll("\\[.*?\\]", "")
+                .replaceAll("\\(.*?\\)", "")
+                .replaceAll("https?://\\S+\\s?", "")
+                .replaceAll("www.\\S+\\s?", "")
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 }

@@ -10,11 +10,16 @@ import org.churk.telegrambot.model.Sticker;
 import org.churk.telegrambot.service.DailyMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
+import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -113,7 +118,8 @@ public abstract class Handler implements CommandHandler {
                 MessageParams.CHAT_ID, chatId,
                 MessageParams.AUDIO, audioMessage,
                 MessageParams.CAPTION, message,
-                MessageParams.REPLY_TO_MESSAGE_ID, messageId
+                MessageParams.REPLY_TO_MESSAGE_ID, messageId,
+                MessageParams.MARKDOWN, true
         ));
     }
 
@@ -121,7 +127,22 @@ public abstract class Handler implements CommandHandler {
         return createMessage(MessageType.AUDIO, Map.of(
                 MessageParams.CHAT_ID, chatId,
                 MessageParams.AUDIO, audioMessage,
-                MessageParams.CAPTION, message
+                MessageParams.CAPTION, message,
+                MessageParams.MARKDOWN, true
         ));
+    }
+
+    protected String getAudioMessage(List<Validable> validables) {
+        return validables.stream()
+                .map(validable -> switch (validable) {
+                            case SendMessage sendMessage -> sendMessage.getText();
+                            case InputMedia inputMedia -> inputMedia.getCaption();
+                            case SendAnimation sendAnimation -> sendAnimation.getCaption();
+                            case SendPhoto sendPhoto -> sendPhoto.getCaption();
+                            case SendVideo sendVideo -> sendVideo.getCaption();
+                            case null, default -> "";
+                        }
+                )
+                .collect(Collectors.joining());
     }
 }
