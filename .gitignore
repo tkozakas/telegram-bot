@@ -12,3 +12,4 @@ prod-compose.yaml
 nix
 result
 deploy.sh
+logs
