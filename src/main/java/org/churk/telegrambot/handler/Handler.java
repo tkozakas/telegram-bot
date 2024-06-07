@@ -113,6 +113,14 @@ public abstract class Handler implements CommandHandler {
         ));
     }
 
+    List<Validable> getTextReplyMessage(Long chatId, Integer messageId, String text) {
+        return createMessage(MessageType.TEXT, Map.of(
+                MessageParams.CHAT_ID, chatId,
+                MessageParams.TEXT, text,
+                MessageParams.REPLY_TO_MESSAGE_ID, messageId
+        ));
+    }
+
     protected List<Validable> getReplyAudioMessage(Long chatId, Integer messageId, String message, File audioMessage) {
         return createMessage(MessageType.AUDIO, Map.of(
                 MessageParams.CHAT_ID, chatId,

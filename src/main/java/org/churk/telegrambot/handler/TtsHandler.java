@@ -29,7 +29,6 @@ public class TtsHandler extends Handler {
         }
 
         String text;
-
         Command command = Command.getTextCommand(args.getFirst(), botProperties.getWinnerName());
         if (command != Command.NONE) {
             HandlerFactory handlerFactory = context.getHandlerFactory();
@@ -48,13 +47,13 @@ public class TtsHandler extends Handler {
                     .replace("\r", " ");
         }
         if (text.isBlank()) {
-            return getReplyMessage(chatId, messageId, "Please provide a text %s <text>"
+            return getTextReplyMessage(chatId, messageId, "Please provide a text %s <text>"
                     .formatted(Command.TTS.getPatternCleaned()));
         }
 
         Optional<File> speechFile = voiceOverService.getSpeech(text);
         if (speechFile.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "Error generating speech");
+            return getTextReplyMessage(chatId, messageId, "Error generating speech");
         }
         return getAudioMessage(chatId, text, speechFile.get());
     }
