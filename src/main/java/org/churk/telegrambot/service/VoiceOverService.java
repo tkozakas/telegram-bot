@@ -3,8 +3,8 @@ package org.churk.telegrambot.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.client.ElevenLabsClient;
-import org.churk.telegrambot.config.ElevenLabsProperties;
 import org.churk.telegrambot.model.TextToSpeechRequest;
+import org.churk.telegrambot.utility.TtsApiKeyManager;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -17,12 +17,12 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class VoiceOverService {
-    private final ElevenLabsProperties elevenLabsProperties;
+    private final TtsApiKeyManager ttsApiKeyManager;
     private ElevenLabsClient elevenLabsClient;
 
     public Optional<File> getSpeech(String text) {
-        String apiKey = elevenLabsProperties.getApiKey();
-        String voiceId = elevenLabsProperties.getVoiceId();
+        String apiKey = ttsApiKeyManager.getApiKey();
+        String voiceId = ttsApiKeyManager.getVoiceId();
         String outputFileName = voiceId + ".wav";
 
         TextToSpeechRequest request = new TextToSpeechRequest(
@@ -35,13 +35,17 @@ public class VoiceOverService {
                         "use_speaker_boost", true
                 )
         );
-        byte[] audioStream = elevenLabsClient.convertTextToSpeech(apiKey, voiceId, request);
-        try (FileOutputStream fos = new FileOutputStream(outputFileName)) {
-            fos.write(audioStream);
-            log.info("Audio stream saved to file: {}", outputFileName);
-            return Optional.of(new File(outputFileName));
-        } catch (IOException e) {
-            log.error("Error saving audio stream to file", e);
+        try {
+            byte[] audioStream = elevenLabsClient.convertTextToSpeech(apiKey, voiceId, request);
+            try (FileOutputStream fos = new FileOutputStream(outputFileName)) {
+                fos.write(audioStream);
+                log.info("Audio stream saved to file: {}", outputFileName);
+                return Optional.of(new File(outputFileName));
+            } catch (IOException e) {
+                log.error("Error saving audio stream to file", e);
+            }
+        } catch (Exception e) {
+            log.error("Error generating speech", e);
         }
         return Optional.empty();
     }
