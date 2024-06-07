@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -33,7 +34,11 @@ public class NewsHandler extends Handler {
                     .formatted(Command.NEWS.getPatternCleaned()));
         }
 
-        String query = args.stream().reduce("", (a, b) -> a + " " + b);
+        String query = args.stream()
+                .map(String::trim)
+                .collect(Collectors.joining(" "))
+                .replace("\n", " ")
+                .replace("\r", " ");
         List<Article> articles = newsService.getNewsByCategory(query);
 
         if (articles.isEmpty()) {
