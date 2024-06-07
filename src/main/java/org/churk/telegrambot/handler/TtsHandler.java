@@ -2,7 +2,7 @@ package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.service.VoiceOverService;
+import org.churk.telegrambot.service.TtsService;
 import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class TtsHandler extends Handler {
-    private final VoiceOverService voiceOverService;
+    private final TtsService ttsService;
 
     @Override
     public List<Validable> handle(UpdateContext context) {
@@ -51,7 +51,7 @@ public class TtsHandler extends Handler {
                     .formatted(Command.TTS.getPatternCleaned()));
         }
 
-        Optional<File> speechFile = voiceOverService.getSpeech(text);
+        Optional<File> speechFile = ttsService.getSpeech(text);
         if (speechFile.isEmpty()) {
             return getTextReplyMessage(chatId, messageId, "Error generating speech");
         }

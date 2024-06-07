@@ -16,7 +16,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class VoiceOverService {
+public class TtsService {
     private final TtsApiKeyManager ttsApiKeyManager;
     private ElevenLabsClient elevenLabsClient;
 

@@ -21,6 +21,7 @@ public enum Command {
     REDDIT(List.of(".*/reddit\\b.*", ".*/meme\\b.*"), List.of(SubCommand.ADD, SubCommand.REMOVE, SubCommand.LIST), "Reddit pics"),
     SHITPOST(List.of(".*/shitpost\\b.*"), List.of(SubCommand.NONE), "Random shitpost"),
     TTS(List.of(".*/tts\\b.*"), List.of(SubCommand.NONE), "Text to speech"),
+    GPT(List.of(".*/gpt\\b.*"), List.of(SubCommand.NONE), "Talk with GPT-3"),
     NONE(List.of(""), List.of(SubCommand.NONE), "");
 
     private final List<String> patterns;

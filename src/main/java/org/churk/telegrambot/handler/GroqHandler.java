@@ -3,8 +3,7 @@ package org.churk.telegrambot.handler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.model.Fact;
-import org.churk.telegrambot.service.FactService;
+import org.churk.telegrambot.service.GroqService;
 import org.churk.telegrambot.service.TtsService;
 import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
@@ -13,54 +12,33 @@ import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 @AllArgsConstructor
-public class FactHandler extends Handler {
-    private final FactService factService;
+public class GroqHandler extends Handler {
+    private final GroqService groqService;
     private final TtsService ttsService;
 
     @Override
     public List<Validable> handle(UpdateContext context) {
-        List<String> args = context.getArgs();
-        if (!args.isEmpty() && args.getFirst().equalsIgnoreCase("add")) {
-            return handleFactAdd(context);
-        }
-        return handleFactRetrieve(context);
-    }
-
-    private List<Validable> handleFactAdd(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         Integer messageId = context.getUpdate().getMessage().getMessageId();
-        List<String> factArgs = context.getArgs().subList(1, context.getArgs().size());
+        List<String> args = context.getArgs();
 
-        if (factArgs.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "Save a fact using /fact add <fact>");
+        if (args.isEmpty()) {
+            return getReplyMessage(chatId, messageId, "Save a fact using /gpt <prompt>");
         }
 
-        String fact = factArgs.stream()
+        String prompt = args.stream()
                 .map(String::trim)
                 .collect(Collectors.joining(" "))
                 .replace("\n", " ")
                 .replace("\r", " ");
-        factService.addFact(chatId, fact);
-        return getReplyMessage(chatId, messageId, "Fact: " + fact + " added");
-    }
+        String response = groqService.getChatCompletion(prompt).getChoices().getFirst().getMessage().getContent();
 
-    private List<Validable> handleFactRetrieve(UpdateContext context) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
-        List<Fact> facts = factService.getAllFacts();
-
-        if (facts.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "No facts available (use /fact add <fact> to add some)");
-        }
-
-        String randomFact = facts.get(ThreadLocalRandom.current().nextInt(facts.size())).getComment();
-        return getAudioMessage(context, randomFact, chatId, messageId);
+        return getAudioMessage(context, response, chatId, messageId);
     }
 
     private List<Validable> getAudioMessage(UpdateContext context, String response, Long chatId, Integer messageId) {
@@ -70,7 +48,7 @@ public class FactHandler extends Handler {
                     getReplyAudioMessage(chatId, messageId, response, audioMessage.get()) :
                     getAudioMessage(chatId, response, audioMessage.get());
         }
-        log.error("Failed to generate audio message for fact: {}", response);
+        log.error("Failed to generate audio message for: {}", response);
         return context.isReply() ?
                 getReplyMessage(chatId, messageId, response) :
                 getMessage(chatId, response);
@@ -78,6 +56,6 @@ public class FactHandler extends Handler {
 
     @Override
     public Command getSupportedCommand() {
-        return Command.FACT;
+        return Command.GPT;
     }
 }
