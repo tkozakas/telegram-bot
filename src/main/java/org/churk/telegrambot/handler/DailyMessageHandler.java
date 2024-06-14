@@ -67,7 +67,7 @@ public class DailyMessageHandler extends ListHandler<Stat> {
             case USER -> handleUserStats(context);
             case ALL -> handleAllStats(context);
             default -> createReplyMessage(context,
-                    "Invalid command, please use %s %s".formatted(Command.DAILY_MESSAGE.getPatternCleaned(), Command.DAILY_MESSAGE.getSubCommands()));
+                    "Invalid command, please use %s %s".formatted(Command.DAILY_MESSAGE.getPatternCleaned(botProperties.getWinnerName()), Command.DAILY_MESSAGE.getSubCommands()));
         };
     }
 
