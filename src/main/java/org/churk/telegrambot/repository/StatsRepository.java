@@ -29,6 +29,7 @@ public interface StatsRepository extends JpaRepository<Stat, UUID> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE Stat s SET s.isWinner = true WHERE s.chatId = ?1 AND s.userId = ?2 AND s.year = ?3")
+    @Query("UPDATE Stat s SET s.isWinner = true, s.score = s.score + 1 " +
+            "WHERE s.chatId = ?1 AND s.userId = ?2 AND s.year = ?3")
     void setIsWinnerByUserIdAndYear(Long chatId, Long userId, int year);
 }
