@@ -49,7 +49,6 @@ public class UnifiedMessageBuilder {
                 case TEXT -> sendMessage.setText((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendMessage.setReplyToMessageId((Integer) value);
                 case MARKDOWN -> sendMessage.setParseMode(ParseMode.MARKDOWN);
-                default -> throw new IllegalStateException("Unexpected value: " + key);
             }
         });
         return sendMessage;
@@ -67,7 +66,6 @@ public class UnifiedMessageBuilder {
                 }
                 case CAPTION -> sendPhoto.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendPhoto.setReplyToMessageId((Integer) value);
-                default -> throw new IllegalStateException("Unexpected value: " + key);
             }
         });
         return sendPhoto;
@@ -85,7 +83,6 @@ public class UnifiedMessageBuilder {
                 }
                 case CAPTION -> sendAnimation.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendAnimation.setReplyToMessageId((Integer) value);
-                default -> throw new IllegalStateException("Unexpected value: " + key);
             }
         });
         return sendAnimation;
@@ -102,7 +99,6 @@ public class UnifiedMessageBuilder {
                     sendSticker.setSticker(new InputFile(stickerFilePath));
                     files.add(new File(stickerFilePath));
                 }
-                default -> throw new IllegalStateException("Unexpected value: " + key);
             }
         });
         return sendSticker;
@@ -120,7 +116,6 @@ public class UnifiedMessageBuilder {
                 }
                 case CAPTION -> sendVideo.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendVideo.setReplyToMessageId((Integer) value);
-                default -> throw new IllegalStateException("Unexpected value: " + key);
             }
         });
         return sendVideo;
@@ -137,7 +132,6 @@ public class UnifiedMessageBuilder {
                     mediaGroup.forEach(media -> files.add(new File(media.getMedia())));
                 }
                 case MESSAGE_ID -> sendMediaGroup.setReplyToMessageId((Integer) value);
-                default -> throw new IllegalStateException("Unexpected value: " + key);
             }
         });
         return sendMediaGroup;
@@ -156,10 +150,26 @@ public class UnifiedMessageBuilder {
                 case CAPTION -> sendAudio.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendAudio.setReplyToMessageId((Integer) value);
                 case MARKDOWN -> sendAudio.setParseMode(ParseMode.MARKDOWN);
-                default -> throw new IllegalStateException("Unexpected value: " + key);
             }
         });
         return sendAudio;
+    }
+
+    public SendDocument createSendDocument(Map<MessageParams, Object> params) {
+        SendDocument sendDocument = new SendDocument();
+        params.forEach((key, value) -> {
+            switch (key) {
+                case CHAT_ID -> sendDocument.setChatId(String.valueOf(value));
+                case DOCUMENT -> {
+                    File documentFile = (File) value;
+                    sendDocument.setDocument(new InputFile(documentFile));
+                    files.add(documentFile);
+                }
+                case CAPTION -> sendDocument.setCaption((String) value);
+                case REPLY_TO_MESSAGE_ID -> sendDocument.setReplyToMessageId((Integer) value);
+            }
+        });
+        return sendDocument;
     }
 
     public List<Validable> build(MessageType messageType, Map<MessageParams, Object> params) {
@@ -171,6 +181,7 @@ public class UnifiedMessageBuilder {
             case VIDEO -> List.of(createSendVideo(params));
             case MEDIA_GROUP -> List.of(createSendMediaGroup(params));
             case AUDIO -> List.of(createSendAudio(params));
+            case DOCUMENT -> List.of(createSendDocument(params));
         };
     }
 }

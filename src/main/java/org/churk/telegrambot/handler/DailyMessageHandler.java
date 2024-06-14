@@ -66,15 +66,12 @@ public class DailyMessageHandler extends ListHandler<Stat> {
             case YEAR -> handleYearStats(context, context.getArgs().getLast());
             case USER -> handleUserStats(context);
             case ALL -> handleAllStats(context);
-            default -> getReplyMessage(context.getUpdate().getMessage().getChatId(),
-                    context.getUpdate().getMessage().getMessageId(),
+            default -> createReplyMessage(context,
                     "Invalid command, please use %s %s".formatted(Command.DAILY_MESSAGE.getPatternCleaned(), Command.DAILY_MESSAGE.getSubCommands()));
         };
     }
 
     private List<Validable> handleYearStats(UpdateContext context, String yearString) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
         if (yearString.isEmpty()) {
             return handleStatsByYear(context, LocalDateTime.now().getYear());
         }
@@ -82,7 +79,7 @@ public class DailyMessageHandler extends ListHandler<Stat> {
         try {
             year = determineYear(yearString);
         } catch (NumberFormatException e) {
-            return getReplyMessage(chatId, messageId, "Please provide a valid year /stats <year>");
+            return createReplyMessage(context, "Please provide a valid year /stats <year>");
         }
         return handleStatsByYear(context, year);
     }
@@ -107,17 +104,16 @@ public class DailyMessageHandler extends ListHandler<Stat> {
         String emptyMessage = dailyMessageService.getKeyNameSentence("no_stats_available");
         String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
         Function<Stat, String> statFormatter = stat -> String.format(statsTable, stats.indexOf(stat) + 1, stat.getFirstName(), stat.getScore());
+        context.setMarkdown(true);
         return formatListResponse(context, stats, statFormatter,
                 header,
-                footer,
-                emptyMessage,
-                true);
+                footer, emptyMessage);
     }
 
     private List<Validable> handleUserStats(UpdateContext context) {
+        context.setReply(true);
         Message message = context.getUpdate().getMessage();
         Long chatId = message.getChatId();
-        Integer messageId = message.getMessageId();
 
         String firstName = context.getArgs().size() == 3 ?
                 context.getArgs().get(2) :
@@ -125,23 +121,23 @@ public class DailyMessageHandler extends ListHandler<Stat> {
 
         List<Stat> userIdsFromFirstName = statsService.getUserIdByChatIdAndFirstName(chatId, firstName);
         if (userIdsFromFirstName.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "No stats available for " + firstName);
+            return createReplyMessage(context, "No stats available for " + firstName);
         }
 
         long total = statsService.getTotalScoreByChatIdAndUserId(chatId, userIdsFromFirstName.getFirst().getUserId());
         String header = dailyMessageService.getKeyNameSentence("me_header").formatted(firstName, botProperties.getWinnerName(), total);
-        return getReplyMessageWithMarkdown(chatId, messageId, header);
+        context.setMarkdown(true);
+        return createTextMessage(context, header);
     }
 
     private List<Validable> handleMessage(UpdateContext context) {
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
         Long chatId = context.getUpdate().getMessage().getChatId();
         int year = LocalDateTime.now().getYear();
 
         List<Stat> statByChatIdAndYear = statsService.getStatsByChatIdAndYear(chatId, year);
 
         if (statByChatIdAndYear.isEmpty()) {
-            return getReplyMessage(chatId, messageId, dailyMessageService.getKeyNameSentence("no_stats_available"));
+            return createReplyMessage(context, dailyMessageService.getKeyNameSentence("no_stats_available"));
         }
 
         Optional<Stat> isWinnerStats = statByChatIdAndYear.stream()
@@ -153,7 +149,8 @@ public class DailyMessageHandler extends ListHandler<Stat> {
             String mentionedUser = "[" + isWinnerStat.getFirstName() + "](tg://user?id=" + isWinnerStat.getUserId() + ")";
             String messageText = dailyMessageService.getKeyNameSentence("winner_message")
                     .formatted(botProperties.getWinnerName(), mentionedUser);
-            return getMessageWithMarkdown(chatId, messageText);
+            context.setMarkdown(true);
+            return createTextMessage(context, messageText);
         }
 
         Stat randomWinner = statByChatIdAndYear.get(ThreadLocalRandom.current().nextInt(statByChatIdAndYear.size()));
@@ -162,27 +159,26 @@ public class DailyMessageHandler extends ListHandler<Stat> {
         List<Sentence> sentences = dailyMessageService.getRandomGroupSentences();
         String mentionedUser = "[" + randomWinner.getFirstName() + "](tg://user?id=" + randomWinner.getUserId() + ")";
         sentences.getLast().setText(sentences.getLast().getText() + mentionedUser);
+        context.setMarkdown(true);
         return sentences
                 .stream()
-                .map(sent -> sent.getText().formatted(botProperties.getWinnerName()))
-                .map(text -> getMessageWithMarkdown(chatId, text).getFirst())
+                .map(sent -> sent.getText()
+                        .formatted(botProperties.getWinnerName())).map(text -> createTextMessage(context, text).getFirst())
                 .toList();
     }
 
     private List<Validable> handleRegister(UpdateContext context) {
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
+        context.setReply(true);
         Long chatId = context.getUpdate().getMessage().getChatId();
         Long userId = context.getUpdate().getMessage().getFrom().getId();
         String firstName = context.getUpdate().getMessage().getFrom().getFirstName();
 
         List<Stat> userStats = statsService.getStatsByChatIdAndUserId(chatId, userId);
         if (!userStats.isEmpty()) {
-            return getReplyMessage(chatId, messageId,
-                    dailyMessageService.getKeyNameSentence("registered_header").formatted(firstName));
+            return createReplyMessage(context, dailyMessageService.getKeyNameSentence("already_registered").formatted(firstName));
         }
         statsService.registerByUserIdAndChatId(userId, chatId, firstName);
-        return getReplyMessage(chatId, messageId,
-                dailyMessageService.getKeyNameSentence("registered_now_header").formatted(firstName));
+        return createReplyMessage(context, dailyMessageService.getKeyNameSentence("registered_now_header").formatted(firstName));
     }
 
     private int determineYear(String yearString) throws NumberFormatException {

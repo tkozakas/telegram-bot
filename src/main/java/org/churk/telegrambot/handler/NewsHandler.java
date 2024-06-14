@@ -25,13 +25,10 @@ public class NewsHandler extends Handler {
 
     @Override
     public List<Validable> handle(UpdateContext context) {
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
-        Long chatId = context.getUpdate().getMessage().getChatId();
         List<String> args = context.getArgs();
 
         if (args.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "Please provide a query %s <query>"
-                    .formatted(Command.NEWS.getPatternCleaned()));
+            return createReplyMessage(context, "Please provide a query %s <query>".formatted(Command.NEWS.getPatternCleaned()));
         }
 
         String query = args.stream()
@@ -42,10 +39,11 @@ public class NewsHandler extends Handler {
         List<Article> articles = newsService.getNewsByCategory(query);
 
         if (articles.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "No news available");
+            return createReplyMessage(context, "No news available");
         }
         String text = getNews(articles);
-        return getMessageWithMarkdown(chatId, text);
+        context.setMarkdown(true);
+        return createTextMessage(context, text);
     }
 
     @Override

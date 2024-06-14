@@ -21,9 +21,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
-
-import static java.lang.Thread.sleep;
 
 @Slf4j
 @Component
@@ -81,13 +80,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                     case SendVideo sendvideo -> execute(sendvideo);
                     case SendMediaGroup sendmediagroup -> execute(sendmediagroup);
                     case SendAudio sendaudio -> execute(sendaudio);
+                    case SendDocument senddocument -> execute(senddocument);
                     default -> {
                     }
                 }
                 if (!(sendMessage instanceof SendMessage)) {
                     UnifiedMessageBuilder.clearFiles();
                 }
-                sleep(1000);
+                int randomMillis = ThreadLocalRandom.current().nextInt(800, 1101);
+                Thread.sleep(randomMillis);
             } catch (TelegramApiException | InterruptedException e) {
                 log.error("Error while sending message", e);
             }

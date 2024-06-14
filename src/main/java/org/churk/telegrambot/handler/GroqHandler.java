@@ -23,12 +23,10 @@ public class GroqHandler extends Handler {
 
     @Override
     public List<Validable> handle(UpdateContext context) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<String> args = context.getArgs();
 
         if (args.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "Save a fact using /gpt <prompt>");
+            return createReplyMessage(context, "Save a fact using /fact add <fact>");
         }
 
         String prompt = args.stream()
@@ -38,20 +36,16 @@ public class GroqHandler extends Handler {
                 .replace("\r", " ");
         String response = groqService.getChatCompletion(prompt).getChoices().getFirst().getMessage().getContent();
 
-        return getAudioMessage(context, response, chatId, messageId);
+        return getAudioMessage(context, response);
     }
 
-    private List<Validable> getAudioMessage(UpdateContext context, String response, Long chatId, Integer messageId) {
+    private List<Validable> getAudioMessage(UpdateContext context, String response) {
         Optional<File> audioMessage = ttsService.getSpeech(response);
         if (audioMessage.isPresent()) {
-            return context.isReply() ?
-                    getReplyAudioMessage(chatId, messageId, response, audioMessage.get()) :
-                    getAudioMessage(chatId, response, audioMessage.get());
+            return createAudioMessage(context, response, audioMessage.get());
         }
         log.error("Failed to generate audio message for: {}", response);
-        return context.isReply() ?
-                getReplyMessage(chatId, messageId, response) :
-                getMessage(chatId, response);
+        return createTextMessage(context, response);
     }
 
     @Override

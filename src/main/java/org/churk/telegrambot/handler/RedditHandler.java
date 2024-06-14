@@ -71,10 +71,9 @@ public class RedditHandler extends ListHandler<Subreddit> {
 
     private List<Validable> handleRandomPost(UpdateContext context, int count) {
         Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
 
         if (subredditService.getSubreddits(chatId).isEmpty()) {
-            return getReplyMessage(chatId, messageId,
+            return createReplyMessage(context,
                     "No subreddits available. Use %s <%s>"
                             .formatted(Command.REDDIT.getPatternCleaned(), SubCommand.ADD.getCommand().getFirst()));
         }
@@ -85,88 +84,87 @@ public class RedditHandler extends ListHandler<Subreddit> {
     private List<Validable> handleAdd(UpdateContext context) {
         String args = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
 
         if (context.getArgs().size() != 2 || !subredditService.isValidSubreddit(args)) {
-            return getReplyMessage(chatId, messageId,
+            return createReplyMessage(context,
                     "Please provide a valid name %s %s <subreddit>"
                             .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.ADD.getCommand().getFirst()));
         }
         String subreddit = args.startsWith(REDDIT_URL) ? args.replace(REDDIT_URL, "") : args;
         if (subredditService.existsByChatIdAndSubredditName(chatId, subreddit)) {
-            return getReplyMessage(chatId, messageId,
-                    "Subreddit %s already exists in the list".formatted(subreddit));
+            return createReplyMessage(context, "Subreddit %s already exists in the list".formatted(subreddit));
         }
         subredditService.addSubreddit(chatId, subreddit);
-        return getReplyMessage(chatId, messageId,
-                "Subreddit %s added".formatted(subreddit));
+        return createReplyMessage(context, "Subreddit %s added".formatted(subreddit));
     }
 
     private List<Validable> handleList(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
         Function<Subreddit, String> subredditFormatter = subreddit -> String.format("- r/*%s*\n", subreddit.getSubredditName());
+        context.setMarkdown(true);
         return formatListResponse(context, subreddits, subredditFormatter,
                 "Subreddits:\n",
                 "",
-                "No subreddits available",
-                true);
+                "No subreddits available");
     }
 
     private List<Validable> handleRemove(UpdateContext context) {
         String args = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
 
         if (context.getArgs().size() != 2 || !subredditService.isValidSubreddit(args)) {
-            return getReplyMessage(chatId, messageId,
+            return createReplyMessage(context,
                     "Please provide a valid name %s %s <subreddit>"
                             .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.REMOVE.getCommand().getFirst()));
         }
         if (!subredditService.existsByChatIdAndSubredditName(chatId, args)) {
-            return getReplyMessage(chatId, messageId,
-                    "Subreddit %s does not exist in the list".formatted(args));
+            return createReplyMessage(context, "Subreddit %s does not exist in the list".formatted(args));
         }
         subredditService.deleteSubreddit(chatId, args);
-        return getReplyMessage(chatId, messageId,
-                "Subreddit %s removed".formatted(args));
+        return createReplyMessage(context, "Subreddit %s removed".formatted(args));
     }
 
     private List<Validable> handlePost(UpdateContext context, String subreddit, int count) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
-        return getRedditPosts(subreddit, chatId, messageId, count);
+        return getRedditPosts(subreddit, context, count);
     }
 
-    private List<Validable> getRedditPosts(String subreddit, Long chatId, Integer messageId, int count) {
+    private List<Validable> getRedditPosts(String subreddit, UpdateContext context, int count) {
         try {
             if (!subredditService.isValidSubreddit(subreddit)) {
-                return getReplyMessage(chatId, messageId,
-                        "This subreddit does not exist");
+                return createReplyMessage(context,
+                        "Please provide a valid name %s %s <subreddit>"
+                                .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.REMOVE.getCommand().getFirst()));
             }
             List<RedditPost> posts = subredditService.getRedditPosts(subreddit, count);
             if (posts.isEmpty()) {
-                return getReplyMessage(chatId, messageId,
-                        "No posts available in r/%s".formatted(subreddit));
+                return createReplyMessage(context, "No posts available in r/%s".formatted(subreddit));
             }
-            return fetchAndProcessMemes(chatId, posts, subreddit);
+            return fetchAndProcessMemes(context, posts, subreddit);
         } catch (FeignException.BadGateway |
                  FeignException.InternalServerError |
                  FeignException.GatewayTimeout e) {
             log.error("Reddit api is dead", e);
-            return getReplyMessage(chatId, messageId, "The api is dead :)");
+            return createLogMessage(context,
+                    "The api is dead :)",
+                    e.getMessage()
+            );
         } catch (FeignException.ServiceUnavailable |
                  FeignException.NotFound |
                  FeignException.UnprocessableEntity e) {
             log.error("Subreddit does not exist", e);
-            return getReplyMessage(chatId, messageId, "This subreddit does not exist");
+            return createLogMessage(context,
+                    "Subreddit does not exist",
+                    e.getMessage());
         } catch (FeignException e) {
             log.error("An error occurred", e);
-            return getReplyMessage(chatId, messageId, "An error occurred");
+            return createLogMessage(context,
+                    "An error occurred",
+                    e.getMessage());
         }
     }
 
-    private List<Validable> fetchAndProcessMemes(Long chatId, List<RedditPost> posts, String subreddit) {
+    private List<Validable> fetchAndProcessMemes(UpdateContext context, List<RedditPost> posts, String subreddit) {
         List<AbstractMap.SimpleEntry<String, File>> files = posts.stream()
                 .map(post -> subredditService.getFile(post)
                         .map(file -> new AbstractMap.SimpleEntry<>(formatCaption(post, subreddit), file)))
@@ -175,18 +173,18 @@ public class RedditHandler extends ListHandler<Subreddit> {
 
         if (files.isEmpty()) {
             return posts.stream()
-                    .map(post -> postWithoutFileResponse(chatId, post, subreddit))
+                    .map(post -> postWithoutFileResponse(context, post, subreddit))
                     .flatMap(List::stream)
                     .toList();
         }
 
         if (files.size() == 1) {
             File file = files.getFirst().getValue();
-            return postWithFileResponse(chatId, posts.getFirst(), file, subreddit);
+            return postWithFileResponse(context, posts.getFirst(), file, subreddit);
         } else {
             convertGifsToMp4(files);
             List<InputMedia> medias = createInputMediaList(files);
-            return getMediaGroup(chatId, medias);
+            return createMediaGroupMessage(context, medias);
         }
     }
 
@@ -252,19 +250,17 @@ public class RedditHandler extends ListHandler<Subreddit> {
                 subreddits.get(ThreadLocalRandom.current().nextInt(subreddits.size())).getSubredditName();
     }
 
-    private List<Validable> postWithoutFileResponse(Long chatId, RedditPost post, String subreddit) {
-        String caption = "%s%n<Image unavailable>%nFrom r/%s"
-                .formatted(post.getTitle() != null ? post.getTitle() : "", subreddit);
-        return getMessage(chatId, caption);
+    private List<Validable> postWithoutFileResponse(UpdateContext context, RedditPost post, String subreddit) {
+        String caption = "%s%n<Image unavailable>%nFrom r/%s".formatted(post.getTitle() != null ? post.getTitle() : "", subreddit);
+        return createTextMessage(context, caption);
     }
 
-    private List<Validable> postWithFileResponse(Long chatId, RedditPost post, File file, String subreddit) {
-        String caption = "%s%nFrom r/%s"
-                .formatted(post.getTitle() != null ? post.getTitle() : "", subreddit);
+    private List<Validable> postWithFileResponse(UpdateContext context, RedditPost post, File file, String subreddit) {
+        String caption = "%s%nFrom r/%s".formatted(post.getTitle() != null ? post.getTitle() : "", subreddit);
         String fileName = file.getName().toLowerCase();
         return fileName.endsWith(".gif") ?
-                getAnimation(chatId, file, caption) :
-                getPhoto(chatId, file, caption);
+                createAnimationMessage(context, file, caption) :
+                createPhotoMessage(context, file, caption);
     }
 
     private int parseCount(UpdateContext context) {

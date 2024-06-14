@@ -24,7 +24,7 @@ public class ShitpostingHandler extends Handler {
         if (context.getArgs().isEmpty()) {
             Shitpost post = shitpostingService.getShitpost();
             return post.isError() ?
-                    getReplyMessage(context.getUpdate().getMessage().getChatId(), context.getUpdate().getMessage().getMessageId(), "Not found") :
+                    createReplyMessage(context, "Not found") :
                     handlePost(context, post.getUrl(), "Random Shitpost");
         }
 
@@ -34,35 +34,29 @@ public class ShitpostingHandler extends Handler {
             default -> {
                 Shitpost post = shitpostingService.getShitpostByName(context.getArgs().getFirst());
                 yield post.isError() ?
-                        getReplyMessage(context.getUpdate().getMessage().getChatId(), context.getUpdate().getMessage().getMessageId(), "Not found") :
+                        createReplyMessage(context, "Not found") :
                         handlePost(context, post.getUrl(), "Shitpost: " + context.getArgs().getFirst());
             }
         };
     }
 
     private List<Validable> handleQuote(UpdateContext context) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
-
         Quote quote = shitpostingService.getQuote();
         String message = quote.getQuote() + "\n\n" + quote.getQuotee();
-        return getReplyMessage(chatId, messageId, message);
+        return createTextMessage(context, message);
     }
 
     private List<Validable> handlePost(UpdateContext context, String url, String caption) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
-
         try {
             Optional<File> file = shitpostingService.getFile(url);
             if (file.isEmpty()) {
-                return getReplyMessage(chatId, messageId, "Error downloading file");
+                return createReplyMessage(context, "Error downloading file");
             }
             file.get().deleteOnExit();
-            return getVideo(chatId, file.get(), caption);
+            return createVideoMessage(context, file.get(), caption);
 
         } catch (Exception e) {
-            return getReplyMessage(chatId, messageId, "Error processing file");
+            return createReplyMessage(context, "Error processing file");
         }
     }
 

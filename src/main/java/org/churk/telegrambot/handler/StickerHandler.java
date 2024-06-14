@@ -28,9 +28,9 @@ public class StickerHandler extends ListHandler<String> {
         SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst().toLowerCase());
 
         if (subCommand == null) {
-            return getReplyMessage(context.getUpdate().getMessage().getChatId(),
-                    context.getUpdate().getMessage().getMessageId(),
-                    "Invalid command, please use %s %s".formatted(Command.STICKER.getPatternCleaned(), Command.STICKER.getSubCommands()));
+            return createReplyMessage(context,
+                    "Invalid command, please use %s %s"
+                            .formatted(Command.STICKER.getPatternCleaned(), Command.STICKER.getSubCommands()));
         }
 
         return switch (subCommand) {
@@ -44,63 +44,51 @@ public class StickerHandler extends ListHandler<String> {
     private List<Validable> handleGetRandomSticker(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<Sticker> stickers = stickerService.getStickerSets(chatId);
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
 
         if (stickers.isEmpty()) {
-            return getReplyMessage(chatId, messageId,
-                    "No sticker sets available");
+            return createReplyMessage(context, "No sticker sets available");
         }
         Sticker randomSticker = stickers.get(ThreadLocalRandom.current().nextInt(stickers.size()));
-        return context.isReply() ?
-                getReplySticker(chatId, messageId, randomSticker) :
-                getSticker(chatId, randomSticker);
+        return createStickerMessage(context, randomSticker);
     }
 
     private List<Validable> handleRemove(UpdateContext context) {
         String subCommand = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
 
         if (subCommand.isEmpty()) {
-            return getReplyMessage(chatId, messageId,
-                    "Please provide a valid name %s %s <name>".formatted(Command.STICKER.getPatternCleaned(), SubCommand.REMOVE.getCommand().getFirst()));
+            return createReplyMessage(context,
+                    "Please provide a valid name %s %s <name>"
+                            .formatted(Command.STICKER.getPatternCleaned(), SubCommand.REMOVE.getCommand().getFirst()));
         }
         if (!stickerService.existsByChatIdAndStickerName(chatId, subCommand)) {
-            return getReplyMessage(chatId, messageId,
-                    "Sticker set " + subCommand + " does not exist in the list");
+            return createReplyMessage(context, "Sticker set " + subCommand + " does not exist in the list");
         }
         stickerService.deleteSticker(chatId, subCommand);
-        return getReplyMessage(chatId, messageId,
-                "Sticker set " + subCommand + " removed");
+        return createReplyMessage(context, "Sticker set " + subCommand + " removed");
     }
 
     private List<Validable> handleList(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<String> stickerSets = stickerService.getStickerSetNames(chatId);
         UnaryOperator<String> stickerFormatter = "- *%s*\n"::formatted;
-        return formatListResponse(context, stickerSets, stickerFormatter,
-                "Sticker sets:\n",
-                "",
-                "No sticker sets available",
-                true);
+        return formatListResponse(context, stickerSets, stickerFormatter, "Sticker sets:\n", "", "No sticker sets available");
     }
 
     private List<Validable> handleAdd(UpdateContext context) {
         String subCommand = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
 
         if (subCommand.isEmpty() || !stickerService.isValidSticker(subCommand)) {
-            return getReplyMessage(chatId, messageId,
-                    "Please provide a valid name %s %s <name>".formatted(Command.STICKER.getPatternCleaned(), SubCommand.ADD.getCommand().getFirst()));
+            return createReplyMessage(context,
+                    "Please provide a valid name %s %s <name>"
+                            .formatted(Command.STICKER.getPatternCleaned(), SubCommand.ADD.getCommand().getFirst()));
         }
         if (stickerService.existsByChatIdAndStickerName(chatId, subCommand)) {
-            return getReplyMessage(chatId, messageId,
-                    "Sticker set " + subCommand + " already exists in the list");
+            return createReplyMessage(context, "Sticker set " + subCommand + " already exists in the list");
         }
         stickerService.addSticker(chatId, subCommand);
-        return getReplyMessage(chatId, messageId,
-                "Sticker set " + subCommand + " added");
+        return createReplyMessage(context, "Sticker set " + subCommand + " added");
     }
 
     @Override

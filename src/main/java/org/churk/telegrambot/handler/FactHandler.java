@@ -26,19 +26,17 @@ public class FactHandler extends Handler {
     @Override
     public List<Validable> handle(UpdateContext context) {
         List<String> args = context.getArgs();
-        if (!args.isEmpty() && args.getFirst().equalsIgnoreCase("add")) {
-            return handleFactAdd(context);
-        }
-        return handleFactRetrieve(context);
+        return !args.isEmpty() && args.getFirst().equalsIgnoreCase("add") ?
+                handleFactAdd(context) :
+                handleFactRetrieve(context);
     }
 
     private List<Validable> handleFactAdd(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<String> factArgs = context.getArgs().subList(1, context.getArgs().size());
 
         if (factArgs.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "Save a fact using /fact add <fact>");
+            return createReplyMessage(context, "Save a fact using /fact add <fact>");
         }
 
         String fact = factArgs.stream()
@@ -47,33 +45,30 @@ public class FactHandler extends Handler {
                 .replace("\n", " ")
                 .replace("\r", " ");
         factService.addFact(chatId, fact);
-        return getReplyMessage(chatId, messageId, "Fact: " + fact + " added");
+        return createReplyMessage(context, "Fact: " + fact + " added");
     }
 
     private List<Validable> handleFactRetrieve(UpdateContext context) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
         List<Fact> facts = factService.getAllFacts();
 
         if (facts.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "No facts available (use /fact add <fact> to add some)");
+            return createReplyMessage(context, "No facts available (use /fact add <fact> to add some)");
         }
 
         String randomFact = facts.get(ThreadLocalRandom.current().nextInt(facts.size())).getComment();
-        return getAudioMessage(context, randomFact, chatId, messageId);
+        return getAudioMessage(context, randomFact);
     }
 
-    private List<Validable> getAudioMessage(UpdateContext context, String response, Long chatId, Integer messageId) {
+    private List<Validable> getAudioMessage(UpdateContext context, String response) {
         Optional<File> audioMessage = ttsService.getSpeech(response);
         if (audioMessage.isPresent()) {
-            return context.isReply() ?
-                    getReplyAudioMessage(chatId, messageId, response, audioMessage.get()) :
-                    getAudioMessage(chatId, response, audioMessage.get());
+            return createAudioMessage(context,
+                    response,
+                    audioMessage.get()
+            );
         }
         log.error("Failed to generate audio message for fact: {}", response);
-        return context.isReply() ?
-                getReplyMessage(chatId, messageId, response) :
-                getMessage(chatId, response);
+        return createTextMessage(context, response);
     }
 
     @Override

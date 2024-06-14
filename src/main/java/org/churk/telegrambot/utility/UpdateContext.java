@@ -16,4 +16,5 @@ public final class UpdateContext {
     private HandlerFactory handlerFactory;
     private Update update;
     private boolean isReply;
+    private boolean isMarkdown;
 }
