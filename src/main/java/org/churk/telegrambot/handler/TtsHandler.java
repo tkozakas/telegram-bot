@@ -19,13 +19,13 @@ public class TtsHandler extends Handler {
 
     @Override
     public List<Validable> handle(UpdateContext context) {
-        Integer messageId = context.getUpdate().getMessage().getMessageId();
-        Long chatId = context.getUpdate().getMessage().getChatId();
         List<String> args = context.getArgs();
 
         if (args.isEmpty()) {
-            return getReplyMessage(chatId, messageId, "Please provide a text %s <text>"
-                    .formatted(Command.TTS.getPatternCleaned()));
+            context.setMarkdown(true);
+            return createReplyMessage(context,
+                    "Please provide a text %s <text>"
+                            .formatted(Command.TTS.getPatternCleaned()));
         }
 
         String text;
@@ -47,15 +47,20 @@ public class TtsHandler extends Handler {
                     .replace("\r", " ");
         }
         if (text.isBlank()) {
-            return getTextReplyMessage(chatId, messageId, "Please provide a text %s <text>"
-                    .formatted(Command.TTS.getPatternCleaned()));
+            context.setMarkdown(true);
+            return createReplyMessage(context,
+                    "Please provide a text %s <text>"
+                            .formatted(Command.TTS.getPatternCleaned()));
         }
-
-        Optional<File> speechFile = ttsService.getSpeech(text);
-        if (speechFile.isEmpty()) {
-            return getTextReplyMessage(chatId, messageId, "Error generating speech");
+        Optional<File> speechFile;
+        try {
+            speechFile = ttsService.getSpeech(text);
+            return speechFile.isEmpty() ?
+                    createReplyMessage(context, "Error generating audio") :
+                    createAudioMessage(context, text, speechFile.get());
+        } catch (Exception e) {
+            return createLogMessage(context, "Error generating audio", e.getMessage());
         }
-        return getAudioMessage(chatId, text, speechFile.get());
     }
 
     @Override

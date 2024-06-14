@@ -1,15 +1,17 @@
 package org.churk.telegrambot.service;
 
+import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.client.ElevenLabsClient;
+import org.churk.telegrambot.config.ElevenLabsProperties;
 import org.churk.telegrambot.model.TextToSpeechRequest;
-import org.churk.telegrambot.utility.TtsApiKeyManager;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,12 +19,12 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class TtsService {
-    private final TtsApiKeyManager ttsApiKeyManager;
+    private final ElevenLabsProperties elevenLabsProperties;
     private ElevenLabsClient elevenLabsClient;
 
-    public Optional<File> getSpeech(String text) {
-        String apiKey = ttsApiKeyManager.getApiKey();
-        String voiceId = ttsApiKeyManager.getVoiceId();
+    public Optional<File> getSpeech(String text) throws FeignException {
+        List<String> apiKey = elevenLabsProperties.getApiKey();
+        String voiceId = elevenLabsProperties.getVoiceId();
         String outputFileName = voiceId + ".wav";
 
         String prompt = removeUnnecessaryCharacters(text);
@@ -37,17 +39,21 @@ public class TtsService {
                         "use_speaker_boost", true
                 )
         );
-        try {
-            byte[] audioStream = elevenLabsClient.convertTextToSpeech(apiKey, voiceId, request);
-            try (FileOutputStream fos = new FileOutputStream(outputFileName)) {
-                fos.write(audioStream);
-                log.info("Audio stream saved to file: {}", outputFileName);
-                return Optional.of(new File(outputFileName));
-            } catch (IOException e) {
-                log.error("Error saving audio stream to file", e);
+        for (String key : apiKey) {
+            try {
+                byte[] audioStream = elevenLabsClient.convertTextToSpeech(key, voiceId, request);
+                if (audioStream != null) {
+                    try (FileOutputStream fos = new FileOutputStream(outputFileName)) {
+                        fos.write(audioStream);
+                        log.info("Audio stream saved to file: {}", outputFileName);
+                        return Optional.of(new File(outputFileName));
+                    } catch (IOException e) {
+                        log.error("Error saving audio stream to file", e);
+                    }
+                }
+            } catch (FeignException e) {
+                log.error("Error while converting text to speech for api-key: {}", key, e);
             }
-        } catch (Exception e) {
-            log.error("Error generating speech", e);
         }
         return Optional.empty();
     }
