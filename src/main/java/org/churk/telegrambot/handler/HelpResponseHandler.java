@@ -1,7 +1,7 @@
 package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
-import org.churk.telegrambot.builder.ListHandler;
+import org.churk.telegrambot.builder.ListResponseHandler;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
-public class HelpHandler extends ListHandler<Command> {
+public class HelpResponseHandler extends ListResponseHandler<Command> {
     @Override
     public List<Validable> handle(UpdateContext context) {
         List<Command> commands = Stream.of(Command.values()).filter(c -> c != Command.NONE).toList();

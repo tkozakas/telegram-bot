@@ -12,9 +12,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
-public class RandomResponseHandler extends Handler {
-    private final FactHandler factHandler;
-    private final StickerHandler stickerHandler;
+public class RandomResponseResponseHandler extends ResponseHandler {
+    private final FactResponseHandler factHandler;
+    private final StickerResponseHandler stickerHandler;
     private final Random random = new Random();
 
     private boolean shouldTriggerRandomResponse() {

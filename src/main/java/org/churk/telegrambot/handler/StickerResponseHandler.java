@@ -1,7 +1,7 @@
 package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
-import org.churk.telegrambot.builder.ListHandler;
+import org.churk.telegrambot.builder.ListResponseHandler;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Sticker;
 import org.churk.telegrambot.model.SubCommand;
@@ -16,7 +16,7 @@ import java.util.function.UnaryOperator;
 
 @Component
 @RequiredArgsConstructor
-public class StickerHandler extends ListHandler<String> {
+public class StickerResponseHandler extends ListResponseHandler<String> {
     private final StickerService stickerService;
 
     @Override

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @AllArgsConstructor
-public class FactHandler extends Handler {
+public class FactResponseHandler extends ResponseHandler {
     private final FactService factService;
     private final TtsService ttsService;
 

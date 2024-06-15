@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Component
 @AllArgsConstructor
-public class ShitpostingHandler extends Handler {
+public class ShitpostingResponseHandler extends ResponseHandler {
     private final ShitpostingService shitpostingService;
 
     @Override

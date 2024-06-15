@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @AllArgsConstructor
-public class GroqHandler extends Handler {
+public class GroqResponseHandler extends ResponseHandler {
     private final GroqService groqService;
     private final TtsService ttsService;
 

@@ -11,10 +11,10 @@ import static org.churk.telegrambot.model.Command.NONE;
 
 @Service
 public class HandlerFactory {
-    private final RandomResponseHandler randomResponseHandler;
+    private final RandomResponseResponseHandler randomResponseHandler;
     private final Map<Command, CommandHandler> handlerMap = new EnumMap<>(Command.class);
 
-    public HandlerFactory(List<CommandHandler> handlers, RandomResponseHandler randomResponseHandler) {
+    public HandlerFactory(List<CommandHandler> handlers, RandomResponseResponseHandler randomResponseHandler) {
         this.randomResponseHandler = randomResponseHandler;
         handlers.stream()
                 .filter(handler -> handler.getSupportedCommand() != null)

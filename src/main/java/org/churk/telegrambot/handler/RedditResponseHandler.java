@@ -3,7 +3,7 @@ package org.churk.telegrambot.handler;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.churk.telegrambot.builder.ListHandler;
+import org.churk.telegrambot.builder.ListResponseHandler;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.RedditPost;
 import org.churk.telegrambot.model.SubCommand;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RedditHandler extends ListHandler<Subreddit> {
+public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
     private static final String REDDIT_URL = "https://www.reddit.com/r/";
     private final SubredditService subredditService;
 

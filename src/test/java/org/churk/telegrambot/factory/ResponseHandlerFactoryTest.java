@@ -2,8 +2,8 @@ package org.churk.telegrambot.factory;
 
 import org.churk.telegrambot.handler.CommandHandler;
 import org.churk.telegrambot.handler.HandlerFactory;
-import org.churk.telegrambot.handler.RandomResponseHandler;
-import org.churk.telegrambot.handler.StartHandler;
+import org.churk.telegrambot.handler.RandomResponseResponseHandler;
+import org.churk.telegrambot.handler.StartResponseHandler;
 import org.churk.telegrambot.model.Command;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,11 +16,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class HandlerFactoryTest {
+class ResponseHandlerFactoryTest {
     @Mock
-    private RandomResponseHandler randomResponseHandler;
+    private RandomResponseResponseHandler randomResponseHandler;
     @InjectMocks
-    private StartHandler startHandler;
+    private StartResponseHandler startHandler;
     private HandlerFactory handlerFactory;
 
     @BeforeEach
@@ -33,7 +33,7 @@ class HandlerFactoryTest {
     void getStartHandlerTest() {
         CommandHandler handler = handlerFactory.getHandler(Command.START);
         assertNotNull(handler, "Handler should not be null");
-        assertEquals(StartHandler.class, handler.getClass(), "Handler should be of type StartHandler");
+        assertEquals(StartResponseHandler.class, handler.getClass(), "Handler should be of type StartHandler");
     }
 
     @Test

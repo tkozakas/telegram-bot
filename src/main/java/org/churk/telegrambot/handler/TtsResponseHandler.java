@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class TtsHandler extends Handler {
+public class TtsResponseHandler extends ResponseHandler {
     private final TtsService ttsService;
 
     @Override

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class NewsHandler extends Handler {
+public class NewsResponseHandler extends ResponseHandler {
     private final NewsService newsService;
 
     private static String getNews(List<Article> articles) {

@@ -6,22 +6,18 @@ import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
-import java.io.File;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class LogsHandler extends Handler {
-
+public class StartResponseHandler extends ResponseHandler {
     @Override
     public List<Validable> handle(UpdateContext context) {
-        String logsPath = "logs/app.log";
-        File file = new File(logsPath);
-        return createDocumentMessage(context, file);
+        return List.of();
     }
 
     @Override
     public Command getSupportedCommand() {
-        return Command.LOGS;
+        return Command.START;
     }
 }

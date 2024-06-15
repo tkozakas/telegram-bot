@@ -1,7 +1,7 @@
 package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
-import org.churk.telegrambot.builder.ListHandler;
+import org.churk.telegrambot.builder.ListResponseHandler;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Sentence;
 import org.churk.telegrambot.model.Stat;
@@ -21,7 +21,7 @@ import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
-public class DailyMessageHandler extends ListHandler<Stat> {
+public class DailyMessageResponseHandler extends ListResponseHandler<Stat> {
     private final StatsService statsService;
     private final StatsRepository statsRepository;
 

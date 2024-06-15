@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class Handler implements CommandHandler {
+public abstract class ResponseHandler implements CommandHandler {
     @Autowired
     protected BotProperties botProperties;
     @Autowired
