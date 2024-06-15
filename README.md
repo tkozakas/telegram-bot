@@ -1,7 +1,7 @@
 # Telegram Bot
 
 Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
-This bot supports a variety of commands to interact with different functionalities. Below is a list of available commands, their patterns, and descriptions:
+This bot supports a variety of commands to interact with different functionalities. Below is a list of available commands and descriptions:
 
 - `/start` - Start the bot.
 - `/help` - Display the list of available commands.
