@@ -25,15 +25,6 @@ public class DailyMessageResponseHandler extends ListResponseHandler<Stat> {
     private final StatsService statsService;
     private final StatsRepository statsRepository;
 
-    public static boolean isInteger(String s) {
-        try {
-            Integer.parseInt(s);
-        } catch (NumberFormatException | NullPointerException e) {
-            return false;
-        }
-        return true;
-    }
-
     @Override
     public List<Validable> handle(UpdateContext context) {
         if (context.getArgs().isEmpty()) {
@@ -183,6 +174,15 @@ public class DailyMessageResponseHandler extends ListResponseHandler<Stat> {
 
     private int determineYear(String yearString) throws NumberFormatException {
         return yearString.isEmpty() ? LocalDateTime.now().getYear() : Integer.parseInt(yearString);
+    }
+
+    public static boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+        } catch (NumberFormatException | NullPointerException e) {
+            return false;
+        }
+        return true;
     }
 
     @Override

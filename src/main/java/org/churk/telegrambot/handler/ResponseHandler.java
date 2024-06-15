@@ -159,7 +159,6 @@ public abstract class ResponseHandler implements CommandHandler {
                 .build());
     }
 
-
     protected String getAudioMessage(List<Validable> validables) {
         return validables.stream()
                 .map(validable -> switch (validable) {

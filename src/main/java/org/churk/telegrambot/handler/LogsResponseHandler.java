@@ -15,8 +15,7 @@ public class LogsResponseHandler extends ResponseHandler {
 
     @Override
     public List<Validable> handle(UpdateContext context) {
-        String logsPath = "logs/app.log";
-        File file = new File(logsPath);
+        File file = new File("logs/app.log");
         return createDocumentMessage(context, file);
     }
 

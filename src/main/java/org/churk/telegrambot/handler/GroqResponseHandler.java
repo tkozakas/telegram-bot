@@ -23,10 +23,16 @@ public class GroqResponseHandler extends ResponseHandler {
 
     @Override
     public List<Validable> handle(UpdateContext context) {
+        Long chatId = context.getUpdate().getMessage().getChatId();
         List<String> args = context.getArgs();
 
         if (args.isEmpty()) {
             return createReplyMessage(context, "Save a fact using /fact add <fact>");
+        }
+
+        if (args.getFirst().equalsIgnoreCase("/reset")) {
+            groqService.clearSession(chatId);
+            return createReplyMessage(context, "Session cleared");
         }
 
         String prompt = args.stream()
@@ -34,7 +40,7 @@ public class GroqResponseHandler extends ResponseHandler {
                 .collect(Collectors.joining(" "))
                 .replace("\n", " ")
                 .replace("\r", " ");
-        String response = groqService.getChatCompletion(prompt).getChoices().getFirst().getMessage().getContent();
+        String response = groqService.getChatCompletion(chatId, prompt).getChoices().getFirst().getMessage().getContent();
 
         return getAudioMessage(context, response);
     }
