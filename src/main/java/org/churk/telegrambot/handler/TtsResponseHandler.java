@@ -54,6 +54,7 @@ public class TtsResponseHandler extends ResponseHandler {
         }
         Optional<File> speechFile;
         try {
+            context.setMarkdown(true);
             speechFile = ttsService.getSpeech(text);
             return speechFile.isEmpty() ?
                     createReplyMessage(context, "Error generating audio") :

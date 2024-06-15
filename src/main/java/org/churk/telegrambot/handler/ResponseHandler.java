@@ -70,20 +70,21 @@ public abstract class ResponseHandler implements CommandHandler {
 
     protected List<Validable> createTextMessage(UpdateContext context, String text) {
         return createMessage(MessageType.TEXT, MessageContext.builder()
+                .replyToMessageId(context.getUpdate().getMessage().getMessageId())
                 .chatId(context.getUpdate().getMessage().getChatId())
-                .text(text)
                 .isMarkdown(context.isMarkdown())
                 .isReply(context.isReply())
-                .replyToMessageId(context.getUpdate().getMessage().getMessageId())
+                .text(text)
                 .build());
     }
 
     protected List<Validable> createReplyMessage(UpdateContext context, String text) {
         return createMessage(MessageType.TEXT, MessageContext.builder()
-                .chatId(context.getUpdate().getMessage().getChatId())
-                .text(text)
-                .isReply(true)
                 .replyToMessageId(context.getUpdate().getMessage().getMessageId())
+                .chatId(context.getUpdate().getMessage().getChatId())
+                .isMarkdown(context.isMarkdown())
+                .isReply(true)
+                .text(text)
                 .build());
     }
 
@@ -137,6 +138,7 @@ public abstract class ResponseHandler implements CommandHandler {
         return createMessage(MessageType.AUDIO, MessageContext.builder()
                 .chatId(context.getUpdate().getMessage().getChatId())
                 .replyToMessageId(context.getUpdate().getMessage().getMessageId())
+                .isMarkdown(context.isMarkdown())
                 .caption(caption)
                 .audio(audioFile)
                 .build());
