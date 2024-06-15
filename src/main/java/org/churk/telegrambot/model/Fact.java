@@ -12,11 +12,10 @@ import java.util.UUID;
 @NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 public class Fact {
-    @Column(length = 3500)
-    private final Long chatId;
-    private final String comment;
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID factId;
-
+    @Column(length = 3500)
+    private final Long chatId;
+    private final String comment;
 }
