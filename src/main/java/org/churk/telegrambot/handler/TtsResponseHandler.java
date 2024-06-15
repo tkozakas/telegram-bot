@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class TtsResponseHandler extends ResponseHandler {
+    public static final int MAX_AUDIO_LENGTH = 100;
     private final TtsService ttsService;
 
     @Override
@@ -55,9 +56,12 @@ public class TtsResponseHandler extends ResponseHandler {
         Optional<File> speechFile;
         try {
             context.setMarkdown(true);
+            if (text.length() > MAX_AUDIO_LENGTH) {
+                return createReplyMessage(context, text);
+            }
             speechFile = ttsService.getSpeech(text);
             return speechFile.isEmpty() ?
-                    createReplyMessage(context, "Error generating audio") :
+                    createReplyMessage(context, text) :
                     createAudioMessage(context, text, speechFile.get());
         } catch (Exception e) {
             return createLogMessage(context, "Error generating audio", e.getMessage());
