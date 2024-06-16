@@ -133,7 +133,7 @@ public class DailyMessageResponseHandler extends ListResponseHandler<Stat> {
         return createTextMessage(context, header);
     }
 
-    private List<Validable> handleMessage(UpdateContext context) {
+    protected List<Validable> handleMessage(UpdateContext context) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         int year = LocalDateTime.now().getYear();
 
@@ -170,7 +170,7 @@ public class DailyMessageResponseHandler extends ListResponseHandler<Stat> {
                 .toList();
     }
 
-    private List<Validable> handleRegister(UpdateContext context) {
+    protected List<Validable> handleRegister(UpdateContext context) {
         context.setReply(true);
         Long chatId = context.getUpdate().getMessage().getChatId();
         Long userId = context.getUpdate().getMessage().getFrom().getId();

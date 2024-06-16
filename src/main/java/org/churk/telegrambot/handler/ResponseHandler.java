@@ -78,7 +78,7 @@ public abstract class ResponseHandler implements CommandHandler {
                 .build());
     }
 
-    protected List<Validable> createReplyMessage(UpdateContext context, String text) {
+    public List<Validable> createReplyMessage(UpdateContext context, String text) {
         return createMessage(MessageType.TEXT, MessageContext.builder()
                 .replyToMessageId(context.getUpdate().getMessage().getMessageId())
                 .chatId(context.getUpdate().getMessage().getChatId())
