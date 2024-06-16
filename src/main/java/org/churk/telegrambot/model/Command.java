@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 public enum Command {
     START(List.of(".*/start\\b.*"), List.of(SubCommand.NONE), "Activate bot"),
     HELP(List.of(".*/help\\b.*"), List.of(SubCommand.NONE), "Get help"),
+    TTS(List.of(".*/tts\\b.*"), List.of(SubCommand.NONE), "Text to speech"),
     DAILY_MESSAGE(List.of(".*/%s\\b.*"), List.of(SubCommand.ALL, SubCommand.STATS, SubCommand.YEAR), "Daily game"),
     NEWS(List.of(".*/news\\b.*"), List.of(SubCommand.NONE), "Latest news"),
     FACT(List.of(".*/fact\\b.*"), List.of(SubCommand.ADD), "Random fact"),
     STICKER(List.of(".*/sticker\\b.*"), List.of(SubCommand.ADD, SubCommand.REMOVE, SubCommand.LIST), "Manage stickers"),
     REDDIT(List.of(".*/reddit\\b.*", ".*/meme\\b.*"), List.of(SubCommand.ADD, SubCommand.REMOVE, SubCommand.LIST), "Reddit pics"),
     SHITPOST(List.of(".*/shitpost\\b.*"), List.of(SubCommand.NONE), "Random shitpost"),
-    TTS(List.of(".*/tts\\b.*"), List.of(SubCommand.NONE), "Text to speech"),
     GPT(List.of(".*/gpt\\b.*"), List.of(SubCommand.NONE), "Talk with GPT-3"),
     LOGS(List.of(".*/logs\\b.*"), List.of(SubCommand.NONE), "Get logs"),
     NONE(List.of(""), List.of(SubCommand.NONE), "");
