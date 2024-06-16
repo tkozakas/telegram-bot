@@ -8,7 +8,6 @@ import org.churk.telegrambot.utility.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
-import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -61,7 +60,7 @@ public class GroqResponseHandler extends ResponseHandler {
         messageHistory.put(chatId, chatHistoryQueue);
         lastAccessed.put(chatId, System.currentTimeMillis());
 
-        return getAudioMessage(context, reply);
+        return createTextMessage(context, reply);
     }
 
     private String getLastReply(Queue<String> chatHistoryQueue) {
@@ -80,15 +79,6 @@ public class GroqResponseHandler extends ResponseHandler {
             messageHistoryStr.append(message).append(" ");
         }
         return messageHistoryStr.toString().trim();
-    }
-
-    private List<Validable> getAudioMessage(UpdateContext context, String response) {
-        Optional<File> audioMessage = ttsService.getSpeech(response);
-        if (audioMessage.isPresent()) {
-            return createAudioMessage(context, response, audioMessage.get());
-        }
-        log.error("Failed to generate audio message for: {}", response);
-        return createTextMessage(context, response);
     }
 
     @Override

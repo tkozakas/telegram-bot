@@ -11,7 +11,7 @@ public class GroqProperties {
     private String apiKey;
     private String model;
     private String setupPrompt;
-    private Integer maxTokens = 100;
+    private Integer maxTokens = 200;
     private Double temperature = 0.7;
     private Double topP = 0.9;
     private Double frequencyPenalty = 0.0;

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
@@ -15,7 +17,9 @@ public class LogsResponseHandler extends ResponseHandler {
 
     @Override
     public List<Validable> handle(UpdateContext context) {
-        File file = new File("logs/app.log");
+        String todayLogs = "logs/app.%s.log".formatted(LocalDate.now().format(DateTimeFormatter.ISO_DATE));
+        System.out.println(todayLogs);
+        File file = new File("logs/app%s.log");
         return createDocumentMessage(context, file);
     }
 
