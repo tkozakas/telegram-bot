@@ -28,7 +28,6 @@ public class TtsService {
         String outputFileName = voiceId + ".wav";
 
         String prompt = removeUnnecessaryCharacters(text);
-
         TextToSpeechRequest request = new TextToSpeechRequest(
                 prompt,
                 "eleven_multilingual_v2",

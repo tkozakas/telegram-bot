@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class TtsResponseHandler extends ResponseHandler {
-    public static final int MAX_AUDIO_LENGTH = 100;
+    public static final int MAX_AUDIO_LENGTH = 1000;
     private final TtsService ttsService;
 
     @Override
