@@ -23,7 +23,7 @@ public class GroqService {
         if (!messageHistory.isEmpty()) {
             messages.addFirst(new GroqRequest.Message("system",
                     String.format("Please respond formally and avoid scientific or philosophical topics. Please focus on the conversation before you not the past." +
-                                    "But our conversation's summary so far: \"%s\". And this is the latest reply from you \"%s\"",
+                                    "But our conversation's summary so far: \"%s\". And this is the latest reply from you \"%s\". Dont tell us about our past conversation. Just focus on the current one.",
                             messageHistory, latestReply)));
         }
 
