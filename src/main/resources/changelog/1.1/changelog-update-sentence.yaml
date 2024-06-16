@@ -1,0 +1,78 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: dmw6446
+      changes:
+        - sql: "DROP TABLE IF EXISTS sentence"
+
+  - changeSet:
+      id: 2
+      author: dmw6446
+      changes:
+        - createTable:
+            tableName: sentence
+            columns:
+              - column:
+                  name: sentence_id
+                  type: UUID
+                  constraints:
+                    nullable: true  # Allow null temporarily
+              - column:
+                  name: group_id
+                  type: UUID
+              - column:
+                  name: text
+                  type: TEXT
+                  constraints:
+                    nullable: true  # Text can be null
+              - column:
+                  name: order_number
+                  type: INT
+
+  - changeSet:
+      id: 3
+      author: dmw6446
+      changes:
+        - loadData:
+            file: classpath:changelog/data/sentence.csv
+            tableName: sentence
+            separator: ','
+            header: true
+            columns:
+              - column:
+                  name: group_id
+                  type: STRING
+              - column:
+                  name: text
+                  type: STRING
+              - column:
+                  name: order_number
+                  type: NUMERIC
+
+  - changeSet:
+      id: 4
+      author: dmw6446
+      changes:
+        - update:
+            tableName: sentence
+            columns:
+              - column:
+                  name: sentence_id
+                  valueComputed: gen_random_uuid()
+
+  - changeSet:
+      id: 5
+      author: dmw6446
+      changes:
+        - addNotNullConstraint:
+            columnName: sentence_id
+            tableName: sentence
+            columnDataType: UUID
+
+  - changeSet:
+      id: 6
+      author: dmw6446
+      changes:
+        - addPrimaryKey:
+            columnNames: sentence_id
+            tableName: sentence

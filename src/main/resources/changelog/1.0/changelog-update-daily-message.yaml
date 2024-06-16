@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: dmw6446
+      changes:
+        - sql: "DROP TABLE IF EXISTS daily_message"
+
+  - changeSet:
+      id: 2
+      author: dmw6446
+      changes:
+        - createTable:
+            tableName: daily_message
+            columns:
+              - column:
+                  name: daily_message_id
+                  type: UUID
+                  constraints:
+                    nullable: true  # Allow null temporarily
+              - column:
+                  name: key_name
+                  type: TEXT
+              - column:
+                  name: text
+                  type: TEXT
+
+  - changeSet:
+      id: 3
+      author: dmw6446
+      changes:
+        - loadData:
+            file: classpath:changelog/data/daily_message.csv
+            tableName: daily_message
+            separator: ','
+            header: true
+            columns:
+              - column:
+                  name: key_name
+                  type: STRING
+              - column:
+                  name: text
+                  type: STRING
+
+  - changeSet:
+      id: 4
+      author: dmw6446
+      changes:
+        - update:
+            tableName: daily_message
+            columns:
+              - column:
+                  name: daily_message_id
+                  valueComputed: gen_random_uuid()
+
+  - changeSet:
+      id: 5
+      author: dmw6446
+      changes:
+        - addNotNullConstraint:
+            columnName: daily_message_id
+            tableName: daily_message
+            columnDataType: UUID
+
+  - changeSet:
+      id: 6
+      author: dmw6446
+      changes:
+        - addPrimaryKey:
+            columnNames: daily_message_id
+            tableName: daily_message

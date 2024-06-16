@@ -6,6 +6,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  liquibase:
+    change-log: classpath:changelog/changelog-master.yaml
+    parameters:
+      daily_message_file_path: classpath:changelog/data/daily_message.csv
+      sentence_file_path: classpath:changelog/data/sentences.csv
 
 logging:
   config: classpath:logback.xml

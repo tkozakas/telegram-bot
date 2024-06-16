@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: classpath:changelog/1.0/changelog-update-daily-message.yaml
+  - include:
+      file: classpath:changelog/1.1/changelog-update-sentence.yaml
