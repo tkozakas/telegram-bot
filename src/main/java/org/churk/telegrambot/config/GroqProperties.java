@@ -12,9 +12,9 @@ public class GroqProperties {
     private String model;
     private String setupPrompt;
     private Integer maxTokens = 200;
-    private Double temperature = 0.7;
-    private Double topP = 0.9;
-    private Double frequencyPenalty = 0.0;
-    private Double presencePenalty = 0.0;
+    private Double temperature = 0.5;
+    private Double topP = 0.86;
+    private Double frequencyPenalty = 0.4;
+    private Double presencePenalty = 0.4;
     private String toolChoice = "auto";
 }
