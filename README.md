@@ -49,3 +49,6 @@ Run the following commands to start the bot using Maven:
 mvn clean install
 mvn spring-boot:run
 ```
+
+# Changing the Bot's Behavior
+You can change the bot's responses by modifying csv files in the `src/main/resources/changelog/data` directory.
