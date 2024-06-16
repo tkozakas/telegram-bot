@@ -23,6 +23,7 @@ public enum Command {
     SHITPOST(List.of(".*/shitpost\\b.*"), List.of(SubCommand.NONE), "Random shitpost"),
     GPT(List.of(".*/gpt\\b.*"), List.of(SubCommand.NONE), "Talk with GPT-3"),
     LOGS(List.of(".*/logs\\b.*"), List.of(SubCommand.NONE), "Get logs"),
+    RANDOM(List.of(".*/random\\b.*"), List.of(SubCommand.NONE), "Random response"),
     NONE(List.of(""), List.of(SubCommand.NONE), "");
 
     private final List<String> patterns;

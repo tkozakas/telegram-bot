@@ -43,6 +43,6 @@ public class RandomResponseResponseHandler extends ResponseHandler {
 
     @Override
     public Command getSupportedCommand() {
-        return null;
+        return Command.RANDOM;
     }
 }
