@@ -32,7 +32,7 @@ public class RandomResponseResponseHandler extends ResponseHandler {
 
     @Override
     public List<Validable> handle(UpdateContext context) {
-        if (!shouldTriggerRandomResponse()) {
+        if (!shouldTriggerRandomResponse() && !(context.getCommand() == Command.RANDOM)) {
             return List.of();
         }
         CommandHandler randomHandler = selectRandomHandler();

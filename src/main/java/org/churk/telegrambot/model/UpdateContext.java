@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public final class UpdateContext {
+    private Command command;
     private List<String> args;
     private HandlerFactory handlerFactory;
     private Update update;

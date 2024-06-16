@@ -49,6 +49,7 @@ public class CommandProcessor {
 
         log.info("Command received from {}: {}", firstName, messageText);
         return handler.handle(UpdateContext.builder()
+                .command(command)
                 .handlerFactory(handlerFactory)
                 .update(update)
                 .args(arguments)
