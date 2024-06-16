@@ -166,7 +166,7 @@ public class DailyMessageResponseHandler extends ListResponseHandler<Stat> {
 
         List<Stat> userStats = statsService.getStatsByChatIdAndUserId(chatId, userId);
         if (!userStats.isEmpty()) {
-            return createReplyMessage(context, dailyMessageService.getKeyNameSentence("already_registered").formatted(firstName));
+            return createReplyMessage(context, dailyMessageService.getKeyNameSentence("registered_header").formatted(firstName));
         }
         statsService.registerByUserIdAndChatId(userId, chatId, firstName);
         return createReplyMessage(context, dailyMessageService.getKeyNameSentence("registered_now_header").formatted(firstName));
