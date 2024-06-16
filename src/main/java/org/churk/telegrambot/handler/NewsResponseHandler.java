@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Article;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.service.NewsService;
-import org.churk.telegrambot.utility.UpdateContext;
+import org.churk.telegrambot.model.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 

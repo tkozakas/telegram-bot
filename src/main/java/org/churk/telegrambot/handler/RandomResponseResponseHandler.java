@@ -2,7 +2,7 @@ package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
 import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.utility.UpdateContext;
+import org.churk.telegrambot.model.UpdateContext;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 

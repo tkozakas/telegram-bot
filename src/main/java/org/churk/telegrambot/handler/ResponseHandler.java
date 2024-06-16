@@ -10,7 +10,7 @@ import org.churk.telegrambot.model.MessageParams;
 import org.churk.telegrambot.model.MessageType;
 import org.churk.telegrambot.model.Sticker;
 import org.churk.telegrambot.service.DailyMessageService;
-import org.churk.telegrambot.utility.UpdateContext;
+import org.churk.telegrambot.model.UpdateContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;

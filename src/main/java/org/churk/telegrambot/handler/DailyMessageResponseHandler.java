@@ -8,7 +8,7 @@ import org.churk.telegrambot.model.Stat;
 import org.churk.telegrambot.model.SubCommand;
 import org.churk.telegrambot.repository.StatsRepository;
 import org.churk.telegrambot.service.StatsService;
-import org.churk.telegrambot.utility.UpdateContext;
+import org.churk.telegrambot.model.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.objects.Message;

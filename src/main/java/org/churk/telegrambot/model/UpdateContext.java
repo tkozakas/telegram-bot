@@ -1,4 +1,4 @@
-package org.churk.telegrambot.utility;
+package org.churk.telegrambot.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
