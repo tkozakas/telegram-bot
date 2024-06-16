@@ -24,20 +24,13 @@ public class DailyMessageService {
 
     @Transactional
     public List<Sentence> getRandomGroupSentences() {
-        Optional<DailyMessage> dailyMessage = dailyMessageRepository.findDailyMessageByKeyName("sentences");
-        if (dailyMessage.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // find one random group id
-        List<UUID> groupIds = sentenceRepository.findGroupIdsByDailyMessageId(dailyMessage.get().getDailyMessageId());
+        List<UUID> groupIds = sentenceRepository.findGroupIdsByDailyMessageId();
         if (groupIds.isEmpty()) {
             return Collections.emptyList();
         }
         UUID randomGroupId = groupIds.get(ThreadLocalRandom.current().nextInt(groupIds.size()));
 
-        // find all sentences for that group id
-        List<Sentence> sentences = sentenceRepository.findAllByGroupIdAndDailyMessageId(randomGroupId, dailyMessage.get().getDailyMessageId());
+        List<Sentence> sentences = sentenceRepository.findAllByGroupIdAndDailyMessageId(randomGroupId);
         if (sentences.isEmpty()) {
             return Collections.emptyList();
         }

@@ -6,8 +6,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-  liquibase:
-    change-log: classpath:liquibase/changelog.yaml
 
 logging:
   config: classpath:logback.xml
