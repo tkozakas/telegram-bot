@@ -3,7 +3,7 @@ stats_all_header,Top-10 users of all time:
 stats_now_header,Top-10 users of this year:
 stats_year_header,Top-10 users - %d
 stats_table,%d. %s — *%d times*
-no_stats_available,No one is registered
+no_stats_available,The stats are empty
 winner_message,"According to my information, the winner of today's *%s* is %s"
 me_header,"%s, you have been the *%s* of the day %d times"
 not_registered_header,"You are not registered yet, %s"

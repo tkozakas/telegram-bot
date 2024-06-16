@@ -87,7 +87,10 @@ public class DailyMessageResponseHandler extends ListResponseHandler<Stat> {
     private List<Validable> handleStatsByYear(UpdateContext context, int year) {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<Stat> stats = statsService.getAllStatsByChatIdAndYear(chatId, year);
-        String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year);
+        if (stats.isEmpty()) {
+            return createReplyMessage(context, dailyMessageService.getKeyNameSentence("no_stats_available"));
+        }
+        String header = dailyMessageService.getKeyNameSentence("stats_year_header").formatted(year) + "\n\n";
         return constructStatsMessage(context, stats, header);
     }
 
@@ -95,14 +98,14 @@ public class DailyMessageResponseHandler extends ListResponseHandler<Stat> {
         Long chatId = context.getUpdate().getMessage().getChatId();
         List<Stat> stats = statsService.getAllStatsByChatId(chatId);
 
-        String header = dailyMessageService.getKeyNameSentence("stats_all_header");
+        String header = dailyMessageService.getKeyNameSentence("stats_all_header") +  "\n\n";
         return constructStatsMessage(context, stats, header);
     }
 
     private List<Validable> constructStatsMessage(UpdateContext context, List<Stat> stats, String header) {
-        String statsTable = dailyMessageService.getKeyNameSentence("stats_table");
-        String emptyMessage = dailyMessageService.getKeyNameSentence("no_stats_available");
-        String footer = dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
+        String statsTable = dailyMessageService.getKeyNameSentence("stats_table") + '\n';
+        String emptyMessage = dailyMessageService.getKeyNameSentence("no_stats_available") + "\n";
+        String footer = "\n" + dailyMessageService.getKeyNameSentence("stats_footer").formatted(stats.size());
         Function<Stat, String> statFormatter = stat -> String.format(statsTable, stats.indexOf(stat) + 1, stat.getFirstName(), stat.getScore());
         context.setMarkdown(true);
         return formatListResponse(context, stats, statFormatter,
