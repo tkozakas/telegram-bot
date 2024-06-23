@@ -30,6 +30,9 @@ public class UnifiedMessageBuilder {
 
     private static void deleteFile(File file) {
         try {
+            if (file.getPath().endsWith("app.log")) {
+                return;
+            }
             String path = file.getPath();
             if (path.contains("attach:")) {
                 path = path.replace("attach:", "");
