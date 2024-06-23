@@ -40,7 +40,7 @@ public class GroqResponseHandler extends ResponseHandler {
         String userName = context.getUpdate().getMessage().getFrom().getUserName();
 
         if (args.isEmpty()) {
-            return createReplyMessage(context, "Save a fact using /fact add <fact>");
+            return createReplyMessage(context, "Please provide a prompt");
         }
 
         String prompt = args.stream()
