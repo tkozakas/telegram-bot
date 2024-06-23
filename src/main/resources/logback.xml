@@ -30,6 +30,13 @@
         </filter>
     </appender>
 
+    <appender name="TODAY_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/app-today.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <!-- Logger for Spring framework to log INFO level only to SPRING_CONSOLE -->
     <logger name="org.springframework" level="INFO" additivity="false">
         <appender-ref ref="SPRING_CONSOLE"/>
@@ -41,15 +48,17 @@
         <appender-ref ref="CONSOLE"/>
     </logger>
 
-    <!-- Logger for org.churk.telegrambot to log INFO level to CONSOLE and FILE -->
+    <!-- Logger for org.churk.telegrambot to log INFO level to CONSOLE, FILE, and TODAY_FILE -->
     <logger name="org.churk.telegrambot" level="INFO" additivity="false">
         <appender-ref ref="FILE"/>
+        <appender-ref ref="TODAY_FILE"/>
         <appender-ref ref="CONSOLE"/>
     </logger>
 
     <!-- Root logger -->
     <root level="ERROR">
         <appender-ref ref="FILE"/>
+        <appender-ref ref="TODAY_FILE"/>
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
