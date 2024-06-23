@@ -19,7 +19,7 @@ public class LogsResponseHandler extends ResponseHandler {
     @Override
     public List<Validable> handle(UpdateContext context) {
         if (context.getArgs().isEmpty()) {
-            getLogs(context, "app.log");
+            return getLogs(context, "app.log");
         }
 
         SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst());
