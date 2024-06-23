@@ -1,4 +1,4 @@
-FROM docker.io/maven:3-eclipse-temurin-21 AS builder
+FROM docker.io/maven:3-eclipse-temurin-21-alpine AS builder
 WORKDIR /app
 
 COPY pom.xml .
@@ -9,12 +9,12 @@ RUN mvn package -DskipTests
 
 RUN java -Djarmode=layertools -jar target/telegram-bot*.jar extract
 
-FROM docker.io/eclipse-temurin:21-jre
+FROM docker.io/eclipse-temurin:21-jre-alpine
+
 WORKDIR /app
 
-RUN apt-get -y update && apt-get -y upgrade \
-  && apt-get install -y --no-install-recommends ffmpeg \
-  && apt-get clean
+RUN apk update \
+  && apk add --no-cache ffmpeg
 
 COPY --from=builder /app/dependencies/ ./
 COPY --from=builder /app/spring-boot-loader/ ./
