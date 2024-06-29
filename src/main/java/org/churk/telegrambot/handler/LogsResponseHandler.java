@@ -19,17 +19,18 @@ public class LogsResponseHandler extends ResponseHandler {
     @Override
     public List<Validable> handle(UpdateContext context) {
         if (context.getArgs().isEmpty()) {
-            return getLogs(context, "app.log");
+            return getLogs(context, "logs/app.log");
         }
 
         SubCommand subCommand = SubCommand.getSubCommand(context.getArgs().getFirst());
         if (subCommand == null) {
             return createReplyMessage(context, "Invalid subcommand");
         }
-        return getLogs(context, "app-today.log");
+        return getLogs(context, "logs/app-today.log");
     }
 
     private List<Validable> getLogs(UpdateContext context, String path) {
+        context.setReply(true);
         File file = new File(path);
         try {
             if (isEmptyFile(file.toPath()) || !file.exists()) {

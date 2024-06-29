@@ -5,12 +5,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.builder.UnifiedMessageBuilder;
 import org.churk.telegrambot.config.BotProperties;
-import org.churk.telegrambot.model.MessageContext;
-import org.churk.telegrambot.model.MessageParams;
-import org.churk.telegrambot.model.MessageType;
-import org.churk.telegrambot.model.Sticker;
+import org.churk.telegrambot.model.*;
 import org.churk.telegrambot.service.DailyMessageService;
-import org.churk.telegrambot.model.UpdateContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
@@ -38,6 +34,19 @@ public abstract class ResponseHandler implements CommandHandler {
     protected DailyMessageService dailyMessageService;
     @Autowired
     protected UnifiedMessageBuilder unifiedMessageBuilder;
+
+    protected MessageContext.MessageContextBuilder createMessageContextBuilder(UpdateContext context) {
+        MessageContext.MessageContextBuilder builder = MessageContext.builder()
+                .chatId(context.getUpdate().getMessage().getChatId())
+                .isMarkdown(context.isMarkdown())
+                .replyToMessageId(context.getUpdate().getMessage().getMessageId());
+
+        if (context.isReply()) {
+            builder.isReply(true);
+        }
+
+        return builder;
+    }
 
     protected List<Validable> createMessage(MessageType messageType, Map<MessageParams, Object> params) {
         Map<MessageParams, Object> filteredParams = params.entrySet().stream()
@@ -69,76 +78,59 @@ public abstract class ResponseHandler implements CommandHandler {
     }
 
     protected List<Validable> createTextMessage(UpdateContext context, String text) {
-        return createMessage(MessageType.TEXT, MessageContext.builder()
-                .replyToMessageId(context.getUpdate().getMessage().getMessageId())
-                .chatId(context.getUpdate().getMessage().getChatId())
-                .isMarkdown(context.isMarkdown())
-                .isReply(context.isReply())
+        return createMessage(MessageType.TEXT, createMessageContextBuilder(context)
                 .text(text)
                 .build());
     }
 
-    public List<Validable> createReplyMessage(UpdateContext context, String text) {
-        return createMessage(MessageType.TEXT, MessageContext.builder()
-                .replyToMessageId(context.getUpdate().getMessage().getMessageId())
-                .chatId(context.getUpdate().getMessage().getChatId())
-                .isMarkdown(context.isMarkdown())
-                .isReply(true)
+    protected List<Validable> createReplyMessage(UpdateContext context, String text) {
+        return createMessage(MessageType.TEXT, createMessageContextBuilder(context)
                 .text(text)
+                .isReply(true)
                 .build());
     }
 
     protected List<Validable> createDocumentMessage(UpdateContext context, File file) {
-        return createMessage(MessageType.DOCUMENT, MessageContext.builder()
-                .chatId(context.getUpdate().getMessage().getChatId())
+        return createMessage(MessageType.DOCUMENT, createMessageContextBuilder(context)
                 .document(file)
                 .build());
     }
 
     protected List<Validable> createStickerMessage(UpdateContext context, Sticker sticker) {
-        return createMessage(MessageType.STICKER, MessageContext.builder()
-                .chatId(context.getUpdate().getMessage().getChatId())
+        return createMessage(MessageType.STICKER, createMessageContextBuilder(context)
                 .sticker(sticker)
-                .replyToMessageId(context.getUpdate().getMessage().getMessageId())
                 .build());
     }
 
     protected List<Validable> createAnimationMessage(UpdateContext context, File file, String caption) {
-        return createMessage(MessageType.ANIMATION, MessageContext.builder()
-                .chatId(context.getUpdate().getMessage().getChatId())
+        return createMessage(MessageType.ANIMATION, createMessageContextBuilder(context)
                 .animation(file)
                 .caption(caption)
                 .build());
     }
 
     protected List<Validable> createPhotoMessage(UpdateContext context, File file, String caption) {
-        return createMessage(MessageType.PHOTO, MessageContext.builder()
-                .chatId(context.getUpdate().getMessage().getChatId())
+        return createMessage(MessageType.PHOTO, createMessageContextBuilder(context)
                 .photo(file)
                 .caption(caption)
                 .build());
     }
 
     protected List<Validable> createVideoMessage(UpdateContext context, File file, String caption) {
-        return createMessage(MessageType.VIDEO, MessageContext.builder()
-                .chatId(context.getUpdate().getMessage().getChatId())
+        return createMessage(MessageType.VIDEO, createMessageContextBuilder(context)
                 .video(file)
                 .caption(caption)
                 .build());
     }
 
     protected List<Validable> createMediaGroupMessage(UpdateContext context, List<InputMedia> mediaGroup) {
-        return createMessage(MessageType.MEDIA_GROUP, MessageContext.builder()
-                .chatId(context.getUpdate().getMessage().getChatId())
+        return createMessage(MessageType.MEDIA_GROUP, createMessageContextBuilder(context)
                 .mediaGroup(mediaGroup)
                 .build());
     }
 
     protected List<Validable> createAudioMessage(UpdateContext context, String caption, File audioFile) {
-        return createMessage(MessageType.AUDIO, MessageContext.builder()
-                .chatId(context.getUpdate().getMessage().getChatId())
-                .replyToMessageId(context.getUpdate().getMessage().getMessageId())
-                .isMarkdown(context.isMarkdown())
+        return createMessage(MessageType.AUDIO, createMessageContextBuilder(context)
                 .caption(caption)
                 .audio(audioFile)
                 .build());
@@ -152,10 +144,7 @@ public abstract class ResponseHandler implements CommandHandler {
         } catch (IOException e) {
             log.error("Failed to write to log file: {}", logFile != null ? logFile.getPath() : "Unknown path", e);
         }
-        return createMessage(MessageType.DOCUMENT, MessageContext.builder()
-                .chatId(context.getUpdate().getMessage().getChatId())
-                .replyToMessageId(context.getUpdate().getMessage().getMessageId())
-                .isReply(true)
+        return createMessage(MessageType.DOCUMENT, createMessageContextBuilder(context)
                 .document(logFile)
                 .caption(caption)
                 .build());
