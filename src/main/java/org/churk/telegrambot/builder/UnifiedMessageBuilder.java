@@ -1,22 +1,31 @@
 package org.churk.telegrambot.builder;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.model.MessageParams;
 import org.churk.telegrambot.model.MessageType;
+import org.churk.telegrambot.utility.MediaUtility;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Service
+@AllArgsConstructor
 public class UnifiedMessageBuilder {
+    private final MediaUtility mediaUtility;
+
     private SendMessage createSendMessage(Map<MessageParams, Object> params) {
         SendMessage sendMessage = new SendMessage();
         params.forEach((key, value) -> {
@@ -86,11 +95,42 @@ public class UnifiedMessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendMediaGroup.setChatId(String.valueOf(value));
-                case MEDIA_GROUP -> sendMediaGroup.setMedias((List<InputMedia>) value);
+                case MEDIA_GROUP -> sendMediaGroup.setMedias(createMediaGroupFromValidables((List<Validable>) value));
                 case MESSAGE_ID -> sendMediaGroup.setReplyToMessageId((Integer) value);
             }
         });
         return sendMediaGroup;
+    }
+
+    private List<InputMedia> createMediaGroupFromValidables(List<Validable> value) {
+        List<InputMedia> inputMediaList = new ArrayList<>();
+        value.forEach(validable -> {
+            switch (validable) {
+                case SendPhoto sendPhoto -> {
+                    InputMedia inputMedia = new InputMediaPhoto();
+                    inputMedia.setMedia(String.valueOf(sendPhoto.getPhoto().getAttachName()));
+                    inputMedia.setCaption(sendPhoto.getCaption());
+                    inputMediaList.add(inputMedia);
+                }
+                case SendVideo sendVideo -> {
+                    InputMedia inputMedia = new InputMediaVideo();
+                    inputMedia.setMedia(String.valueOf(sendVideo.getVideo().getAttachName()));
+                    inputMedia.setCaption(sendVideo.getCaption());
+                    inputMediaList.add(inputMedia);
+                }
+                case SendAnimation sendAnimation -> {
+                    InputMedia inputMedia = new InputMediaVideo();
+                    File file = mediaUtility.convertGifToMp4(String.valueOf(sendAnimation.getAnimation().getAttachName()));
+                    inputMedia.setMedia(file, "animation.mp4");
+                    inputMedia.setCaption(sendAnimation.getCaption());
+                    inputMediaList.add(inputMedia);
+                }
+                default -> {
+                }
+            }
+        });
+
+        return inputMediaList;
     }
 
     private SendAudio createSendAudio(Map<MessageParams, Object> params) {
@@ -124,15 +164,16 @@ public class UnifiedMessageBuilder {
     }
 
     public List<Validable> build(MessageType messageType, Map<MessageParams, Object> params) {
-        return switch (messageType) {
-            case TEXT -> List.of(createSendMessage(params));
-            case PHOTO -> List.of(createSendPhoto(params));
-            case ANIMATION -> List.of(createSendAnimation(params));
-            case STICKER -> List.of(createSendSticker(params));
-            case VIDEO -> List.of(createSendVideo(params));
-            case MEDIA_GROUP -> List.of(createSendMediaGroup(params));
-            case AUDIO -> List.of(createSendAudio(params));
-            case DOCUMENT -> List.of(createSendDocument(params));
-        };
+        return List.of(switch (messageType) {
+            case TEXT -> createSendMessage(params);
+            case PHOTO -> createSendPhoto(params);
+            case ANIMATION -> createSendAnimation(params);
+            case STICKER -> createSendSticker(params);
+            case VIDEO -> createSendVideo(params);
+            case MEDIA_GROUP -> createSendMediaGroup(params);
+            case AUDIO -> createSendAudio(params);
+            case DOCUMENT -> createSendDocument(params);
+            default -> throw new IllegalStateException("Unexpected value: " + messageType);
+        });
     }
 }

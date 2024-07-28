@@ -15,6 +15,10 @@ public class RedditPost {
     }
 
     public boolean isImage() {
-        return url.endsWith(".jpg") || url.endsWith(".png");
+        return url.endsWith(".jpg") || url.endsWith(".png") || url.endsWith(".jpeg");
+    }
+
+    public boolean isGif() {
+        return url.endsWith(".gif");
     }
 }

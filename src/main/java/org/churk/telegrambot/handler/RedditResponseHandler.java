@@ -10,7 +10,9 @@ import org.churk.telegrambot.service.SubredditService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
@@ -121,22 +123,29 @@ public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
             if (posts.isEmpty()) {
                 return createReplyMessage(context, "No posts available in r/%s".formatted(subreddit));
             }
-
-            return posts.stream()
+            Set<String> seenUrls = new HashSet<>();
+            List<Validable> mediaList = posts.stream()
+                    .filter(post -> seenUrls.add(post.getUrl()))
                     .map(post -> {
                         String title = post.getTitle();
                         String url = post.getUrl();
-                        String text = "*[%s](%s)*".formatted(title, url);
                         if (post.isVideo()) {
-                            return createVideoMessage(context, url, text);
+                            return createVideoMessage(context, url, title);
                         }
                         if (post.isImage()) {
-                            return createPhotoMessage(context, url, text);
+                            return createPhotoMessage(context, url, title);
                         }
-                        return createTextMessage(context, text);
+                        if (post.isGif()) {
+                            return createAnimationMessage(context, url, title);
+                        }
+                        return createTextMessage(context, title);
                     })
                     .flatMap(List::stream)
                     .toList();
+            if (mediaList.size() == 1) {
+                return mediaList;
+            }
+            return createMediaGroupMessage(context, mediaList);
         } catch (FeignException e) {
             log.error("Error while fetching posts from Reddit", e);
             return createReplyMessage(context, "Error while fetching posts from Reddit");

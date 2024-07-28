@@ -8,6 +8,6 @@ public enum MessageType {
     VIDEO,
     AUDIO,
     DOCUMENT,
-    MEDIA_GROUP
+    MEDIA, MEDIA_GROUP
 }
 

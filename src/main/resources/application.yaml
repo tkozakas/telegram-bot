@@ -12,6 +12,12 @@ spring:
       daily_message_file_path: classpath:changelog/data/daily_message.csv
       sentence_file_path: classpath:changelog/data/sentences.csv
 
+logging:
+  config: classpath:logback.xml
+
+meme-api:
+  url: http://localhost:8443
+
 bot:
   # username: <<PROVIDE USING ENVIRONMENT VARIABLES>>
   # token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
@@ -24,5 +30,3 @@ schedule:
   winner-reset: 0 0 0 * * *
   meme-post: 0 0 * * * *
 
-meme-api:
-  url: https://localhost:8443

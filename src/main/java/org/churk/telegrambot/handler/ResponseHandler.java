@@ -67,14 +67,21 @@ public abstract class ResponseHandler implements CommandHandler {
         }
         params.put(MessageParams.DOCUMENT, context.getDocument());
         params.put(MessageParams.STICKER, context.getSticker() != null ? context.getSticker().getFileId() : null);
-        params.put(MessageParams.ANIMATION, context.getAnimation());
+        params.put(MessageParams.ANIMATION, context.getGifUrl());
         params.put(MessageParams.CAPTION, context.getCaption());
         params.put(MessageParams.PHOTO, context.getPhotoUrl());
         params.put(MessageParams.VIDEO, context.getVideoUrl());
-        params.put(MessageParams.MEDIA_GROUP, context.getMediaGroup());
+        params.put(MessageParams.MEDIA_GROUP, context.getMediaList());
         params.put(MessageParams.AUDIO, context.getAudioStream());
 
         return createMessage(messageType, params);
+    }
+
+    protected List<Validable> createMedia(UpdateContext context, String url, String caption) {
+        return createMessage(MessageType.MEDIA, createMessageContextBuilder(context)
+                .mediaUrl(url)
+                .caption(caption)
+                .build());
     }
 
     protected List<Validable> createTextMessage(UpdateContext context, String text) {
@@ -102,9 +109,9 @@ public abstract class ResponseHandler implements CommandHandler {
                 .build());
     }
 
-    protected List<Validable> createAnimationMessage(UpdateContext context, File file, String caption) {
+    protected List<Validable> createAnimationMessage(UpdateContext context, String url, String caption) {
         return createMessage(MessageType.ANIMATION, createMessageContextBuilder(context)
-                .animation(file)
+                .gifUrl(url)
                 .caption(caption)
                 .build());
     }
@@ -123,9 +130,9 @@ public abstract class ResponseHandler implements CommandHandler {
                 .build());
     }
 
-    protected List<Validable> createMediaGroupMessage(UpdateContext context, List<InputMedia> mediaGroup) {
+    protected List<Validable> createMediaGroupMessage(UpdateContext context, List<Validable> mediaList) {
         return createMessage(MessageType.MEDIA_GROUP, createMessageContextBuilder(context)
-                .mediaGroup(mediaGroup)
+                .mediaList(mediaList)
                 .build());
     }
 
