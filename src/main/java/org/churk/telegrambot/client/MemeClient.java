@@ -7,7 +7,6 @@ import org.churk.telegrambot.model.Shitpost;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,21 +18,21 @@ public interface MemeClient {
     @PostMapping(value = "/gpt/prompt", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     ResponseEntity<String> getGpt(@RequestBody String prompt);
 
-    @GetMapping("/meme/reddit/{subreddit}/{count}")
+    @PostMapping("/meme/reddit/{subreddit}/{count}")
     ResponseEntity<List<RedditPost>> getRedditPost(@PathVariable("subreddit") String subreddit, @PathVariable("count") int count);
 
-    @GetMapping("/meme/shitpost/{search}")
+    @PostMapping("/meme/shitpost/{search}")
     ResponseEntity<Shitpost> getShitPost(@PathVariable("search") String search);
 
-    @GetMapping("/meme/shitpost")
+    @PostMapping("/meme/shitpost")
     ResponseEntity<Shitpost> getShitPost();
 
-    @GetMapping("/meme/shitpost/quote")
+    @PostMapping("/meme/shitpost/quote")
     ResponseEntity<Quote> getShitPostQuote();
 
-    @GetMapping("/news/{category}")
+    @PostMapping("/news/{category}")
     ResponseEntity<List<Article>> getNews(@PathVariable("category") String category);
 
-    @PostMapping(value = "/elevenlabs/tts", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @PostMapping(value = "/elevenlabs/tts", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     ResponseEntity<byte[]> getTts(@RequestBody String text);
 }

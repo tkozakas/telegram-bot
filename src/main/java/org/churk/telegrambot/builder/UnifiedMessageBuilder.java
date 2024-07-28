@@ -26,6 +26,37 @@ import java.util.Map;
 public class UnifiedMessageBuilder {
     private final MediaUtility mediaUtility;
 
+    private List<InputMedia> createMediaGroupFromValidables(List<Validable> value) {
+        List<InputMedia> inputMediaList = new ArrayList<>();
+        value.forEach(validable -> {
+            switch (validable) {
+                case SendPhoto sendPhoto -> {
+                    InputMedia inputMedia = new InputMediaPhoto();
+                    inputMedia.setMedia(String.valueOf(sendPhoto.getPhoto().getAttachName()));
+                    inputMedia.setCaption(sendPhoto.getCaption());
+                    inputMediaList.add(inputMedia);
+                }
+                case SendVideo sendVideo -> {
+                    InputMedia inputMedia = new InputMediaVideo();
+                    inputMedia.setMedia(String.valueOf(sendVideo.getVideo().getAttachName()));
+                    inputMedia.setCaption(sendVideo.getCaption());
+                    inputMediaList.add(inputMedia);
+                }
+                case SendAnimation sendAnimation -> {
+                    InputMedia inputMedia = new InputMediaVideo();
+                    File file = mediaUtility.convertGifToMp4(String.valueOf(sendAnimation.getAnimation().getAttachName()));
+                    inputMedia.setMedia(file, "animation.mp4");
+                    inputMedia.setCaption(sendAnimation.getCaption());
+                    inputMediaList.add(inputMedia);
+                }
+                default -> {
+                }
+            }
+        });
+
+        return inputMediaList;
+    }
+
     private SendMessage createSendMessage(Map<MessageParams, Object> params) {
         SendMessage sendMessage = new SendMessage();
         params.forEach((key, value) -> {
@@ -100,37 +131,6 @@ public class UnifiedMessageBuilder {
             }
         });
         return sendMediaGroup;
-    }
-
-    private List<InputMedia> createMediaGroupFromValidables(List<Validable> value) {
-        List<InputMedia> inputMediaList = new ArrayList<>();
-        value.forEach(validable -> {
-            switch (validable) {
-                case SendPhoto sendPhoto -> {
-                    InputMedia inputMedia = new InputMediaPhoto();
-                    inputMedia.setMedia(String.valueOf(sendPhoto.getPhoto().getAttachName()));
-                    inputMedia.setCaption(sendPhoto.getCaption());
-                    inputMediaList.add(inputMedia);
-                }
-                case SendVideo sendVideo -> {
-                    InputMedia inputMedia = new InputMediaVideo();
-                    inputMedia.setMedia(String.valueOf(sendVideo.getVideo().getAttachName()));
-                    inputMedia.setCaption(sendVideo.getCaption());
-                    inputMediaList.add(inputMedia);
-                }
-                case SendAnimation sendAnimation -> {
-                    InputMedia inputMedia = new InputMediaVideo();
-                    File file = mediaUtility.convertGifToMp4(String.valueOf(sendAnimation.getAnimation().getAttachName()));
-                    inputMedia.setMedia(file, "animation.mp4");
-                    inputMedia.setCaption(sendAnimation.getCaption());
-                    inputMediaList.add(inputMedia);
-                }
-                default -> {
-                }
-            }
-        });
-
-        return inputMediaList;
     }
 
     private SendAudio createSendAudio(Map<MessageParams, Object> params) {
