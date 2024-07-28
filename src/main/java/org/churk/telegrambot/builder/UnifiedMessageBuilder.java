@@ -176,4 +176,8 @@ public class UnifiedMessageBuilder {
             default -> throw new IllegalStateException("Unexpected value: " + messageType);
         });
     }
+
+    public void deleteTempFiles() {
+        mediaUtility.deleteTempFiles();
+    }
 }

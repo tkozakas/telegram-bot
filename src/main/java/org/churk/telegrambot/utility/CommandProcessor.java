@@ -84,4 +84,8 @@ public class CommandProcessor {
     public void handleReset() {
         statsService.reset();
     }
+
+    public void deleteTempFiles() {
+        unifiedMessageBuilder.deleteTempFiles();
+    }
 }

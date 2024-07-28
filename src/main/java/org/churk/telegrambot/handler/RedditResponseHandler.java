@@ -127,7 +127,7 @@ public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
             List<Validable> mediaList = posts.stream()
                     .filter(post -> seenUrls.add(post.getUrl()))
                     .map(post -> {
-                        String title = post.getTitle();
+                        String title = "From r/%s\n%s".formatted(subreddit, post.getTitle());
                         String url = post.getUrl();
                         if (post.isVideo()) {
                             return createVideoMessage(context, url, title);

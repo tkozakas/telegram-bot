@@ -10,10 +10,12 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Slf4j
 @Component
 public class MediaUtility {
+    private final List<File> tempFiles = List.of();
     private static final int MAX_WIDTH = 640;
     private static final int MAX_HEIGHT = 480;
     private static final String DEBUG_INFO = "info";
@@ -39,6 +41,11 @@ public class MediaUtility {
                         .addArguments("-loglevel", DEBUG_INFO))
                 .execute();
         log.info("GIF converted to MP4: {}", mp4FilePath);
+        tempFiles.add(mp4FilePath.toFile());
         return mp4FilePath.toFile();
+    }
+
+    public void deleteTempFiles() {
+        tempFiles.stream().filter(File::exists).forEachOrdered(File::delete);
     }
 }
