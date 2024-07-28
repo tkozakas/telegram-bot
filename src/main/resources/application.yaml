@@ -12,13 +12,6 @@ spring:
       daily_message_file_path: classpath:changelog/data/daily_message.csv
       sentence_file_path: classpath:changelog/data/sentences.csv
 
-logging:
-  config: classpath:logback.xml
-
-news:
-  language: en
-  # api-key: <<PROVIDE USING ENVIRONMENT VARIABLES>>
-
 bot:
   # username: <<PROVIDE USING ENVIRONMENT VARIABLES>>
   # token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
@@ -26,11 +19,10 @@ bot:
 
   random-response-chance: 0.2
 
-media:
-  path: /tmp/
-
 schedule:
   daily-message: 0 0 12 * * *
   winner-reset: 0 0 0 * * *
   meme-post: 0 0 * * * *
 
+meme-api:
+  url: https://localhost:8443

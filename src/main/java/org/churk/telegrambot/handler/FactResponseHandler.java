@@ -2,17 +2,15 @@ package org.churk.telegrambot.handler;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.churk.telegrambot.client.MemeClient;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Fact;
-import org.churk.telegrambot.service.FactService;
-import org.churk.telegrambot.service.TtsService;
 import org.churk.telegrambot.model.UpdateContext;
+import org.churk.telegrambot.service.FactService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
-import java.io.File;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -21,7 +19,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class FactResponseHandler extends ResponseHandler {
     private final FactService factService;
-    private final TtsService ttsService;
+    private final MemeClient memeClient;
 
     @Override
     public List<Validable> handle(UpdateContext context) {
@@ -60,11 +58,11 @@ public class FactResponseHandler extends ResponseHandler {
     }
 
     private List<Validable> getAudioMessage(UpdateContext context, String response) {
-        Optional<File> audioMessage = ttsService.getSpeech(response);
-        if (audioMessage.isPresent()) {
+        byte[] audioStream = memeClient.getTts(response).getBody();
+        if (audioStream != null) {
             return createAudioMessage(context,
                     response,
-                    audioMessage.get()
+                    audioStream
             );
         }
         log.error("Failed to generate audio message for fact: {}", response);

@@ -69,10 +69,10 @@ public abstract class ResponseHandler implements CommandHandler {
         params.put(MessageParams.STICKER, context.getSticker() != null ? context.getSticker().getFileId() : null);
         params.put(MessageParams.ANIMATION, context.getAnimation());
         params.put(MessageParams.CAPTION, context.getCaption());
-        params.put(MessageParams.PHOTO, context.getPhoto());
-        params.put(MessageParams.VIDEO, context.getVideo());
+        params.put(MessageParams.PHOTO, context.getPhotoUrl());
+        params.put(MessageParams.VIDEO, context.getVideoUrl());
         params.put(MessageParams.MEDIA_GROUP, context.getMediaGroup());
-        params.put(MessageParams.AUDIO, context.getAudio());
+        params.put(MessageParams.AUDIO, context.getAudioStream());
 
         return createMessage(messageType, params);
     }
@@ -109,16 +109,16 @@ public abstract class ResponseHandler implements CommandHandler {
                 .build());
     }
 
-    protected List<Validable> createPhotoMessage(UpdateContext context, File file, String caption) {
+    protected List<Validable> createPhotoMessage(UpdateContext context, String url, String caption) {
         return createMessage(MessageType.PHOTO, createMessageContextBuilder(context)
-                .photo(file)
+                .photoUrl(url)
                 .caption(caption)
                 .build());
     }
 
-    protected List<Validable> createVideoMessage(UpdateContext context, File file, String caption) {
+    protected List<Validable> createVideoMessage(UpdateContext context, String url, String caption) {
         return createMessage(MessageType.VIDEO, createMessageContextBuilder(context)
-                .video(file)
+                .videoUrl(url)
                 .caption(caption)
                 .build());
     }
@@ -129,10 +129,10 @@ public abstract class ResponseHandler implements CommandHandler {
                 .build());
     }
 
-    protected List<Validable> createAudioMessage(UpdateContext context, String caption, File audioFile) {
+    protected List<Validable> createAudioMessage(UpdateContext context, String caption, byte[] audioStream) {
         return createMessage(MessageType.AUDIO, createMessageContextBuilder(context)
                 .caption(caption)
-                .audio(audioFile)
+                .audioStream(audioStream)
                 .build());
     }
 

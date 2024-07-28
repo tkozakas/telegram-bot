@@ -4,26 +4,15 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.churk.telegrambot.builder.ListResponseHandler;
-import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.model.RedditPost;
-import org.churk.telegrambot.model.SubCommand;
-import org.churk.telegrambot.model.Subreddit;
+import org.churk.telegrambot.client.MemeClient;
+import org.churk.telegrambot.model.*;
 import org.churk.telegrambot.service.SubredditService;
-import org.churk.telegrambot.model.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo;
 
-import java.io.File;
-import java.util.AbstractMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -31,6 +20,7 @@ import java.util.stream.Collectors;
 public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
     private static final String REDDIT_URL = "https://www.reddit.com/r/";
     private final SubredditService subredditService;
+    private final MemeClient memeClient;
 
     @Override
     public List<Validable> handle(UpdateContext context) {
@@ -60,10 +50,10 @@ public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
                     String secondArg = context.getArgs().get(1);
                     if (isNumeric(secondArg)) {
                         int count = Integer.parseInt(secondArg);
-                        yield handlePost(context, firstArg, count);
+                        yield getRedditPosts(firstArg, context, count);
                     }
                 }
-                yield handlePost(context, firstArg, 1);
+                yield getRedditPosts(firstArg, context, 1);
             }
             default -> throw new IllegalStateException("Unexpected value: " + subCommand);
         };
@@ -78,14 +68,14 @@ public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
                             .formatted(Command.REDDIT.getPatternCleaned(), SubCommand.ADD.getCommand().getFirst()));
         }
         String subreddit = chooseSubreddit(chatId);
-        return handlePost(context, subreddit, count);
+        return getRedditPosts(subreddit, context, count);
     }
 
     private List<Validable> handleAdd(UpdateContext context) {
         String args = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
 
-        if (context.getArgs().size() != 2 || !subredditService.isValidSubreddit(args)) {
+        if (context.getArgs().size() != 2) {
             return createReplyMessage(context,
                     "Please provide a valid name %s %s <subreddit>"
                             .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.ADD.getCommand().getFirst()));
@@ -113,7 +103,7 @@ public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
         String args = context.getArgs().getLast();
         Long chatId = context.getUpdate().getMessage().getChatId();
 
-        if (context.getArgs().size() != 2 || !subredditService.isValidSubreddit(args)) {
+        if (context.getArgs().size() != 2) {
             return createReplyMessage(context,
                     "Please provide a valid name %s %s <subreddit>"
                             .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.REMOVE.getCommand().getFirst()));
@@ -125,142 +115,38 @@ public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
         return createReplyMessage(context, "Subreddit %s removed".formatted(args));
     }
 
-    private List<Validable> handlePost(UpdateContext context, String subreddit, int count) {
-        return getRedditPosts(subreddit, context, count);
-    }
-
     private List<Validable> getRedditPosts(String subreddit, UpdateContext context, int count) {
         try {
-            if (!subredditService.isValidSubreddit(subreddit)) {
-                return createReplyMessage(context,
-                        "Please provide a valid name %s %s <subreddit>"
-                                .formatted(Command.REDDIT.getPatternCleaned(botProperties.getWinnerName()), SubCommand.REMOVE.getCommand().getFirst()));
-            }
-            List<RedditPost> posts = subredditService.getRedditPosts(subreddit, count);
+            List<RedditPost> posts = memeClient.getRedditPost(subreddit, count).getBody();
             if (posts.isEmpty()) {
                 return createReplyMessage(context, "No posts available in r/%s".formatted(subreddit));
             }
-            return fetchAndProcessMemes(context, posts, subreddit);
-        } catch (FeignException.BadGateway |
-                 FeignException.InternalServerError |
-                 FeignException.GatewayTimeout e) {
-            log.error("Reddit api is dead", e);
-            return createLogMessage(context,
-                    "The api is dead :)",
-                    e.getMessage()
-            );
-        } catch (FeignException.ServiceUnavailable |
-                 FeignException.NotFound |
-                 FeignException.UnprocessableEntity e) {
-            log.error("Subreddit does not exist", e);
-            return createLogMessage(context,
-                    "Subreddit does not exist",
-                    e.getMessage());
-        } catch (FeignException e) {
-            log.error("An error occurred", e);
-            return createLogMessage(context,
-                    "An error occurred",
-                    e.getMessage());
-        }
-    }
 
-    private List<Validable> fetchAndProcessMemes(UpdateContext context, List<RedditPost> posts, String subreddit) {
-        List<AbstractMap.SimpleEntry<String, File>> files = posts.stream()
-                .map(post -> subredditService.getFile(post)
-                        .map(file -> new AbstractMap.SimpleEntry<>(formatCaption(post, subreddit), file)))
-                .flatMap(Optional::stream)
-                .toList();
-
-        if (files.isEmpty()) {
             return posts.stream()
-                    .map(post -> postWithoutFileResponse(context, post, subreddit))
+                    .map(post -> {
+                        String title = post.getTitle();
+                        String url = post.getUrl();
+                        String text = "*[%s](%s)*".formatted(title, url);
+                        if (post.isVideo()) {
+                            return createVideoMessage(context, url, text);
+                        }
+                        if (post.isImage()) {
+                            return createPhotoMessage(context, url, text);
+                        }
+                        return createTextMessage(context, text);
+                    })
                     .flatMap(List::stream)
                     .toList();
-        }
-
-        if (files.size() == 1) {
-            File file = files.getFirst().getValue();
-            return postWithFileResponse(context, posts.getFirst(), file, subreddit);
-        } else {
-            convertGifsToMp4(files);
-            List<InputMedia> medias = createInputMediaList(files);
-            return createMediaGroupMessage(context, medias);
+        } catch (FeignException e) {
+            log.error("Error while fetching posts from Reddit", e);
+            return createReplyMessage(context, "Error while fetching posts from Reddit");
         }
     }
-
-    private String formatCaption(RedditPost post, String subreddit) {
-        return "%s%nFrom r/%s".formatted(post.getTitle() != null ? post.getTitle() : "", subreddit);
-    }
-
-    private void convertGifsToMp4(List<AbstractMap.SimpleEntry<String, File>> files) {
-        files.forEach(entry -> {
-            File file = entry.getValue();
-            if (file.getName().toLowerCase().endsWith(".gif")) {
-                Optional<File> mp4File = subredditService.convertGifToMp4(file);
-                if (mp4File.isEmpty()) {
-                    return;
-                }
-                entry.setValue(mp4File.get());
-            }
-        });
-    }
-
-    private List<InputMedia> createInputMediaList(List<AbstractMap.SimpleEntry<String, File>> files) {
-        return files.stream()
-                .map(pair -> {
-                    String caption = pair.getKey();
-                    File file = pair.getValue();
-                    String mediaName = file.getPath();
-                    return createInputMedia(file, mediaName, caption);
-                })
-                .collect(Collectors.toList());
-    }
-
-    private InputMedia createInputMedia(File file, String mediaName, String caption) {
-        if (isVideoFile(file)) {
-            return InputMediaVideo.builder()
-                    .media("attach://" + mediaName)
-                    .mediaName(mediaName)
-                    .caption(caption)
-                    .isNewMedia(true)
-                    .newMediaFile(file)
-                    .parseMode(ParseMode.HTML)
-                    .build();
-        } else {
-            return InputMediaPhoto.builder()
-                    .media("attach://" + mediaName)
-                    .mediaName(mediaName)
-                    .caption(caption)
-                    .isNewMedia(true)
-                    .newMediaFile(file)
-                    .parseMode(ParseMode.HTML)
-                    .build();
-        }
-    }
-
-    private boolean isVideoFile(File file) {
-        String fileName = file.getName().toLowerCase();
-        return fileName.endsWith(".mp4") || fileName.endsWith(".mov") || fileName.endsWith(".wmv") || fileName.endsWith(".avi");
-    }
-
 
     private String chooseSubreddit(Long chatId) {
         List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
         return subreddits.isEmpty() ? null :
                 subreddits.get(ThreadLocalRandom.current().nextInt(subreddits.size())).getSubredditName();
-    }
-
-    private List<Validable> postWithoutFileResponse(UpdateContext context, RedditPost post, String subreddit) {
-        String caption = "%s%n<Image unavailable>%nFrom r/%s".formatted(post.getTitle() != null ? post.getTitle() : "", subreddit);
-        return createTextMessage(context, caption);
-    }
-
-    private List<Validable> postWithFileResponse(UpdateContext context, RedditPost post, File file, String subreddit) {
-        String caption = "%s%nFrom r/%s".formatted(post.getTitle() != null ? post.getTitle() : "", subreddit);
-        String fileName = file.getName().toLowerCase();
-        return fileName.endsWith(".gif") ?
-                createAnimationMessage(context, file, caption) :
-                createPhotoMessage(context, file, caption);
     }
 
     private int parseCount(UpdateContext context) {

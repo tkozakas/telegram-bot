@@ -1,28 +1,22 @@
 package org.churk.telegrambot.handler;
 
 import lombok.AllArgsConstructor;
-import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.model.Quote;
-import org.churk.telegrambot.model.Shitpost;
-import org.churk.telegrambot.model.SubCommand;
-import org.churk.telegrambot.service.ShitpostingService;
-import org.churk.telegrambot.model.UpdateContext;
+import org.churk.telegrambot.client.MemeClient;
+import org.churk.telegrambot.model.*;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
-import java.io.File;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @AllArgsConstructor
 public class ShitpostingResponseHandler extends ResponseHandler {
-    private final ShitpostingService shitpostingService;
+    private final MemeClient memeClient;
 
     @Override
     public List<Validable> handle(UpdateContext context) {
         if (context.getArgs().isEmpty()) {
-            Shitpost post = shitpostingService.getShitpost();
+            Shitpost post = memeClient.getShitPost().getBody();
             return post.isError() ?
                     createReplyMessage(context, "Not found") :
                     handlePost(context, post.getUrl(), "Random Shitpost");
@@ -32,7 +26,7 @@ public class ShitpostingResponseHandler extends ResponseHandler {
         return switch (subCommand) {
             case QUOTE -> handleQuote(context);
             default -> {
-                Shitpost post = shitpostingService.getShitpostByName(context.getArgs().getFirst());
+                Shitpost post = memeClient.getShitPost(context.getArgs().getFirst()).getBody();
                 yield post.isError() ?
                         createReplyMessage(context, "Not found") :
                         handlePost(context, post.getUrl(), "Shitpost: " + context.getArgs().getFirst());
@@ -41,23 +35,13 @@ public class ShitpostingResponseHandler extends ResponseHandler {
     }
 
     private List<Validable> handleQuote(UpdateContext context) {
-        Quote quote = shitpostingService.getQuote();
+        Quote quote = memeClient.getShitPostQuote().getBody();
         String message = quote.getQuote() + "\n\n" + quote.getQuotee();
         return createTextMessage(context, message);
     }
 
     private List<Validable> handlePost(UpdateContext context, String url, String caption) {
-        try {
-            Optional<File> file = shitpostingService.getFile(url);
-            if (file.isEmpty()) {
-                return createReplyMessage(context, "Error downloading file");
-            }
-            file.get().deleteOnExit();
-            return createVideoMessage(context, file.get(), caption);
-
-        } catch (Exception e) {
-            return createReplyMessage(context, "Error processing file");
-        }
+        return createVideoMessage(context, url, caption);
     }
 
     @Override

@@ -6,6 +6,15 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RedditPost {
-    private String url;
     private String title;
+    private String url;
+    private String author;
+
+    public boolean isVideo() {
+        return url.endsWith(".mp4");
+    }
+
+    public boolean isImage() {
+        return url.endsWith(".jpg") || url.endsWith(".png");
+    }
 }

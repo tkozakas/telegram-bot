@@ -10,40 +10,13 @@ import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Service
 public class UnifiedMessageBuilder {
-    public static List<File> files = new ArrayList<>();
-
-    public static void clearFiles() {
-        UnifiedMessageBuilder.files.forEach(UnifiedMessageBuilder::deleteFile);
-        UnifiedMessageBuilder.files = new ArrayList<>();
-    }
-
-    private static void deleteFile(File file) {
-        try {
-            if (file.getPath().endsWith("app.log")) {
-                return;
-            }
-            String path = file.getPath();
-            if (path.contains("attach:")) {
-                path = path.replace("attach:", "");
-            }
-            Files.deleteIfExists(Path.of(path));
-        } catch (IOException e) {
-            log.error("Error while deleting file: {}", file.getAbsolutePath(), e);
-            throw new RuntimeException(e);
-        }
-    }
-
     private SendMessage createSendMessage(Map<MessageParams, Object> params) {
         SendMessage sendMessage = new SendMessage();
         params.forEach((key, value) -> {
@@ -62,11 +35,7 @@ public class UnifiedMessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendPhoto.setChatId(String.valueOf(value));
-                case PHOTO -> {
-                    File photoFile = (File) value;
-                    sendPhoto.setPhoto(new InputFile(photoFile));
-                    files.add(photoFile);
-                }
+                case PHOTO -> sendPhoto.setPhoto(new InputFile((String) value));
                 case CAPTION -> sendPhoto.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendPhoto.setReplyToMessageId((Integer) value);
             }
@@ -79,11 +48,7 @@ public class UnifiedMessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendAnimation.setChatId(String.valueOf(value));
-                case ANIMATION -> {
-                    File animationFile = (File) value;
-                    sendAnimation.setAnimation(new InputFile(animationFile));
-                    files.add(animationFile);
-                }
+                case ANIMATION -> sendAnimation.setAnimation(new InputFile((String) value));
                 case CAPTION -> sendAnimation.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendAnimation.setReplyToMessageId((Integer) value);
             }
@@ -97,11 +62,7 @@ public class UnifiedMessageBuilder {
             switch (key) {
                 case CHAT_ID -> sendSticker.setChatId(String.valueOf(value));
                 case REPLY_TO_MESSAGE_ID -> sendSticker.setReplyToMessageId((Integer) value);
-                case STICKER -> {
-                    String stickerFilePath = (String) value;
-                    sendSticker.setSticker(new InputFile(stickerFilePath));
-                    files.add(new File(stickerFilePath));
-                }
+                case STICKER -> sendSticker.setSticker(new InputFile((String) value));
             }
         });
         return sendSticker;
@@ -112,11 +73,7 @@ public class UnifiedMessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendVideo.setChatId(String.valueOf(value));
-                case VIDEO -> {
-                    File videoFile = (File) value;
-                    sendVideo.setVideo(new InputFile(videoFile));
-                    files.add(videoFile);
-                }
+                case VIDEO -> sendVideo.setVideo(new InputFile((String) value));
                 case CAPTION -> sendVideo.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendVideo.setReplyToMessageId((Integer) value);
             }
@@ -129,11 +86,7 @@ public class UnifiedMessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendMediaGroup.setChatId(String.valueOf(value));
-                case MEDIA_GROUP -> {
-                    List<InputMedia> mediaGroup = (List<InputMedia>) value;
-                    sendMediaGroup.setMedias(mediaGroup);
-                    mediaGroup.forEach(media -> files.add(new File(media.getMedia())));
-                }
+                case MEDIA_GROUP -> sendMediaGroup.setMedias((List<InputMedia>) value);
                 case MESSAGE_ID -> sendMediaGroup.setReplyToMessageId((Integer) value);
             }
         });
@@ -146,9 +99,8 @@ public class UnifiedMessageBuilder {
             switch (key) {
                 case CHAT_ID -> sendAudio.setChatId(String.valueOf(value));
                 case AUDIO -> {
-                    File audioFile = (File) value;
-                    sendAudio.setAudio(new InputFile(audioFile));
-                    files.add(audioFile);
+                    byte[] audioBytes = (byte[]) value;
+                    sendAudio.setAudio(new InputFile(new ByteArrayInputStream(audioBytes), "audio.mp3"));
                 }
                 case CAPTION -> sendAudio.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendAudio.setReplyToMessageId((Integer) value);
@@ -158,16 +110,12 @@ public class UnifiedMessageBuilder {
         return sendAudio;
     }
 
-    public SendDocument createSendDocument(Map<MessageParams, Object> params) {
+    private SendDocument createSendDocument(Map<MessageParams, Object> params) {
         SendDocument sendDocument = new SendDocument();
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendDocument.setChatId(String.valueOf(value));
-                case DOCUMENT -> {
-                    File documentFile = (File) value;
-                    sendDocument.setDocument(new InputFile(documentFile));
-                    files.add(documentFile);
-                }
+                case DOCUMENT -> sendDocument.setDocument(new InputFile((String) value));
                 case CAPTION -> sendDocument.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendDocument.setReplyToMessageId((Integer) value);
             }

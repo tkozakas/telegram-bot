@@ -1,8 +1,8 @@
 package org.churk.telegrambot.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.churk.telegrambot.client.MemeClient;
 import org.churk.telegrambot.model.Command;
-import org.churk.telegrambot.service.TtsService;
 import org.churk.telegrambot.model.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TtsResponseHandler extends ResponseHandler {
     public static final int MAX_AUDIO_LENGTH = 1000;
-    private final TtsService ttsService;
+    private final MemeClient memeClient;
 
     @Override
     public List<Validable> handle(UpdateContext context) {
@@ -53,16 +53,15 @@ public class TtsResponseHandler extends ResponseHandler {
                     "Please provide a text %s <text>"
                             .formatted(Command.TTS.getPatternCleaned()));
         }
-        Optional<File> speechFile;
         try {
             context.setMarkdown(true);
             if (text.length() > MAX_AUDIO_LENGTH) {
                 return createReplyMessage(context, text);
             }
-            speechFile = ttsService.getSpeech(text);
-            return speechFile.isEmpty() ?
+            byte[] response = memeClient.getTts(text).getBody();
+            return response == null ?
                     createReplyMessage(context, text) :
-                    createAudioMessage(context, text, speechFile.get());
+                    createAudioMessage(context, text, response);
         } catch (Exception e) {
             return createLogMessage(context, "Error generating audio", e.getMessage());
         }

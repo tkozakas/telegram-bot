@@ -18,9 +18,9 @@ public class MessageContext {
     private boolean isMarkdown;
     private File animation;
     private File document;
-    private File photo;
-    private File video;
-    private File audio;
+    private String photoUrl;
+    private String videoUrl;
+    private byte[] audioStream;
     private Sticker sticker;
     private List<InputMedia> mediaGroup;
 }
