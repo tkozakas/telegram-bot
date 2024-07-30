@@ -88,10 +88,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                 log.error("Error while sending message", e);
             }
         }
-        deleteTempFiles();
-    }
-
-    private void deleteTempFiles() {
         commandProcessor.deleteTempFiles();
     }
 
