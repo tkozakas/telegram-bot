@@ -6,6 +6,7 @@ import org.churk.telegrambot.builder.UnifiedMessageBuilder;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.CommandHandler;
 import org.churk.telegrambot.handler.HandlerFactory;
+import org.churk.telegrambot.handler.RandomResponseResponseHandler;
 import org.churk.telegrambot.model.*;
 import org.churk.telegrambot.service.ChatService;
 import org.churk.telegrambot.service.DailyMessageService;
@@ -42,10 +43,6 @@ public class CommandProcessor {
         List<String> arguments = List.of(messageText.split(" ")).subList(1, messageText.split(" ").length);
         Command command = Command.getTextCommand(messageText, botProperties.getWinnerName());
         CommandHandler handler = handlerFactory.getHandler(command);
-
-        if (command == Command.NONE) {
-            return List.of();
-        }
 
         log.info("Command received from {}: {}", firstName, messageText);
         return handler.handle(UpdateContext.builder()

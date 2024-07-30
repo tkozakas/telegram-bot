@@ -18,7 +18,7 @@ public class RandomResponseResponseHandler extends ResponseHandler {
     private final Random random = new Random();
 
     private boolean shouldTriggerRandomResponse() {
-        return random.nextInt(100) < botProperties.getRandomResponseChance() * 10;
+        return random.nextDouble() < botProperties.getResponseChance();
     }
 
     private CommandHandler selectRandomHandler() {
@@ -32,7 +32,7 @@ public class RandomResponseResponseHandler extends ResponseHandler {
 
     @Override
     public List<Validable> handle(UpdateContext context) {
-        if (!shouldTriggerRandomResponse() && !(context.getCommand() == Command.RANDOM)) {
+        if (!shouldTriggerRandomResponse()) {
             return List.of();
         }
         CommandHandler randomHandler = selectRandomHandler();

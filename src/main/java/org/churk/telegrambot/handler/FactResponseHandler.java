@@ -60,10 +60,7 @@ public class FactResponseHandler extends ResponseHandler {
     private List<Validable> getAudioMessage(UpdateContext context, String response) {
         byte[] audioStream = memeClient.getTts(response).getBody();
         if (audioStream != null) {
-            return createAudioMessage(context,
-                    response,
-                    audioStream
-            );
+            return createAudioMessage(context, response, audioStream);
         }
         log.error("Failed to generate audio message for fact: {}", response);
         return createTextMessage(context, response);

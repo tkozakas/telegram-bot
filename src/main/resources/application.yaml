@@ -23,7 +23,7 @@ bot:
   # token: <<PROVIDE USING ENVIRONMENT VARIABLES>>
   # winner_name: <<PROVIDE USING ENVIRONMENT VARIABLES>>
 
-  random-response-chance: 0.2
+  response-chance: 0.03
 
 schedule:
   daily-message: 0 0 12 * * *

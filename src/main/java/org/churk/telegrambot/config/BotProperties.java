@@ -9,5 +9,5 @@ public class BotProperties {
     private String username;
     private String token;
     private String winnerName;
-    private Double randomResponseChance;
+    private double responseChance;
 }
