@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 @Getter
 @AllArgsConstructor
 public enum Command {
-    START(List.of(".*/start\\b.*"), List.of(SubCommand.NONE), "Activate bot"),
     HELP(List.of(".*/help\\b.*"), List.of(SubCommand.NONE), "Get help"),
     TTS(List.of(".*/tts\\b.*"), List.of(SubCommand.NONE), "Text to speech"),
     DAILY_MESSAGE(List.of(".*/%s\\b.*"), List.of(SubCommand.ALL, SubCommand.STATS, SubCommand.YEAR), "Daily game"),

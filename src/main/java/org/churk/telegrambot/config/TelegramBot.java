@@ -69,8 +69,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (update.hasMyChatMember()) {
             ChatMemberUpdated myChatMember = update.getMyChatMember();
             String newStatus = myChatMember.getNewChatMember().getStatus();
-            if (newStatus.equals("left") || newStatus.equals("kicked")) {
-                commandProcessor.handleDeleteChat(update.getMessage().getChatId());
+            switch (newStatus) {
+                case "left", "kicked" -> commandProcessor.handleDeleteChat(update.getMessage().getChatId());
+                case "member", "administrator", "creator" -> commandProcessor.handleAddChat(update);
             }
         }
     }

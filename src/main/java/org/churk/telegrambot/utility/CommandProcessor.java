@@ -87,4 +87,8 @@ public class CommandProcessor {
     public void handleDeleteTempFiles() {
         unifiedMessageBuilder.deleteTempFiles();
     }
+
+    public void handleAddChat(Update update) {
+        chatService.addChat(update);
+    }
 }
