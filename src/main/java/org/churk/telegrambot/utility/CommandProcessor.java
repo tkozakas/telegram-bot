@@ -6,7 +6,6 @@ import org.churk.telegrambot.builder.UnifiedMessageBuilder;
 import org.churk.telegrambot.config.BotProperties;
 import org.churk.telegrambot.handler.CommandHandler;
 import org.churk.telegrambot.handler.HandlerFactory;
-import org.churk.telegrambot.handler.RandomResponseResponseHandler;
 import org.churk.telegrambot.model.*;
 import org.churk.telegrambot.service.ChatService;
 import org.churk.telegrambot.service.DailyMessageService;
@@ -77,12 +76,15 @@ public class CommandProcessor {
                         .args(List.of(RANDOM.getCommand().getFirst()))
                         .build()).stream()).toList();
     }
+    public void handleDeleteChat(Long chatId) {
+        chatService.deleteChat(chatId);
+    }
 
     public void handleReset() {
         statsService.reset();
     }
 
-    public void deleteTempFiles() {
+    public void handleDeleteTempFiles() {
         unifiedMessageBuilder.deleteTempFiles();
     }
 }

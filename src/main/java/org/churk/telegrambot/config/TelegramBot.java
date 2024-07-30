@@ -11,6 +11,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.*;
+import org.telegram.telegrambots.meta.api.objects.ChatMemberUpdated;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
@@ -65,6 +66,13 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             executeMessages(commandProcessor.handleCommand(update));
         }
+        if (update.hasMyChatMember()) {
+            ChatMemberUpdated myChatMember = update.getMyChatMember();
+            String newStatus = myChatMember.getNewChatMember().getStatus();
+            if (newStatus.equals("left") || newStatus.equals("kicked")) {
+                commandProcessor.handleDeleteChat(update.getMessage().getChatId());
+            }
+        }
     }
 
     private void executeMessages(List<Validable> sendMessages) {
@@ -88,7 +96,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 log.error("Error while sending message", e);
             }
         }
-        commandProcessor.deleteTempFiles();
+        commandProcessor.handleDeleteTempFiles();
     }
 
     @Scheduled(cron = "${schedule.daily-message}") // 12 am

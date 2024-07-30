@@ -24,4 +24,8 @@ public class ChatService {
     public boolean isChatExists(Long chatId) {
         return chatRepository.existsById(chatId);
     }
+
+    public void deleteChat(Long chatId) {
+        chatRepository.deleteById(chatId);
+    }
 }
