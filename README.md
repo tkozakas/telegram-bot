@@ -30,15 +30,8 @@ BOT_USERNAME=<<YOUR_BOT_USERNAME>>
 BOT_WINNER_NAME=<<YOUR_BOT_WINNER_NAME>>
 ```
 ### Optional
-```env
-ELEVENLABS_API_KEY=<<YOUR_ELEVENLABS_API_KEY1, YOUR_ELEVENLABS_API_KEY2, ...>>
-ELEVENLABS_VOICE_ID=Ybqj6CIlqb6M85s9Bl4n;
+Follow the guide [here](https://github.com.tomas6446/meme-api) to get other features working.
 
-GROQ_API_KEY=<<YOUR_GROQ_API_KEY>>;
-GROQ_MODEL=<<YOUR_GROQ_MODEL>>;
-
-NEWS_API_KEY=<<YOUR_NEWS_API_KEY>>;
-```
 ### Docker Setup
 Run the following command to start the bot in a Docker container:
 ```bash
