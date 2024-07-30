@@ -41,7 +41,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         return botProperties.getToken();
     }
 
-
     @PostConstruct
     private void registerBotCommands() throws TelegramApiException {
         List<BotCommand> botCommandList = Stream.of(Command.values())
