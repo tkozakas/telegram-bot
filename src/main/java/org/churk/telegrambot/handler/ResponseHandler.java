@@ -36,16 +36,11 @@ public abstract class ResponseHandler implements CommandHandler {
     protected UnifiedMessageBuilder unifiedMessageBuilder;
 
     protected MessageContext.MessageContextBuilder createMessageContextBuilder(UpdateContext context) {
-        MessageContext.MessageContextBuilder builder = MessageContext.builder()
+        return MessageContext.builder()
                 .chatId(context.getUpdate().getMessage().getChatId())
+                .isReply(context.isReply())
                 .isMarkdown(context.isMarkdown())
                 .replyToMessageId(context.getUpdate().getMessage().getMessageId());
-
-        if (context.isReply()) {
-            builder.isReply(true);
-        }
-
-        return builder;
     }
 
     protected List<Validable> createMessage(MessageType messageType, Map<MessageParams, Object> params) {
@@ -75,13 +70,6 @@ public abstract class ResponseHandler implements CommandHandler {
         params.put(MessageParams.AUDIO, context.getAudioStream());
 
         return createMessage(messageType, params);
-    }
-
-    protected List<Validable> createMedia(UpdateContext context, String url, String caption) {
-        return createMessage(MessageType.MEDIA, createMessageContextBuilder(context)
-                .mediaUrl(url)
-                .caption(caption)
-                .build());
     }
 
     protected List<Validable> createTextMessage(UpdateContext context, String text) {
