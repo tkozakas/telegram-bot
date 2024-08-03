@@ -64,7 +64,10 @@ public class UnifiedMessageBuilder {
                 case CHAT_ID -> sendMessage.setChatId(String.valueOf(value));
                 case TEXT -> sendMessage.setText((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendMessage.setReplyToMessageId((Integer) value);
-                case MARKDOWN -> sendMessage.setParseMode(ParseMode.MARKDOWN);
+                case MARKDOWN -> {
+                    sendMessage.enableMarkdown((Boolean) value);
+                    sendMessage.setParseMode(ParseMode.MARKDOWN);
+                }
             }
         });
         return sendMessage;
@@ -78,6 +81,7 @@ public class UnifiedMessageBuilder {
                 case PHOTO -> sendPhoto.setPhoto(new InputFile((String) value));
                 case CAPTION -> sendPhoto.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendPhoto.setReplyToMessageId((Integer) value);
+                case MARKDOWN -> sendPhoto.setParseMode(ParseMode.MARKDOWN);
             }
         });
         return sendPhoto;
@@ -91,6 +95,7 @@ public class UnifiedMessageBuilder {
                 case ANIMATION -> sendAnimation.setAnimation(new InputFile((String) value));
                 case CAPTION -> sendAnimation.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendAnimation.setReplyToMessageId((Integer) value);
+                case MARKDOWN -> sendAnimation.setParseMode(ParseMode.MARKDOWN);
             }
         });
         return sendAnimation;
@@ -116,6 +121,7 @@ public class UnifiedMessageBuilder {
                 case VIDEO -> sendVideo.setVideo(new InputFile((String) value));
                 case CAPTION -> sendVideo.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendVideo.setReplyToMessageId((Integer) value);
+                case MARKDOWN -> sendVideo.setParseMode(ParseMode.MARKDOWN);
             }
         });
         return sendVideo;
@@ -158,6 +164,7 @@ public class UnifiedMessageBuilder {
                 case DOCUMENT -> sendDocument.setDocument(new InputFile((String) value));
                 case CAPTION -> sendDocument.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendDocument.setReplyToMessageId((Integer) value);
+                case MARKDOWN -> sendDocument.setParseMode(ParseMode.MARKDOWN);
             }
         });
         return sendDocument;

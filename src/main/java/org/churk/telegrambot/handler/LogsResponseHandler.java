@@ -30,7 +30,6 @@ public class LogsResponseHandler extends ResponseHandler {
     }
 
     private List<Validable> getLogs(UpdateContext context, String path) {
-        context.setReply(true);
         File file = new File(path);
         try {
             if (isEmptyFile(file.toPath()) || !file.exists()) {

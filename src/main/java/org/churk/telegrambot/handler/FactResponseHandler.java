@@ -30,7 +30,7 @@ public class FactResponseHandler extends ResponseHandler {
     }
 
     private List<Validable> handleFactAdd(UpdateContext context) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
+        Long chatId = context.getChatId();
         List<String> factArgs = context.getArgs().subList(1, context.getArgs().size());
 
         if (factArgs.isEmpty()) {

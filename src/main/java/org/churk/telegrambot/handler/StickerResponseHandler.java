@@ -42,7 +42,7 @@ public class StickerResponseHandler extends ListResponseHandler<String> {
     }
 
     private List<Validable> handleGetRandomSticker(UpdateContext context) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
+        Long chatId = context.getChatId();
         List<Sticker> stickers = stickerService.getStickerSets(chatId);
 
         if (stickers.isEmpty()) {
@@ -54,7 +54,7 @@ public class StickerResponseHandler extends ListResponseHandler<String> {
 
     private List<Validable> handleRemove(UpdateContext context) {
         String subCommand = context.getArgs().getLast();
-        Long chatId = context.getUpdate().getMessage().getChatId();
+        Long chatId = context.getChatId();
 
         if (subCommand.isEmpty()) {
             return createReplyMessage(context,
@@ -69,7 +69,7 @@ public class StickerResponseHandler extends ListResponseHandler<String> {
     }
 
     private List<Validable> handleList(UpdateContext context) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
+        Long chatId = context.getChatId();
         List<String> stickerSets = stickerService.getStickerSetNames(chatId);
         UnaryOperator<String> stickerFormatter = "- *%s*\n"::formatted;
         return formatListResponse(context, stickerSets, stickerFormatter, "Sticker sets:\n", "", "No sticker sets available");
@@ -77,7 +77,7 @@ public class StickerResponseHandler extends ListResponseHandler<String> {
 
     private List<Validable> handleAdd(UpdateContext context) {
         String subCommand = context.getArgs().getLast();
-        Long chatId = context.getUpdate().getMessage().getChatId();
+        Long chatId = context.getChatId();
 
         if (subCommand.isEmpty() || !stickerService.isValidSticker(subCommand)) {
             return createReplyMessage(context,

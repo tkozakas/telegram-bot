@@ -13,17 +13,12 @@ public class ListDecorator<T> {
         this.itemNameExtractor = itemNameExtractor;
     }
 
-    public String getFormattedList(String header, String footer, int limit, boolean escapeMarkdown) {
+    public String getFormattedList(String header, String footer, int limit) {
         String formattedItems = items.stream()
                 .limit(limit)
                 .map(itemNameExtractor)
-                .map(name -> !escapeMarkdown ? escapeMarkdown(name) : name)
                 .collect(Collectors.joining());
 
         return header + formattedItems + footer;
-    }
-
-    private String escapeMarkdown(String text) {
-        return text.replaceAll("([_\\\\*\\[\\]()~`>#+\\-=|{}.!])", "\\\\$1");
     }
 }

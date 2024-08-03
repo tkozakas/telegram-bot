@@ -37,10 +37,8 @@ public abstract class ResponseHandler implements CommandHandler {
 
     protected MessageContext.MessageContextBuilder createMessageContextBuilder(UpdateContext context) {
         return MessageContext.builder()
-                .chatId(context.getUpdate().getMessage().getChatId())
-                .isReply(context.isReply())
-                .isMarkdown(context.isMarkdown())
-                .replyToMessageId(context.getUpdate().getMessage().getMessageId());
+                .replyToMessageId(context.getMessageId())
+                .chatId(context.getChatId());
     }
 
     protected List<Validable> createMessage(MessageType messageType, Map<MessageParams, Object> params) {
@@ -54,12 +52,6 @@ public abstract class ResponseHandler implements CommandHandler {
         Map<MessageParams, Object> params = new HashMap<>();
         params.put(MessageParams.CHAT_ID, context.getChatId());
         params.put(MessageParams.TEXT, context.getText());
-        if (context.isReply()) {
-            params.put(MessageParams.REPLY_TO_MESSAGE_ID, context.getReplyToMessageId());
-        }
-        if (context.isMarkdown()) {
-            params.put(MessageParams.MARKDOWN, true);
-        }
         params.put(MessageParams.DOCUMENT, context.getDocument());
         params.put(MessageParams.STICKER, context.getSticker() != null ? context.getSticker().getFileId() : null);
         params.put(MessageParams.ANIMATION, context.getGifUrl());
@@ -68,7 +60,10 @@ public abstract class ResponseHandler implements CommandHandler {
         params.put(MessageParams.VIDEO, context.getVideoUrl());
         params.put(MessageParams.MEDIA_GROUP, context.getMediaList());
         params.put(MessageParams.AUDIO, context.getAudioStream());
-
+        params.put(MessageParams.MARKDOWN, true);
+        if (context.isReply()) {
+            params.put(MessageParams.REPLY_TO_MESSAGE_ID, context.getReplyToMessageId());
+        }
         return createMessage(messageType, params);
     }
 

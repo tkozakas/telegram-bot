@@ -21,7 +21,6 @@ public class TtsResponseHandler extends ResponseHandler {
         List<String> args = context.getArgs();
 
         if (args.isEmpty()) {
-            context.setMarkdown(true);
             return createReplyMessage(context,
                     "Please provide a text %s <text>"
                             .formatted(Command.TTS.getPatternCleaned()));
@@ -34,7 +33,6 @@ public class TtsResponseHandler extends ResponseHandler {
             CommandHandler handler = handlerFactory.getHandler(command);
             List<Validable> result = handler.handle(UpdateContext.builder()
                     .handlerFactory(handlerFactory)
-                    .update(context.getUpdate())
                     .args(args.subList(1, args.size()))
                     .build());
             text = getAudioMessage(result).formatted(botProperties.getWinnerName());
@@ -46,13 +44,11 @@ public class TtsResponseHandler extends ResponseHandler {
                     .replace("\r", " ");
         }
         if (text.isBlank()) {
-            context.setMarkdown(true);
             return createReplyMessage(context,
                     "Please provide a text %s <text>"
                             .formatted(Command.TTS.getPatternCleaned()));
         }
         try {
-            context.setMarkdown(true);
             if (text.length() > MAX_AUDIO_LENGTH) {
                 return createReplyMessage(context, text);
             }

@@ -22,7 +22,6 @@ public class GroqResponseHandler extends ResponseHandler {
         if (args.isEmpty()) {
             return createReplyMessage(context, "Please provide a prompt");
         }
-        context.setMarkdown(true);
         String reply = memeClient.getGpt(String.join(" ", args)).getBody();
         return createTextMessage(context, reply);
     }

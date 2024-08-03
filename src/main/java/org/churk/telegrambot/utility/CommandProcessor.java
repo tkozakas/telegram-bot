@@ -44,12 +44,17 @@ public class CommandProcessor {
         CommandHandler handler = handlerFactory.getHandler(command);
 
         log.info("Command received from {}: {}", firstName, messageText);
-        return handler.handle(UpdateContext.builder()
-                .command(command)
+        UpdateContext context = UpdateContext.builder()
                 .handlerFactory(handlerFactory)
-                .update(update)
+                .command(command)
                 .args(arguments)
-                .build());
+                .chatId(message.getChatId())
+                .userId(message.getFrom().getId())
+                .messageId(message.getMessageId())
+                .firstName(firstName)
+                .build();
+
+        return handler.handle(context);
     }
 
     private List<Validable> handleBotAddedToGroup(Update update) {
@@ -72,7 +77,6 @@ public class CommandProcessor {
         List<Chat> chats = chatService.getAllChats();
         return chats.stream().flatMap(chat ->
                 handler.handle(UpdateContext.builder()
-                        .update(chat.getUpdate())
                         .args(List.of(RANDOM.getCommand().getFirst()))
                         .build()).stream()).toList();
     }

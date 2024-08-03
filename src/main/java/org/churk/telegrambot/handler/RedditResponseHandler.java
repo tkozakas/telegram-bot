@@ -62,7 +62,7 @@ public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
     }
 
     private List<Validable> handleRandomPost(UpdateContext context, int count) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
+        Long chatId = context.getChatId();
 
         if (subredditService.getSubreddits(chatId).isEmpty()) {
             return createReplyMessage(context,
@@ -75,7 +75,7 @@ public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
 
     private List<Validable> handleAdd(UpdateContext context) {
         String args = context.getArgs().getLast();
-        Long chatId = context.getUpdate().getMessage().getChatId();
+        Long chatId = context.getChatId();
 
         if (context.getArgs().size() != 2) {
             return createReplyMessage(context,
@@ -91,10 +91,9 @@ public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
     }
 
     private List<Validable> handleList(UpdateContext context) {
-        Long chatId = context.getUpdate().getMessage().getChatId();
+        Long chatId = context.getChatId();
         List<Subreddit> subreddits = subredditService.getSubreddits(chatId);
         Function<Subreddit, String> subredditFormatter = subreddit -> String.format("- r/*%s*\n", subreddit.getSubredditName());
-        context.setMarkdown(true);
         return formatListResponse(context, subreddits, subredditFormatter,
                 "Subreddits:\n",
                 "",
@@ -103,7 +102,7 @@ public class RedditResponseHandler extends ListResponseHandler<Subreddit> {
 
     private List<Validable> handleRemove(UpdateContext context) {
         String args = context.getArgs().getLast();
-        Long chatId = context.getUpdate().getMessage().getChatId();
+        Long chatId = context.getChatId();
 
         if (context.getArgs().size() != 2) {
             return createReplyMessage(context,

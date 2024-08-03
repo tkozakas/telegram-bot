@@ -16,7 +16,6 @@ public class HelpResponseHandler extends ListResponseHandler<Command> {
     @Override
     public List<Validable> handle(UpdateContext context) {
         List<Command> commands = Stream.of(Command.values()).filter(c -> c != Command.NONE).toList();
-        context.setMarkdown(true);
         return formatListResponse(context, commands, this::formatCommand,
                 "Available commands:\n",
                 "",

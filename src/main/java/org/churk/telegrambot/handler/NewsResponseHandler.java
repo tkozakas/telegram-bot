@@ -22,8 +22,6 @@ public class NewsResponseHandler extends ResponseHandler {
         if (args.isEmpty()) {
             return createReplyMessage(context, "Please provide a query %s <query>".formatted(Command.NEWS.getPatternCleaned()));
         }
-
-        context.setMarkdown(true);
         List<Article> articles = memeClient.getNews(String.join(" ", args)).getBody();
 
         if (articles == null || articles.isEmpty()) {
