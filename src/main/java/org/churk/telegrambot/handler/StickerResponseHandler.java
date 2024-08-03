@@ -5,8 +5,8 @@ import org.churk.telegrambot.builder.ListResponseHandler;
 import org.churk.telegrambot.model.Command;
 import org.churk.telegrambot.model.Sticker;
 import org.churk.telegrambot.model.SubCommand;
-import org.churk.telegrambot.service.StickerService;
 import org.churk.telegrambot.model.UpdateContext;
+import org.churk.telegrambot.service.StickerService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
