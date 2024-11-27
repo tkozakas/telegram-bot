@@ -13,3 +13,4 @@ nix
 result
 deploy.sh
 logs
+application-dev.yaml
