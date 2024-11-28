@@ -161,7 +161,7 @@ public class UnifiedMessageBuilder {
         params.forEach((key, value) -> {
             switch (key) {
                 case CHAT_ID -> sendDocument.setChatId(String.valueOf(value));
-                case DOCUMENT -> sendDocument.setDocument(new InputFile((String) value));
+                case DOCUMENT -> handleFile(value, sendDocument);
                 case CAPTION -> sendDocument.setCaption((String) value);
                 case REPLY_TO_MESSAGE_ID -> sendDocument.setReplyToMessageId((Integer) value);
                 case MARKDOWN -> sendDocument.setParseMode(ParseMode.MARKDOWN);
@@ -186,5 +186,13 @@ public class UnifiedMessageBuilder {
 
     public void deleteTempFiles() {
         mediaUtility.deleteTempFiles();
+    }
+
+    public <T> void handleFile(T value, SendDocument sendDocument) {
+        switch (value) {
+            case File file -> sendDocument.setDocument(new InputFile(file));
+            case String filePath -> sendDocument.setDocument(new InputFile(filePath));
+            case null, default -> throw new IllegalArgumentException("Invalid DOCUMENT value. Must be File or String.");
+        }
     }
 }

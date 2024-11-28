@@ -9,6 +9,9 @@ import org.churk.telegrambot.model.UpdateContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.interfaces.Validable;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 @Slf4j
@@ -28,12 +31,26 @@ public class GroqResponseHandler extends ResponseHandler {
             String reply = memeClient.clearMemory(chatId).getBody();
             return createReplyMessage(context, reply);
         }
+        if (args.getFirst().contains("memory")) {
+            File file = new File("memory.txt");
+            String reply = memeClient.getMemory(chatId);
+            return writeToFile(context, file, reply);
+        }
         GptRequest gptRequest = new GptRequest();
         gptRequest.setPrompt(String.join(" ", args));
         gptRequest.setChatId(chatId);
         gptRequest.setUsername(context.getFirstName());
         String reply = memeClient.getGpt(gptRequest).getBody();
         return createTextMessage(context, reply);
+    }
+
+    private List<Validable> writeToFile(UpdateContext context, File file, String reply) {
+        try {
+            Files.writeString(file.toPath(), reply);
+            return createDocumentMessage(context, file);
+        } catch (IOException e) {
+            return createReplyMessage(context, "Error while writing to file");
+        }
     }
 
     @Override

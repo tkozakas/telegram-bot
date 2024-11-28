@@ -1,5 +1,6 @@
 package org.churk.telegrambot.client;
 
+import javassist.compiler.ast.MethodDecl;
 import org.churk.telegrambot.model.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -17,6 +18,9 @@ public interface MemeClient {
 
     @PostMapping(value = "/gpt/clear/{chatId}")
     ResponseEntity<String> clearMemory(@PathVariable("chatId") Long chatId);
+
+    @PostMapping(value = "/gpt/memory/{chatId}")
+    String getMemory(@PathVariable("chatId") Long chatId);
 
     @PostMapping("/meme/reddit/{subreddit}/{count}")
     ResponseEntity<List<RedditPost>> getRedditPost(@PathVariable("subreddit") String subreddit, @PathVariable("count") int count);
