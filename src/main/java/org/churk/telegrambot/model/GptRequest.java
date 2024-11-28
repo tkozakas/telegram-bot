@@ -6,4 +6,5 @@ import lombok.Data;
 public class GptRequest {
     private String prompt;
     private Long chatId;
+    private String username;
 }

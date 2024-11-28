@@ -24,9 +24,14 @@ public class GroqResponseHandler extends ResponseHandler {
         if (args.isEmpty()) {
             return createReplyMessage(context, "Please provide a prompt");
         }
+        if (args.getFirst().contains("clear")) {
+            String reply = memeClient.clearMemory(chatId).getBody();
+            return createReplyMessage(context, reply);
+        }
         GptRequest gptRequest = new GptRequest();
         gptRequest.setPrompt(String.join(" ", args));
         gptRequest.setChatId(chatId);
+        gptRequest.setUsername(context.getFirstName());
         String reply = memeClient.getGpt(gptRequest).getBody();
         return createTextMessage(context, reply);
     }

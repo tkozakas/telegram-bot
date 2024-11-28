@@ -15,6 +15,9 @@ public interface MemeClient {
     @PostMapping(value = "/gpt/prompt")
     ResponseEntity<String> getGpt(@RequestBody GptRequest gptRequest);
 
+    @PostMapping(value = "/gpt/clear/{chatId}")
+    ResponseEntity<String> clearMemory(@PathVariable("chatId") Long chatId);
+
     @PostMapping("/meme/reddit/{subreddit}/{count}")
     ResponseEntity<List<RedditPost>> getRedditPost(@PathVariable("subreddit") String subreddit, @PathVariable("count") int count);
 
