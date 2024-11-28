@@ -2,7 +2,7 @@ services:
   telegram-bot:
     container_name: telegram-bot
     # build image locally first
-    image: tomas6446/telegram-bot:latest
+    image: tkozakas/telegram-bot:latest
     environment:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://telegram-bot-postgres-prod:5432/telegram_bot"
       SPRING_DATASOURCE_USERNAME: "postgres"

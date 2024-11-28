@@ -2,7 +2,7 @@
 
 Telegram bot implemented in Java, using Spring Boot and the Telegram Bot API.
 This bot supports a variety of commands to interact with different functionalities. 
-Uses this api [Meme-api](https://github.com/tomas6446/meme-api) to get memes, news, and so on. 
+Uses this api [Meme-api](https://github.com/tkozakas/meme-api) to get memes, news, and so on. 
 Below is a list of available commands and descriptions:
 
 - `/start` - Start the bot.
@@ -30,7 +30,7 @@ BOT_USERNAME=<<YOUR_BOT_USERNAME>>
 BOT_WINNER_NAME=<<YOUR_BOT_WINNER_NAME>>
 ```
 ### Optional
-Follow the guide [here](https://github.com.tomas6446/meme-api) to get other features working.
+Follow the guide [here](https://github.com.tkozakas/meme-api) to get other features working.
 
 ### Docker Setup
 Run the following command to start the bot in a Docker container:

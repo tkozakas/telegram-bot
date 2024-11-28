@@ -29,4 +29,4 @@ USER telegram-bot
 
 ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
 
-# docker build -t tomas6446/telegram-api-bot:latest .
+# docker build -t tkozakas/telegram-api-bot:latest .
